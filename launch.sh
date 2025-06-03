@@ -342,7 +342,7 @@ main() {
     (mkdir -p storage/framework/{sessions,views,cache} \
         storage/app/{private,public,private/TasksFiles,public/teamlogo} \
         && sudo chmod -R 775 storage \
-        && sudo chown -R $USER:www-data storage \
+        && sudo chown -R www-data:www-data storage \
         && cp -n public/media/img/StandartLogo.png storage/app/public/teamlogo/ > /dev/null 2>&1) &
     spinner $!
     echo
@@ -377,13 +377,17 @@ main() {
         run_docker down
     fi
 
+    if ! run_docker up -d --build; then
+        handle_error "Ошибка при запуске контейнеров" "run_docker up -d --build"
+    fi
+
     # Дополнительная проверка прав перед запуском
     print_msg $CYAN "🔧 " "Проверка и настройка прав доступа..."
     (sudo chown -R $USER:www-data storage \
      && sudo chown -R $USER:www-data bootstrap/cache \
      && sudo chmod -R 775 storage \
      && sudo chmod -R 775 bootstrap/cache \
-     && sudo chmod -R 775 public \
+     && sudo chmod -R 777 public \
      && sudo chown -R $USER:www-data .env) &
     spinner $!
     print_status "success" "Права доступа проверены и настроены"
@@ -393,16 +397,6 @@ main() {
         handle_error "Ошибка при запуске контейнеров" "run_docker up -d --build"
     fi
     print_status "success" "Контейнеры успешно запущены"
-    echo
-
-    # Настройка прав внутри контейнера
-    print_msg $CYAN "🔧 " "Настройка прав внутри контейнера..."
-    (run_docker exec app chown -R www-data:www-data /var/www/html/storage \
-     && run_docker exec app chown -R www-data:www-data /var/www/html/bootstrap/cache \
-     && run_docker exec app chmod -R 775 /var/www/html/storage \
-     && run_docker exec app chmod -R 775 /var/www/html/bootstrap/cache) &
-    spinner $!
-    print_status "success" "Права внутри контейнера настроены"
     echo
 
     # Миграции и сидирование
@@ -419,13 +413,7 @@ main() {
     spinner $!
 
     print_msg $CYAN "🔗 " "Создание симлинков..."
-    (run_docker exec app bash -c "mkdir -p /var/www/html/storage/app/public \
-        && rm -rf /var/www/html/public/storage \
-        && php /var/www/html/artisan storage:link \
-        && chown -R sail:www-data /var/www/html/storage \
-        && chown -R sail:www-data /var/www/html/public/storage \
-        && chmod -R 775 /var/www/html/storage \
-        && chmod -R 775 /var/www/html/public/storage" > /dev/null 2>&1) &
+    (./vendor/bin/sail artisan storage:link) &
     spinner $!
     print_status "success" "Симлинк storage создан"
     echo
@@ -440,10 +428,15 @@ main() {
     print_msg $CYAN "🔍 " "Проверка прав доступа..."
     (sudo chown -R $USER:www-data . \
      && sudo chmod -R 775 storage \
-     && sudo chmod -R 775 bootstrap/cache \) &
+     && sudo chmod -R 775 bootstrap/cache \
+     ) &
     spinner $!
     print_status "success" "Финальная проверка прав завершена"
     echo
+
+    chmod gu+w -R storage
+    chmod guo+w -R storage
+    ./vendor/bin/sail artisan cache:clear > /dev/null 2>&1
 
     # Финальное сообщение
     echo -e "${MAGENTA}"
