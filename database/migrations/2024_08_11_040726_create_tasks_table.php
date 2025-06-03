@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('category');
             $table->string('complexity');
             $table->longText('description');
-            $table->longText('decide');
+            $table->longText('decide')->nullable();
             $table->longText('FILES')->nullable();
             $table->float('solved');
             $table->float('price');
