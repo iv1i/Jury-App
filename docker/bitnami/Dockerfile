@@ -61,9 +61,22 @@ ENV APP_VERSION="8.3.14" \
 RUN groupadd --force -g $WWWGROUP sail
 RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
 
+# Добавляем после создания пользователя sail
+RUN mkdir -p /var/www/html \
+    && chown -R sail:sail /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache \
+    && usermod -aG www-data sail \
+    && usermod -aG sail www-data
+
+# Добавляем в конец Dockerfile перед WORKDIR
+RUN echo "alias art='php /var/www/html/artisan'" >> /home/sail/.bashrc
+
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chmod +x /usr/local/bin/start-container
+
+RUN echo "alias art='php /var/www/html/artisan'" >> /home/sail/.bashrc
 
 WORKDIR /var/www/html
 
