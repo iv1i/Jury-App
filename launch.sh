@@ -135,7 +135,7 @@ install_package() {
 
     case $package in
         "php")
-            sudo apt install -y php php-cli php-mbstring php-xml php-mysql php-dom php-zip php-curl php-gd > /dev/null 2>&1
+            sudo apt update && apt install -y php php-cli php-mbstring php-xml php-mysql php-dom php-zip php-curl php-gd
             ;;
         "composer")
             EXPECTED_CHECKSUM="$(php -r 'copy("https://composer.github.io/installer.sig", "php://stdout");')"
