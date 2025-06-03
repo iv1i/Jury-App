@@ -271,7 +271,7 @@ handle_error() {
             return 0
         else
             print_status "error" "Не удалось исправить проблему автоматически"
-            return 1
+            exit 1
         fi
     fi
 
@@ -369,6 +369,16 @@ main() {
     spinner $!
     print_status "success" "Сборка завершена"
     echo
+
+    # Настройка DNS
+    print_msg $CYAN "⚙ " "Настройка DNS..."
+     if grep -q "nameserver 8.8.8.8" /etc/resolv.conf && grep -q "nameserver 8.8.4.4" /etc/resolv.conf; then
+                echo -e "${GREEN}✔ DNS уже настроены правильно${NC}"
+            else
+                if [ "$(id -u)" != "0" ]; then
+                    echo -e "${RED}Для успешной сборки потребуется обновить файл /etc/resolv.conf${NC}"
+                fi
+    fi
 
     # Запуск Docker
     print_msg $CYAN "🐳 " "Запуск Docker контейнеров..."
