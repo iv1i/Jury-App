@@ -1,0 +1,32 @@
+/* Стили для input[type="file"] */
+#inputmanyfiles {
+    display: none;
+}
+
+/* Стили для label */
+#LabelForInputFiles {
+    cursor: pointer;
+    display: inline-block;
+}
+
+/* Стили для svg */
+#LabelForInputFiles svg {
+    vertical-align: middle;
+}
+#LabelForInputFiles svg:hover{
+    fill: #299fff;
+}
+/* Стили для текста в label */
+#LabelForInputFiles > span {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+#clearFilesButton {
+    cursor: pointer;
+}
+#clearFilesButtonPath:hover {
+    stroke: red;
+}

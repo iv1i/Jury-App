@@ -1,0 +1,78 @@
+.drop-container {
+    color: var(--app-bg-inv);
+    position: relative;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+    left: 15vw;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px dashed var(--app-bg-inv);
+    cursor: pointer;
+    transition: background .2s ease-in-out, border .2s ease-in-out;
+}
+.files-container {
+    color: var(--app-bg-inv);
+    position: relative;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+    left: 15vw;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px dashed var(--app-bg-inv);
+    cursor: pointer;
+    transition: background .2s ease-in-out, border .2s ease-in-out;
+}
+
+.drop-container:hover {
+    border-color: #299fff;
+}
+.drop-container:hover .drop-title {
+    color: #299fff;
+}
+
+
+.drop-title {
+    color: var(--app-bg-inv);
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    transition: color .2s ease-in-out;
+}
+.files-title {
+    color: var(--app-bg-inv);
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    transition: color .2s ease-in-out;
+}
+
+input[type=file]::file-selector-button {
+    margin-right: 20px;
+    border: none;
+    background: #2969FF;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    transition: background .2s ease-in-out;
+}
+
+input[type=file]::file-selector-button:hover {
+    background: #299fff;
+}
+input[type=file] {
+    width: 350px;
+    max-width: 100%;
+    color: var(--app-bg-inv);
+    padding: 0.8vh;
+    border-radius: 10px;
+    border: 1px solid var(--app-bg-inv);
+}

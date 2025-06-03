@@ -1,0 +1,37 @@
+.DeleteFilesButton {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 25px;
+    border: 2px solid rgb(55, 55, 140);
+    background-color: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 10px #333;
+    overflow: hidden;
+    transition: .3s;
+    left: 90%;
+    top: 72%;
+}
+
+.DeleteFilesButton:hover {
+    background-color: rgb(194, 194, 234);
+    transform: scale(1.2);
+    box-shadow: 0 0 4px #111;
+    transition: .3s;
+}
+
+.DeleteFilesButtonSvg {
+    color: rgb(55, 55, 140);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: .3s;
+}
+
+
+
+
+
+
+

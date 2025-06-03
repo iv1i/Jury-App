@@ -1,0 +1,17 @@
+.form_item{
+    text-align: center;
+    color: var(--app-bg-inv);
+    font-weight: 900;
+}
+
+.task_text {
+    width: 95%;
+    height: 20vh;
+    resize: vertical;
+    max-height: 34vh;
+}
+
+.from_item_input{
+    position: relative;
+    left: 2vw;
+}
