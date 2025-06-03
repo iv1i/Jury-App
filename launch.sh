@@ -440,9 +440,7 @@ main() {
     print_msg $CYAN "🔍 " "Проверка прав доступа..."
     (sudo chown -R $USER:www-data . \
      && sudo chmod -R 775 storage \
-     && sudo chmod -R 775 bootstrap/cache \
-     chmod -R gu+w storage \
-     chmod -R guo+w storage) &
+     && sudo chmod -R 775 bootstrap/cache \) &
     spinner $!
     print_status "success" "Финальная проверка прав завершена"
     echo
@@ -461,8 +459,8 @@ main() {
     print_msg $GREEN "    🔒 " "Пароль: 1111"
     echo
     print_msg $GREEN "🚀 " "Приложение готово к использованию!"
-    chmod -R gu+w storage
-    chmod -R guo+w storage
+    chmod gu+w -R storage
+    chmod guo+w -R storage
     ./vendor/bin/sail artisan cache:clear > /dev/null 2>&1
 }
 
