@@ -97,8 +97,8 @@
 
 @section('scripts')
     <script type="text/javascript">
-        const data = {!! json_encode($M) !!};
-        const desidedteams = {!! json_encode(\App\Models\desided_tasks_teams::all()) !!};
+        const data = {!! json_encode($Users) !!};
+        const desidedteams = {!! json_encode($DesidedT) !!};
         const divElement = document.querySelector('.products-area-wrapper');
 
         MakeHTML(MakeMassive(data, desidedteams), divElement);
@@ -156,7 +156,7 @@
             <div class="products-row" ${item.BorderStyle}>
                 <div class="product-cell image">
                     <img src="${url + item.teamlogo}" alt="product">
-                    <span>${item.name} ${item.GuestLogo}</span>
+                    <span>${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
                 </div>
                 <div class="product-cell sales"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
                 <div class="product-cell price" style="display: flex; flex-wrap: wrap;"><span class="cell-label">{{ __('Tasks') }}:</span>${item.style}</div>

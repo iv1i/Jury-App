@@ -250,8 +250,8 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
     @yield('appcontent')
 </div>
     @yield('scripts')
-<script src="{{ asset('js/Other/SwitchTheme.js') }}"></script>
 <script src="{{ asset('js/Other/TableStyle.js') }}"></script>
+<script src="{{ asset('js/Other/SwitchTheme.js') }}"></script>
 <script src="{{ asset('js/Admin/Admin.js') }}"></script>
 <script src="{{ asset('js/Slidebars/SlidebarAdmin.js') }}"></script>
 <script id="ClearLocalStorage">

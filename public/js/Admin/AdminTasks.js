@@ -1,4 +1,4 @@
-const blurButton = document.getElementById('CloseBtn');
+const blurButton = document.getElementById('CloseBtnPlus');
 blurButton.addEventListener('click', function() {
     const TopmostDiv = document.querySelector('.topmost-div-task-plus');
     const appContent = document.querySelector('.app-content');
@@ -10,7 +10,7 @@ blurButton.addEventListener('click', function() {
     TopmostDiv.style.display = 'none';
 });
 
-const blurButton2 = document.getElementById('CloseBtn2');
+const blurButton2 = document.getElementById('CloseBtnMinus');
 blurButton2.addEventListener('click', function() {
     const TopmostDiv = document.querySelector('.topmost-div-task-minus');
     const appContent = document.querySelector('.app-content');

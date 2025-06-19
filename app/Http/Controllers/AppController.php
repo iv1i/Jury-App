@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Settings;
 use App\Models\Tasks;
+use App\Models\User;
+use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -27,10 +29,9 @@ class AppController extends Controller
 
         return redirect()->back()->withErrors([__('Incorrect username or password.')]);
     }
-    public function logout(Request $request)
+    public function logout(Request $request, SettingsService $settings)
     {
-        $settings = Settings::find(1);
-        if($settings->Logout === 'no'){
+        if(!$settings->get('sidebar.Logout')){
             abort(403);
         }
         // Выход текущего пользователя из системы
@@ -43,13 +44,11 @@ class AppController extends Controller
     }
 
     //----------------------------------------------------------------View
-    public function StatisticIDview(int $id)
+    public function StatisticIDview(int $id, SettingsService $settings)
     {
         $user = \App\Models\User::with('solvedTasks.tasks')->find($id);
-        $settings = Settings::find(1);
-        if($settings->Statistics === 'no' && $id !== \auth()->id()){
+        if(!$settings->get('sidebar.Statistics')){
             abort(403);
-            //return response('Access is restricted.', 403);
         }
         if (!$user) {
             return redirect()->back()->with('error', 'Пользователь не найден');
@@ -70,36 +69,52 @@ class AppController extends Controller
             return view('App.AppStatisticID', compact('id', 'M', 'chkT', 'TeamSolvedTAsks'));
         }
     }
-    public function StatisticView()
+    public function StatisticView(SettingsService $settings)
     {
-        $settings = Settings::find(1);
-        if($settings->Statistics === 'no'){
+        if(!$settings->get('sidebar.Statistics')){
             abort(403);
         }
         $M = \App\Models\User::all();
         return view('App.AppStatistic', compact('M'));
     }
-    public function ScoreboardView()
+    public function ScoreboardView(SettingsService $settings)
     {
+        if(!$settings->get('sidebar.Scoreboard')){
+            abort(403);
+        }
         $M = \App\Models\User::all();
         return view('App.AppScoreboard', compact('M'));
     }
-    public function ProjectorView()
+    public function ProjectorView(SettingsService $settings)
     {
-        $settings = Settings::find(1);
-        if($settings->Projector === 'no'){
+        if(!$settings->get('sidebar.Projector')){
             abort(403);
         }
         $M = \App\Models\User::all();
         return view('Guest.projectorTB', compact('M'));
     }
-    public function HomeView()
+    public function HomeView(SettingsService $settings)
     {
-        $settings = Settings::find(1);
-        if($settings->Home === 'no'){
+        if(!$settings->get('sidebar.Home')){
             abort(403);
         }
-        return view('App.AppHome');
+        $Tasks = Tasks::all()->makeVisible('flag');
+        $SolvedTasks = User::find(auth()->id())->solvedTasks;
+        $universalResult = $this->processTasksUniversal($Tasks);
+
+        // Получаем все категории (исключая difficulty и sumary)
+        $categories = $universalResult['categories'] ?? [];
+        ksort($categories);
+
+        // Получаем все возможные сложности
+        $complexities = $universalResult['difficulty'] ?? [];
+        ksort($complexities);
+        return view('App.AppHome', [
+            'Tasks' => $Tasks,
+            'categories' => $categories,
+            'complexities' => $complexities,
+            'SolvedTasks' => $SolvedTasks
+        ]);
     }
     public function TasksIDView(int $id)
     {
@@ -116,13 +131,12 @@ class AppController extends Controller
             return redirect()->back()->with('error', 'Задача не найдена');
         }
     }
-    public function RulesView()
+    public function RulesView(SettingsService $settings)
     {
-        $settings = Settings::find(1);
-        if($settings->Rules === 'no'){
+        if(!$settings->get('sidebar.Rules')){
             abort(403);
         }
-        $sett = $settings->Rule;
+        $sett = $settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
         return view('Guest.rules', compact('sett'));
     }
     public function AuthView()
@@ -141,6 +155,85 @@ class AppController extends Controller
     }
 
     //----------------------------------------------------------------Other
+    function formatToLegacyUniversal($universalResult) {
+        // Сначала создаем массив только с sumary
+        $legacy = [
+            'sumary' => $universalResult['sumary'] ?? 0
+        ];
+
+        // Стандартные категории из legacy-формата (для обратной совместимости)
+        $legacyCategories = [
+            'admin', 'recon', 'crypto', 'stegano', 'ppc', 'pwn',
+            'web', 'forensic', 'joy', 'misc', 'osint', 'reverse',
+            'easy', 'medium', 'hard' // Добавляем сложности в категории для сортировки
+        ];
+
+        // Собираем все возможные категории
+        $allCategories = array_unique(array_merge(
+            $legacyCategories,
+            array_keys($universalResult['categories'] ?? [])
+        ));
+
+        // Сортируем категории в алфавитном порядке
+        sort($allCategories);
+
+        // Добавляем категории в отсортированном порядке
+        foreach ($allCategories as $category) {
+            // Для сложностей берем из difficulty
+            if (in_array($category, ['easy', 'medium', 'hard'])) {
+                $legacy[$category] = $universalResult['difficulty'][$category] ?? 0;
+            }
+            // Для остальных категорий берем из categories
+            else {
+                $legacy[$category] = $universalResult['categories'][$category] ?? 0;
+            }
+        }
+
+        return $legacy;
+    }
+    function processTasksUniversal($tasks) {
+        $result = [
+            'sumary' => 0,
+            'difficulty' => [],
+            'categories' => []
+        ];
+
+        foreach ($tasks as $task) {
+            $result['sumary']++;
+
+            // Обработка сложности
+            $difficulty = strtolower($task['complexity'] ?? 'unknown');
+            if (!isset($result['difficulty'][$difficulty])) {
+                $result['difficulty'][$difficulty] = 0;
+            }
+            $result['difficulty'][$difficulty]++;
+
+            // Обработка категорий (поддержка задач с несколькими категориями)
+            $categories = $task['category'] ?? 'unknown';
+
+            // Если категория передана как строка (одна категория)
+            if (is_string($categories)) {
+                $categories = array_map('trim', explode(',', $categories));
+            }
+
+            // Если категория передана как массив
+            if (is_array($categories)) {
+                foreach ($categories as $category) {
+                    $category = strtolower(trim($category));
+                    if (!isset($result['categories'][$category])) {
+                        $result['categories'][$category] = 0;
+                    }
+                    $result['categories'][$category]++;
+                }
+            }
+        }
+
+        // Сортируем категории и сложности для удобства
+        ksort($result['difficulty']);
+        ksort($result['categories']);
+
+        return $result;
+    }
     public function DwnlFile($md5file, $id, Request $request)
     {
         $task = Tasks::find($id);

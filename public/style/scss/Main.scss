@@ -787,27 +787,27 @@ body {
     width: 100%;
 }
 
-.topmost-div{
-    position: fixed;
-    border-radius: 15px;
-    z-index: 9999;
-    top: 10vw;
-    left: 30vw;
-    width: 50vw;
-    background-color: var(--app-bg-2);
-    @media screen and (max-width: 1024px) {&{
-        top: 6em;
-        width: 82vw;
-        left: 14vw;
-    }}
-}
+//.topmost-div{
+//    position: fixed;
+//    border-radius: 15px;
+//    z-index: 9999;
+//    top: 10vw;
+//    left: 30vw;
+//    width: 50vw;
+//    background-color: var(--app-bg-2);
+//    @media screen and (max-width: 1024px) {&{
+//        top: 6em;
+//        width: 82vw;
+//        left: 14vw;
+//    }}
+//}
 
-.topmost-div-task-plus{
-    position: fixed; border-radius: 15px; z-index: 9999; top: 8vw; left: 30vw; width: 50vw; background-color: var(--app-bg-2);display: none;
-}
-.topmost-div-task-minus{
-    position: fixed; border-radius: 15px; z-index: 9999; top: 8vw; left: 30vw; width: 50vw; background-color: var(--app-bg-2);display: none;
-}
+//.topmost-div-task-plus{
+//    position: fixed; border-radius: 15px; z-index: 9999; top: 4vw; left: 30vw; width: 50vw; background-color: var(--app-bg-2);display: none;
+//}
+//.topmost-div-task-minus{
+//    position: fixed; border-radius: 15px; z-index: 9999; top: 4vw; left: 30vw; width: 50vw; background-color: var(--app-bg-2);display: none;
+//}
 
 .description{
     word-wrap: break-word; /* Для старых браузеров */
@@ -947,4 +947,17 @@ body {
     &:before {
         background-color: #9d5959;
     }
+}
+
+.guest-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    background-color: #4169e1;
+    border-radius: 3px;
+    text-align: center;
+    white-space: nowrap;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }

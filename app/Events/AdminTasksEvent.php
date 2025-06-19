@@ -23,6 +23,7 @@ class AdminTasksEvent implements ShouldBroadcastNow
     public function __construct($tasks)
     {
         $this->tasks = $tasks;
+        $this->tasks->makeVisible('flag');
     }
 
     /**

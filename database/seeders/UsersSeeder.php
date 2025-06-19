@@ -18,7 +18,6 @@ class UsersSeeder extends Seeder
             'name' => 'Team A',
             'password' => Hash::make('1111'),
             'teamlogo' => 'StandartLogo.png',
-            'GuestLogo' => '',
             'players' => 6,
             'wherefrom' => 'Россия',
             'guest' => 'Yes',

@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\ConnectionException;
 use Illuminate\Support\Facades\Log;
+use Mockery\Exception;
 
 class AdminServiceProvider extends ServiceProvider
 {
@@ -47,12 +48,8 @@ class AdminServiceProvider extends ServiceProvider
                     ['password' => Hash::make($admin['password'])]
                 );
             }
-        } catch (ConnectionException $e) {
-            Log::warning('Не удалось подключиться к базе данных: ' . $e->getMessage());
-        } catch (QueryException $e) {
+        }  catch (Exception $e) {
             Log::warning('Ошибка при работе с базой данных: ' . $e->getMessage());
-        } catch (\Exception $e) {
-            Log::error('Неожиданная ошибка в AdminServiceProvider: ' . $e->getMessage());
         }
     }
 }

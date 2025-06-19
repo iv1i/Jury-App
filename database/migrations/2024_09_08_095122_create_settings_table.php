@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('Scoreboard');
             $table->string('Statistics');
             $table->string('Logout');
-            $table->longtext('Rule');
+            $table->longtext('Rule')->nullable();
             $table->timestamps();
         });
     }

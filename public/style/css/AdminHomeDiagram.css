@@ -172,6 +172,7 @@
 }
 
 .search-icon {
+    color: var(--app-bg-inv);
     position: absolute;
     left: 10px;
     top: 50%;

@@ -1,10 +1,13 @@
 @extends('layouts.admin')
 
 @section('css')
+    <link rel="stylesheet" href="{{ asset('style/css/Notif.css') }}">
+    <link rel="stylesheet" href="{{ asset('style/css/DeleteButton.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/InputFile.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/AdminTasks.css') }}">
     <link rel="stylesheet" href="{{ asset('style/scss/buttoncheckflag.css') }}">
-    <link rel="stylesheet" href="{{ asset('style/css/HomeTask.css') }}">
+    <link rel="stylesheet" href="{{ asset('style/css/AdminTask.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         {!! Vite::content('resources/js/app.js') !!}
     </script>
@@ -13,6 +16,29 @@
 @section('title', 'AltayCTF-Admin')
 
 @section('appcontent')
+    <div class="notifications">
+        <div class="toast ">
+            <div  class="toast-content">
+                <i class="fas fa-solid fa-check check"></i>
+
+                <div class="message">
+                    <span class="text text-1"></span>
+                    <span class="text text-2"></span>
+                    <span class="text text-3"></span>
+                </div>
+            </div>
+            <i style="color: var(--app-bg-inv)" class="fa-solid fa-xmark close">
+            </i>
+            <style>
+                .toast .progress:before {
+                    background-color: #f4406a;
+                }
+            </style>
+            <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
+            <div  class="progress"></div>
+        </div>
+    </div>
+    <div class="Tasks-Container"></div>
     <div class="app-content">
         <div id="FormSwitchTheme" class="app-content-header">
             <h1 class="app-content-headerText">{{ __('Tasks') }}</h1>
@@ -75,27 +101,18 @@
                 </button>
                 <div class="filter-menu">
                     <label>{{ __('Category') }}</label>
-                    <select name="category" id="category">
+                    <select name="filter-menu-category" id="filter-menu-category">
                         <option value="All Categories">{{ __('All Categories') }}</option>
-                        <option>admin</option>
-                        <option>recon</option>
-                        <option>crypto</option>
-                        <option>stegano</option>
-                        <option>ppc</option>
-                        <option>pwn</option>
-                        <option>web</option>
-                        <option>forensic</option>
-                        <option>joy</option>
-                        <option>misc</option>
-                        <option>osint</option>
-                        <option>reverse</option>
+                        @foreach($categories as $category => $count)
+                            <option>{{ $category }}</option>
+                        @endforeach
                     </select>
                     <label>{{ __('Complexity') }}</label>
-                    <select name="complexity" id="complexity">
+                    <select name="filter-menu-complexity" id="filter-menu-complexity">
                         <option value="All Complexity">{{ __('All Complexity') }}</option>
-                        <option>easy</option>
-                        <option>medium</option>
-                        <option>hard</option>
+                        @foreach($complexities as $complexity => $count)
+                            <option>{{ $complexity }}</option>
+                        @endforeach
                     </select>
                     <div class="filter-menu-buttons">
                         <button class="filter-button reset" id="ResetBtn">
@@ -135,12 +152,25 @@
             <div class="app-content-actions-wrapper">
             </div>
         </div>
-        <div class="products-area-wrapper tableView"></div>
+        <div class="products-area-wrapper tableView">
+            <div class="products-header">
+                <div class="product-cell image">{{ __('Name') }}</div>
+                <div class="product-cell category">{{ __('Category') }}</div>
+                <div class="product-cell status-cell">{{ __('Complexity') }}</div>
+                <div class="product-cell sales">{{ __('ID') }}</div>
+                <div class="product-cell price">{{ __('Price') }}</div>
+                <div class="product-cell action">{{ __('Action') }}</div>
+            </div>
+            <div class="Product-body">
+
+            </div>
+        </div>
+        <div class="CloseTaskBanner" style="display: none; width: 100%; height: 100%; background-color: white; position:absolute; opacity: .0;" onclick="closeAllTasks()"></div>
     </div>
-    <div class="topmost-div-task-plus">
+    <div style="display:none;" class="topmost-div-task-plus">
         <div style="text-align: center; color: white; height: 3vw;">
             <h1 class="TaskH1">{{ __('Add Task') }}</h1>
-            <button id="CloseBtn" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
+            <button id="CloseBtnPlus" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
             </button>
         </div>
         <form action="/Admin/Tasks/Add" method="POST" class="form" id="MyFormPlus">
@@ -153,26 +183,17 @@
             <div class="form_item ">
                 <div>Категория</div>
                 <select name="category" id="category">
-                    <option>admin</option>
-                    <option>recon</option>
-                    <option>crypto</option>
-                    <option>stegano</option>
-                    <option>ppc</option>
-                    <option>pwn</option>
-                    <option>web</option>
-                    <option>forensic</option>
-                    <option>joy</option>
-                    <option>misc</option>
-                    <option>osint</option>
-                    <option>reverse</option>
+                    @foreach($AllCategories as $count => $category)
+                        <option>{{ $category }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="form_item ">
                 <div>Сложность</div>
                 <select name="complexity" id="complexity">
-                    <option>easy</option>
-                    <option>medium</option>
-                    <option>hard</option>
+                    @foreach($AllComplexities as $count => $complexity)
+                        <option>{{ $complexity }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="form_item ">
@@ -183,16 +204,50 @@
                 <div>Описание</div>
                 <textarea name="description" class="task_text" required=""></textarea>
             </div>
-            <label for="images" class="drop-container" style="margin-top: 10px">
+            <label for="DropfilesPlus" class="drop-container" style="margin-top: 10px">
                 <span class="drop-title">{{ __('Drop files here') }}</span>
-                <input type="file" name="file[]" id="images" multiple>
+                <input type="file" name="file[]" id="DropfilesPlus" multiple>
             </label>
             <div class="form_item ">
                 <div>Флаг</div>
                 <input type="text" name="flag" class="" required="" placeholder="school{}  flag{}" autocomplete="off">
             </div>
+
+            <!-- Кнопка для раскрытия дополнительных полей -->
             <div class="form_item">
-                <button style="width: 90%; position: relative;" class="btnchk" onClick={console.log("click")} type="submit">
+                <button type="button" id="toggleAdditionalFiles" class="additional-files-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    <span>{{ __('Additional files') }}</span>
+                </button>
+            </div>
+
+            <!-- Дополнительные поля (изначально скрыты) -->
+            <div id="additionalFilesSection" class="additional-files-section" style="display: none;">
+                <div class="form_item">
+                    <div>Web Application Port</div>
+                    <input type="number" name="web_port" placeholder="e.g., 8080">
+                </div>
+                <div class="form_item">
+                    <div>Database Port (if used)</div>
+                    <input type="number" name="db_port" placeholder="e.g., 3306">
+                </div>
+                <div class="form_item">
+                    <div>Source Code Archive</div>
+                    <label for="sourcecode" class="drop-container">
+                        <span class="drop-title">{{ __('Upload source code archive') }}</span>
+                        <input type="file" name="sourcecode" id="sourcecode" accept=".zip,.tar,.gz">
+                    </label>
+                </div>
+            </div>
+
+            <div class="form_item">
+                <button style="position: relative;" class="btnchk" type="submit">
                     {{ __('Add') }}
                     <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g filter="url(#filter0_f_618_1123)">
@@ -215,12 +270,11 @@
                 </button>
             </div>
         </form>
-        <h1></h1>
     </div>
-    <div class="topmost-div-task-minus">
+    <div style="display:none;" class="topmost-div-task-minus">
         <div style="text-align: center; color: white; height: 3vw;">
             <h1 class="TaskH1">{{ __('Delete Tasks') }}</h1>
-            <button id="CloseBtn2" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
+            <button id="CloseBtnMinus" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
             </button>
         </div>
         <form method="POST" class="form" id="MyFormMinus" action="/Admin/Tasks/Delete">
@@ -260,34 +314,501 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/Admin/AdminTasks.js') }}"></script>
-    <script id="FormaPlussPluss">
-        document.getElementById('MyFormPlus').addEventListener('submit', function (event) {
+    <script id="Main-Script">
+        const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
+        function closeAllTasks() {
+            const hiddenElements = document.querySelectorAll('div[class*="Task-id-"]');
+            const AppContent = document.querySelector('.app-content');
+            const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
+            const TopmostDivPluss = document.querySelector('.topmost-div-task-plus');
+            const TopmostDivMinuss = document.querySelector('.topmost-div-task-minus');
+
+            const minusButton = document.querySelector('.button-minus');
+            const plusButton = document.querySelector('.button-plus');
+            plusButton.style.display = 'block';
+            minusButton.style.display = 'block';
+
+            if (AppContent) {
+                AppContent.style.filter = 'none';
+            }
+            if (CloseTaskBanner) {
+                CloseTaskBanner.style.display = 'none';
+            }
+            hiddenElements.forEach(element => {
+                element.style.display = 'none';
+            });
+            TopmostDivPluss.style.display = 'none';
+            TopmostDivMinuss.style.display = 'none';
+        }
+
+        // Функция для создания формы задачи
+        function createTaskForm(task) {
+
+            const AllCategories = @json($AllCategories);
+            const AllComplexities = @json($AllComplexities);
+
+            // Генерируем options для категорий
+            const categoryOptions = AllCategories.map(category =>
+                `<option ${task.category === category ? 'selected' : ''}>${category}</option>`
+            ).join('');
+
+            // Генерируем options для сложностей
+            const complexityOptions = AllComplexities.map(complexity =>
+                `<option ${task.complexity === complexity ? 'selected' : ''}>${complexity}</option>`
+            ).join('');
+
+            const formHtml = `
+    <div style="display: none" class="topmost-div Task-id-${task.id}">
+        <div style="text-align: center; color: white; height: 3vw;">
+            <h1 class="TaskH1">{{ __('To Change Task') }} #${task.id}</h1>
+            <div style="text-align: center; height: 3em;">
+                <div id="CloseBtn" class="btnclosetask" onclick="Taskid${task.id}close()">
+                    <img class="closeicontask" src="{{ asset('/media/icon/close.png') }}">
+                </div>
+            </div>
+        </div>
+        <form action="/Admin/Tasks/Change" method="POST" class="form" id="MyFormChange${task.id}" enctype="multipart/form-data">
+            @csrf
+            @method('PATCH')
+            <div class="form_item">
+                <div>Название</div>
+                <input name="name" class="" required value="${task.name}">
+            </div>
+            <div class="form_item">
+                <div>Категория</div>
+                <select name="category" id="category">
+                    ${categoryOptions}
+                </select>
+            </div>
+            <div class="form_item">
+                <div>Сложность</div>
+                <select name="complexity" id="complexity">
+                    ${complexityOptions}
+                </select>
+            </div>
+            <div class="form_item">
+                <div>Очки</div>
+                <input type="text" name="points" placeholder="1000" value="${task.oldprice}" class="" required>
+            </div>
+            <div class="form_item">
+                <div>Описание</div>
+                <textarea name="description" class="task_text">${task.description || ''}</textarea>
+            </div>
+            <div class="form_item" style="display: flex">
+                <label for="Dropfiles-Task-${task.id}" class="drop-container">
+                    <span class="drop-title">
+                        ${task.FILES ? '{{ __('Replace files') }}' : '{{ __('Add files') }}'}
+                    </span>
+                    <input type="file" name="file[]" id="Dropfiles-Task-${task.id}" multiple>
+                </label>
+                ${task.FILES ? `
+                <div class="files-container" id="file-names">
+                    <span class="files-title">{{ __('Saved files') }}:</span>
+                    ${task.FILES.split(";").slice(0, 3).map(file => file ? `
+                        <span style="font-size: 13px; color: #878b8e; display: flex">${file}</span>
+                    ` : '').join('')}
+                    ${task.FILES.split(";").length > 3 ? `
+                        <span style="font-size: 13px; color: #878b8e; display: flex">
+                            И еще ${task.FILES.split(";").length-4} ...
+                        </span>
+                    ` : ''}
+                    ${task.FILES ? `
+            <div class="DeleteFilesButton DeleteFilesButton-${task.id}" data-task-id="${task.id}">
+                <svg class="DeleteFilesButtonSvg" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </div>
+        ` : ''}
+                </div>
+                ` : ''}
+            </div>
+            <div class="form_item">
+                <div>Флаг</div>
+                <input type="text" name="flag" class="" placeholder="school{} flag{}" value="${task.flag}">
+            </div>
+            <div class="form_item">
+                <input type="hidden" name="id" value="${task.id}">
+            </div>
+            <button class="btnchk" type="submit">
+                {{ __('Update') }}
+            <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g filter="url(#filter0_f_618_1123)">
+                    <path d="M42.9 2H76.5L34.5 44H2L42.9 2Z" fill="url(#paint0_linear_618_1123)"/>
+                </g>
+                <defs>
+                    <filter id="filter0_f_618_1123" x="0" y="0" width="78.5" height="46" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                        <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+                        <feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_618_1123"/>
+                    </filter>
+                    <linearGradient id="paint0_linear_618_1123" x1="76.5" y1="2.00002" x2="34.5" y2="44" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white" stop-opacity="0.6"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0.05"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </button>
+    </form>
+    </div>
+    `;
+
+            // Остальной код функции остается без изменений
+            const container = document.querySelector('.Tasks-Container');
+            container.insertAdjacentHTML('beforeend', formHtml);
+
+            // Добавляем обработчики событий для новой формы
+            document.getElementById(`MyFormChange${task.id}`).addEventListener('submit', async function(event) {
+                event.preventDefault();
+                await submitFormAsync(this, task.id);
+            });
+
+            if (task.FILES) {
+                document.querySelector(`.DeleteFilesButton-${task.id}`).addEventListener('click', async function() {
+                    if (confirm('Вы уверены, что хотите удалить все файлы этой задачи?')) {
+                        const form = document.getElementById(`MyFormChange${task.id}`);
+                        const input = form.querySelector('input[type="hidden"][name="deleteFilesFromTask"]') || document.createElement('input');
+
+                        input.type = 'hidden';
+                        input.value = 'DELETEALL';
+                        input.name = 'deleteFilesFromTask';
+                        form.appendChild(input);
+
+                        await submitFormAsync(form, task.id);
+                    }
+                });
+            }
+
+            // Добавляем функции для открытия/закрытия
+            window[`Taskid${task.id}`] = function() {
+                const div = document.querySelector(`.topmost-div.Task-id-${task.id}`);
+                const AppContent = document.querySelector('.app-content');
+
+                if (div) {
+                    if (AppContent) AppContent.style.filter = 'blur(4px)';
+                    if (CloseTaskBanner) CloseTaskBanner.style.display = 'block';
+                    div.style.display = 'block';
+                }
+            };
+
+            window[`Taskid${task.id}close`] = function() {
+                const div = document.querySelector(`.topmost-div.Task-id-${task.id}`);
+                const AppContent = document.querySelector('.app-content');
+                const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
+
+                if (div) {
+                    if (AppContent) AppContent.style.filter = 'none';
+                    if (CloseTaskBanner) CloseTaskBanner.style.display = 'none';
+                    div.style.display = 'none';
+                }
+            };
+        }
+
+        // Функция для экранирования HTML
+        function escapeHtml(unsafe) {
+            return unsafe
+                ? unsafe.toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;")
+                : '';
+        }
+
+        // Асинхронная отправка формы
+        async function submitFormAsync(form, taskId) {
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+
+            try {
+                // Показываем индикатор загрузки
+                submitButton.disabled = true;
+                submitButton.innerHTML = 'Обновление...';
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Сетевая ошибка: ' + response.statusText);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('success', 'Успех', data.message || 'Операция выполнена успешно', data.actions);
+
+                    // Обновляем данные в localStorage
+                    const adminData = JSON.parse(localStorage.getItem('DataAdmin') || '[]');
+                    const taskIndex = adminData.findIndex(t => t.id == taskId);
+
+                    if (taskIndex !== -1) {
+                        // Обновляем данные задачи
+                        if (form.querySelector('input[name="deleteFilesFromTask"]')) {
+                            adminData[taskIndex].FILES = null;
+                        } else {
+                            // Обновляем другие поля из формы
+                            adminData[taskIndex].name = form.querySelector('input[name="name"]').value;
+                            adminData[taskIndex].category = form.querySelector('select[name="category"]').value;
+                            adminData[taskIndex].complexity = form.querySelector('select[name="complexity"]').value;
+                            adminData[taskIndex].oldprice = form.querySelector('input[name="points"]').value;
+                            adminData[taskIndex].description = form.querySelector('textarea[name="description"]').value;
+                            adminData[taskIndex].flag = form.querySelector('input[name="flag"]').value;
+
+                            // Если были загружены новые файлы, сервер должен вернуть их список в data.files
+                            if (data.files) {
+                                adminData[taskIndex].FILES = data.files.join(';');
+                            }
+                        }
+
+                        localStorage.setItem('DataAdmin', JSON.stringify(adminData));
+
+                        // Обновляем форму на странице без закрытия
+                        const formContainer = document.querySelector(`.Task-id-${taskId}`);
+                        if (formContainer) {
+                            formContainer.remove(); // Удаляем старую форму
+                            createTaskForm(adminData[taskIndex]); // Создаем новую с обновленными данными
+                            window[`Taskid${taskId}`](); // Открываем форму после обновления
+                        }
+                    }
+                } else {
+                    showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+                }
+
+                return data;
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showToast('error', 'Ошибка', 'Произошла ошибка при отправке формы');
+                throw error;
+            } finally {
+                // Восстанавливаем кнопку в исходное состояние
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
+        }
+
+        // Инициализация существующих форм
+        @foreach ($Tasks as $T)
+        createTaskForm({!! $T !!});
+        @endforeach
+
+        // Обработчик событий для новых задач
+        Echo.private(`channel-admin-tasks`).listen('AdminTasksEvent', (e) => {
+            const tasks = e.tasks;
+            console.log(tasks);
+            localStorage.setItem('DataAdmin', JSON.stringify(tasks));
+
+            // Удаляем все существующие формы
+            document.querySelectorAll('.topmost-div[class*="Task-id-"]').forEach(el => el.remove());
+
+            // Создаем формы для всех задач
+            tasks.forEach(task => {
+                createTaskForm(task);
+            });
+
+            // Обновляем список задач
+            let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
+            let taskcategory = localStorage.getItem('taskcategoryAdmin');
+            Filtereed(tasks, taskcomplexity, taskcategory);
+        });
+
+        let toastTimer1, toastTimer2;
+
+        function showToast(type, title, message, actions = null) {
+            const toast = document.querySelector(".toast");
+            const toastContent = toast.querySelector(".toast-content");
+            const checkIcon = toast.querySelector(".check");
+            const messageText1 = toast.querySelector(".text-1");
+            const messageText2 = toast.querySelector(".text-2");
+            const messageText3 = toast.querySelector(".text-3");
+            const progress = toast.querySelector(".progress");
+
+            // Очищаем предыдущие таймеры
+            clearTimeout(toastTimer1);
+            clearTimeout(toastTimer2);
+
+            // Сбрасываем анимацию прогресс-бара
+            progress.classList.remove("active");
+            // Принудительный рефлоу для сброса анимации
+            void progress.offsetWidth;
+
+            // Удаляем предыдущие добавленные стили
+            const existingStyles = document.querySelectorAll('style[data-toast-style]');
+            existingStyles.forEach(style => style.remove());
+
+            toast.style.display = "flex";
+
+            // Set icon and colors based on type
+            if (type === 'success') {
+                checkIcon.className = "fas fa-solid fa-check check";
+                checkIcon.style.backgroundColor = "#40f443";
+                const style = document.createElement('style');
+                style.innerHTML = '.toast .progress:before { background-color: #40f443 !important; }';
+                style.setAttribute('data-toast-style', 'true');
+                document.head.appendChild(style);
+            } else {
+                checkIcon.className = "fas fa-solid fa-times check";
+                checkIcon.style.backgroundColor = "#f4406a";
+                const style = document.createElement('style');
+                style.innerHTML = '.toast .progress:before { background-color: #f4406a !important; }';
+                style.setAttribute('data-toast-style', 'true');
+                document.head.appendChild(style);
+            }
+
+            messageText1.textContent = title;
+            messageText2.textContent = message;
+
+            // Очищаем предыдущие действия
+            messageText3.innerHTML = '';
+
+            // Добавляем действия с новой строки для каждого
+            if (actions && actions.length > 0) {
+                actions.forEach(action => {
+                    const actionElement = document.createElement('div');
+                    actionElement.textContent = `• ${action}`;
+                    messageText3.appendChild(actionElement);
+                });
+            }
+
+            toast.classList.add("active");
+
+            // Запускаем анимацию прогресс-бара снова
+            setTimeout(() => {
+                progress.classList.add("active");
+            }, 10);
+
+            const closeIcon = document.querySelector('.close');
+
+            if (toast) {
+                toastTimer1 = setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 5000);
+
+                toastTimer2 = setTimeout(() => {
+                    progress.classList.remove('active');
+                }, 5300);
+
+                if (closeIcon) {
+                    closeIcon.removeEventListener('click', closeToast);
+                    closeIcon.addEventListener('click', closeToast);
+                }
+            }
+        }
+
+        function closeToast() {
+            const toast = document.querySelector(".toast");
+            const progress = toast.querySelector(".progress");
+
+            toast.classList.remove('active');
+
+            setTimeout(() => {
+                progress.classList.remove('active');
+            }, 300);
+
+            clearTimeout(toastTimer1);
+            clearTimeout(toastTimer2);
+        }
+
+        document.getElementById('MyFormPlus').addEventListener('submit', async function (event) {
             event.preventDefault(); // предотвращаем стандартное поведение формы
 
             const formData = new FormData(this); // создаем объект FormData из формы
-            fetch('/Admin/Tasks/Add', {
+            const responseplus = await fetch('/Admin/Tasks/Add', {
                 method: 'POST',
                 body: formData,
             })
+
+            const data = await responseplus.json();
+
+            if (responseplus.ok && data.success) {
+                showToast('success', 'Успех', data.message || 'Операция выполнена успешно');
+                return data;
+            } else {
+                showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+                return data;
+            }
         });
-    </script>
-    <script id="FormaMinusMinus">
-        document.getElementById('MyFormMinus').addEventListener('submit', function (event) {
+
+        document.getElementById('MyFormMinus').addEventListener('submit', async function (event) {
             event.preventDefault(); // предотвращаем стандартное поведение формы
 
             const formData = new FormData(this); // создаем объект FormData из формы
 
-            fetch('/Admin/Tasks/Delete', {
+            const responseminus = await fetch('/Admin/Tasks/Delete', {
                 method: 'POST',
                 body: formData,
             })
+
+
+            const data = await responseminus.json();
+
+            if (responseminus.ok && data.success) {
+                showToast('success', 'Успех', data.message || 'Операция выполнена успешно');
+                return data;
+            } else {
+                showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+                return data;
+            }
         });
-    </script>
-    <script type="text/javascript">
-        const data = {!! json_encode(\App\Models\Tasks::all()) !!};
+
+        const blurButton = document.getElementById('CloseBtnPlus');
+        blurButton.addEventListener('click', function() {
+            const TopmostDiv = document.querySelector('.topmost-div-task-plus');
+            const appContent = document.querySelector('.app-content');
+            const minusButton = document.querySelector('.button-minus');
+            const plusButton = document.querySelector('.button-plus');
+            plusButton.style.display = 'block';
+            minusButton.style.display = 'block';
+            appContent.style.filter = 'none';
+            TopmostDiv.style.display = 'none';
+            CloseTaskBanner.style.display = 'none';
+        });
+
+        const blurButton2 = document.getElementById('CloseBtnMinus');
+        blurButton2.addEventListener('click', function() {
+            const TopmostDiv = document.querySelector('.topmost-div-task-minus');
+            const appContent = document.querySelector('.app-content');
+            const plusButton = document.querySelector('.button-plus');
+            const minusButton = document.querySelector('.button-minus');
+            minusButton.style.display = 'block';
+            plusButton.style.display = 'block';
+            appContent.style.filter = 'none';
+            TopmostDiv.style.display = 'none';
+            CloseTaskBanner.style.display = 'none';
+
+        });
+
+        const plusButton = document.getElementById('button-plus');
+        plusButton.addEventListener('click', function() {
+            const TopmostDiv = document.querySelector('.topmost-div-task-plus');
+            const appContent = document.querySelector('.app-content');
+            const minusButton = document.querySelector('.button-minus');
+            const plusButton = document.querySelector('.button-plus');
+            plusButton.style.display = 'none';
+            minusButton.style.display = 'none';
+            appContent.style.filter = 'blur(4px)';
+            TopmostDiv.style.display = 'block';
+            CloseTaskBanner.style.display = 'block';
+        });
+
+        const minusButton = document.getElementById('button-minus');
+        minusButton.addEventListener('click', function() {
+            const TopmostDiv = document.querySelector('.topmost-div-task-minus');
+            const appContent = document.querySelector('.app-content');
+            const plusButton = document.querySelector('.button-plus');
+            const minusButton = document.querySelector('.button-minus');
+            minusButton.style.display = 'none';
+            plusButton.style.display = 'none';
+            appContent.style.filter = 'blur(4px)';
+            TopmostDiv.style.display = 'block';
+            CloseTaskBanner.style.display = 'block';
+        });
+
+        const data = {!! json_encode($Tasks) !!};
         localStorage.setItem('DataAdmin', JSON.stringify(data));
-        const divElement = document.querySelector('.tableView');
+        const divElement = document.querySelector('.Product-body');
 
         let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
         let taskcategory = localStorage.getItem('taskcategoryAdmin');
@@ -303,8 +824,8 @@
             Filtereed(valueToDisplay, taskcomplexity, taskcategory);
         });
         document.getElementById('ApplyBtn').addEventListener('click', function () {
-            let taskcomplexity = document.getElementById('complexity').value;
-            let taskcategory = document.getElementById('category').value;
+            let taskcomplexity = document.getElementById('filter-menu-complexity').value;
+            let taskcategory = document.getElementById('filter-menu-category').value;
 
             localStorage.setItem('taskcomplexityAdmin', taskcomplexity);
             localStorage.setItem('taskcategoryAdmin', taskcategory);
@@ -371,8 +892,8 @@
             document.cookie = `${name}=${encodeURIComponent(value)}${expires}${sameSiteAttribute}${cookiePath}`;
         }
         function setSelection(complx, categ) {
-            let select = document.querySelector("select[name='complexity']");
-            let select2 = document.querySelector("select[name='category']");
+            let select = document.querySelector("select[name='filter-menu-complexity']");
+            let select2 = document.querySelector("select[name='filter-menu-category']");
 
             if (complx == 'All Complexity') {
                 select.selectedIndex = 0;
@@ -428,30 +949,106 @@
             }
         }
         function MakeHTML(Data, Element) {
-            const html0 = `<div class="products-header">
+            const htmlheader = `<div class="products-header">
                 <div class="product-cell image">{{ __('Name') }}</div>
                 <div class="product-cell category">{{ __('Category') }}</div>
                 <div class="product-cell status-cell">{{ __('Complexity') }}</div>
                 <div class="product-cell sales">{{ __('ID') }}</div>
                 <div class="product-cell price">{{ __('Price') }}</div>
             </div>`;
-            const html1 = Data.map(item => `
-            <a href="/Admin/Tasks/${item.id}" class="products-row tasklink">
-                <div class="product-cell image">
-                    <span>${item.name}</span>
-                </div>
-                <div class="product-cell category"><span class="cell-label">{{ __('Category') }}:</span>${item.category.toUpperCase()}</div>
-                <div class="product-cell status-cell">
-                    <span class="cell-label">{{ __('Complexity') }}:</span>
-                    <span class="status ${item.complexity}">${item.complexity.toUpperCase()}</span>
-                </div>
-                <div class="product-cell sales"><span class="cell-label">{{ __('ID') }}:</span>${item.id}</div>
-                <div class="product-cell price"><span class="cell-label">{{ __('Price') }}:</span>${item.price}</div>
-            </a>
-        `).join("");
-            const HTML = html0 + html1;
+            const htmlbody = Data.map(item => `
+      <div style="cursor: pointer" class="products-row tasklink" onclick="Taskid${item.id}()">
+        <div class="product-cell image">
+            <span>${item.name}</span>
+        </div>
+        <div class="product-cell category">
+            <span class="cell-label">{{ __('Category') }}:</span>${item.category.toUpperCase()}
+        </div>
+        <div class="product-cell status-cell">
+            <span class="cell-label">{{ __('Complexity') }}:</span>
+            <span class="status ${item.complexity}">${item.complexity.toUpperCase()}</span>
+        </div>
+        <div class="product-cell sales">
+            <span class="cell-label">{{ __('ID') }}:</span>${item.id}
+        </div>
+        <div class="product-cell price">
+            <span class="cell-label">{{ __('Price') }}:</span>${item.price}
+        </div>
+        <div class="product-cell action">
+            <button class="delete-task-btn" data-task-id="${item.id}" title="{{ __('Delete task') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+    `).join("");
+
+            const HTML = htmlbody;
             Element.innerHTML = HTML;
+
+            // Добавляем обработчики событий для кнопок удаления
+            document.querySelectorAll('.delete-task-btn').forEach(button => {
+                button.addEventListener('click', async function(e) {
+                    e.stopPropagation();
+                    const taskId = this.getAttribute('data-task-id');
+
+                    if (confirm('Вы уверены, что хотите удалить эту задачу?')) {
+                        try {
+                            const response = await fetch('/Admin/Tasks/Delete', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: `_token=${encodeURIComponent(document.querySelector('input[name="_token"]').value)}&_method=DELETE&ID=${taskId}`
+                            });
+
+                            const data = await response.json();
+
+                            if (response.ok && data.success) {
+                                showToast('success', 'Успех', 'Задача успешно удалена');
+                                this.closest('.products-row').remove();
+                            } else {
+                                showToast('error', 'Ошибка', data.message || 'Ошибка при удалении задачи');
+                            }
+                        } catch (error) {
+                            console.error('Ошибка:', error);
+                            showToast('error', 'Ошибка', 'Произошла ошибка при удалении задачи');
+                        }
+                    }
+                });
+            });
         }
+
+        document.getElementById('toggleAdditionalFiles').addEventListener('click', function() {
+            const section = document.getElementById('additionalFilesSection');
+            const isVisible = section.style.display === 'block';
+
+            section.style.display = isVisible ? 'none' : 'block';
+            this.querySelector('svg').style.transform = isVisible ? 'rotate(0deg)' : 'rotate(45deg)';
+
+            // Анимация иконки
+            this.querySelector('svg').animate([
+                { transform: isVisible ? 'rotate(45deg)' : 'rotate(0deg)' },
+                { transform: isVisible ? 'rotate(0deg)' : 'rotate(45deg)' }
+            ], {
+                duration: 300,
+                easing: 'ease-in-out'
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработчик нажатия клавиш
+            document.addEventListener('keydown', function (event) {
+                // Проверяем, нажата ли клавиша Esc (код 27)
+                if (event.key === 'Escape' || event.keyCode === 27) {
+                    closeAllTasks();
+                }
+            });
+        });
     </script>
 @endsection
-

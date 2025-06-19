@@ -19,6 +19,9 @@ return new class extends Migration
             $table->longText('description');
             $table->longText('decide')->nullable();
             $table->longText('FILES')->nullable();
+            $table->integer('web_port')->nullable();
+            $table->integer('db_port')->nullable();
+            $table->string('web_directory')->nullable();
             $table->float('solved');
             $table->float('price');
             $table->float('oldprice');

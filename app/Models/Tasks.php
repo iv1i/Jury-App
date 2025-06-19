@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Tasks extends Model
 {
@@ -17,11 +18,16 @@ class Tasks extends Model
         'description',
         'solved',
         'flag',
+        'web_port',
+        'db_port',
+        'web_directory',
+        'FILES',
     ];
+
+
 
     protected $hidden = [
         'flag',
-        'FILES',
     ];
 
     public function SolvedTasks(): \Illuminate\Database\Eloquent\Relations\HasMany

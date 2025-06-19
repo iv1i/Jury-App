@@ -1,3 +1,4 @@
+@inject('settings', 'App\Services\SettingsService')
 @extends('layouts.admin')
 
 @section('css')
@@ -21,47 +22,53 @@
             </button>
         </div>
         <div class="notifications">
-                <div class="toast ">
-                    <div  class="toast-content">
-                        <i class="fas fa-solid fa-check check"></i>
+            <div  class="toast ">
+                <div  class="toast-content">
+                    <i class="fas fa-solid fa-check check"></i>
 
-                        <div class="message">
-                            <span class="text text-1"></span>
-                                <span class="text text-2"></span>
-                        </div>
+                    <div class="message">
+                        <span class="text text-1"></span>
+                        <span class="text text-2"></span>
                     </div>
-                    <i style="color: var(--app-bg-inv)" class="fa-solid fa-xmark close">
-                    </i>
-                    <style>
-                        .toast .progress:before {
-                            background-color: #f4406a;
-                        }
-                    </style>
-                    <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
-                    <div  class="progress"></div>
                 </div>
+                <i style="color: var(--app-bg-inv)" class="fa-solid fa-xmark close">
+                </i>
+                <style>
+                    .toast .progress:before {
+                        background-color: #f4406a;
+                    }
+                </style>
+                <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
+                <div  class="progress"></div>
             </div>
+        </div>
         <!-- Инструкция-оверлей (показывается только при первом посещении) -->
         <div id="instructionOverlay" class="instruction-overlay" style="display: none;">
             <div class="instruction-box">
-                <h2>Инструкция по управлению настройками</h2>
+                <h1>Инструкция по управлению настройками</h1>
                 <ul>
                     <li><strong>Раздел {!! __('Auth') !!}:</strong> Управление видимостью разделов гостя</li>
+                    <ul>
                     <li><strong>{{ __('Rules') }}:</strong> Включение/отключение отображения правил для пользователей</li>
                     <li><strong>{{ __('Projector') }}:</strong> Включение/отключение отображения проектора</li>
+                    </ul>
 
-                    <br />
 
                     <li><strong>Раздел {!! __('App') !!}:</strong> Управление видимостью разделов приложения</li>
-                    <li><strong>{{ __('Home') }}/{{ __('Scoreboard') }}/{{ __('Statistics') }}:</strong> Показывать или скрывать соответствующие разделы</li>
-                    <li><strong>{{ __('Logout') }}:</strong> Показывать или скрывать кнопку выхода</li>
+                    <ul>
+                        <li><strong>{{ __('Home') }}/{{ __('Scoreboard') }}/{{ __('Statistics') }}:</strong> Показывать или скрывать соответствующие разделы</li>
+                        <li><strong>{{ __('Logout') }}:</strong> Показывать или скрывать кнопку выхода</li>
+                    </ul>
 
-                    <br />
 
                     <li><strong>Раздел {!! __('Tools') !!}:</strong> Опасные операции</li>
-                    <li><strong>{{ __('Reset') }}:</strong> Сброс определенных настроек системы</li>
-                    <li><strong>{{ __('Delete All') }}:</strong> Удаление всех данных (используйте с осторожностью)</li>
-                    <li><strong>{{ __('Change the rules') }}:</strong> Редактирование текста правил</li>
+                    <ul>
+                        <li><strong>{{ __('Reset') }}:</strong> Сброс итогов соревнований</li>
+                        <li><strong>{{ __('Delete All') }}:</strong> Удаление всех данных (используйте с осторожностью!)</li>
+                        <li><strong>{{ __('Change the rules') }}:</strong> Редактирование текста правил</li>
+                        <li><strong>{{ __('Add/Delete Category') }}:</strong> Добавление/удаление категорий</li>
+                    </ul>
+
                 </ul>
 
                 <div class="warning">
@@ -85,7 +92,7 @@
         <div class="settings-grid">
             <!-- Настройки авторизации -->
             <div class="settings-card">
-                <h2 class="settings-card-title">{!! __('Auth') !!}</h2>
+                <h2 class="settings-card-title">{!! __('Auth') !!} /sidebar</h2>
 
                 <div class="settings-item">
                     <span class="settings-label">{{ __('Rules') }}</span>
@@ -106,7 +113,7 @@
 
             <!-- Настройки приложения -->
             <div class="settings-card">
-                <h2 class="settings-card-title">{!! __('App') !!}</h2>
+                <h2 class="settings-card-title">{!! __('App') !!} /sidebar</h2>
 
                 <div class="settings-item">
                     <span class="settings-label">{{ __('Home') }}</span>
@@ -177,36 +184,109 @@
                     </svg>
                     {{ __('Edit Rules') }}
                 </button>
+
+                <button id="addCategoryButton" class="settings-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                    {{ __('Add/Delete Category') }}
+                </button>
             </div>
         </div>
+    </div>
+    <!-- Модальное окно для редактирования правил -->
+    <div id="rulesModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">{{ __('Edit Rules') }}</h3>
+                <button class="modal-close">&times;</button>
+            </div>
 
-        <!-- Модальное окно для редактирования правил -->
-        <div id="rulesModal" class="modal-overlay">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title">{{ __('Edit Rules') }}</h3>
-                    <button class="modal-close">&times;</button>
+            <form method="post" id="MyFormChngRules" action="{{ route('AdminSettingsChngRules') }}" enctype="multipart/form-data">
+                @csrf
+                <input type="checkbox" id="delivery_3" value="Yes" name="check" style="display: none;">
+                <input type="hidden" value="CHNGRULL" name="ButtonChangeRull">
+
+                <textarea name="Rull" id="TextAreaRull" class="rules-editor" spellcheck="false">{{ $Rules }}</textarea>
+
+                <div class="modal-footer">
+                    <button type="button" class="settings-button" id="cancelRulesButton">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="submit" class="settings-button" id="saveRulesButton">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
+                        </svg>
+                        {{ __('Save Rules') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления категории и сложности -->
+    <div id="categoryModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">{{ __('Add/Delete Category') }}</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+
+            <div class="modal-body-container">
+                <!-- Existing Categories Block -->
+                <div class="categories-list-block">
+                    <h4 class="categories-list-title">{{ __('Existing Categories') }}</h4>
+                    <div>
+                        <div class="categories-list-scroll">
+                            @foreach($settings->get('categories') as $category)
+                                <div class="category-tag">{{ $category }}</div>
+                            @endforeach
+                        </div>
+                        <div class="categories-list-scroll list-button-block">
+                            <div class="clear-button">clear</div>
+                        </div>
+                    </div>
                 </div>
 
-                <form method="post" id="MyFormChngRules" action="{{ route('AdminSettingsChngRules') }}" enctype="multipart/form-data">
+                <!-- Form Block -->
+                <form method="post" id="MyFormAddCategory" action="{{ route('AdminSettingsChgCategoryes') }}" enctype="multipart/form-data">
                     @csrf
-                    <input type="checkbox" id="delivery_3" value="Yes" name="check" style="display: none;">
-                    <input type="hidden" value="CHNGRULL" name="ButtonChangeRull">
+                    <input type="checkbox" id="delivery_4" value="Yes" name="check" style="display: none;">
+                    <input type="hidden" value="ADDCATEGORY" name="ButtonAddCategory">
 
-                    <textarea name="Rull" id="TextAreaRull" class="rules-editor" spellcheck="false">{{ $Sett }}</textarea>
+                    <div class="form-group">
+                        <label for="categoryName">{{ __('Category') }}</label>
+                        <input type="text" id="categoryName" name="categoryName" class="form-input" placeholder="{{ __('Enter category name') }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficultyName">{{ __('Action') }}</label>
+                        <select class="form-input" name="command" id="command">
+                            <option value="add" selected>add</option>
+                            <option value="delete">delete</option>
+                        </select>
+                    </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="settings-button danger-button" id="cancelRulesButton">
+                        <button type="button" class="settings-button" id="cancelCategoryButton">
                             {{ __('Cancel') }}
                         </button>
-                        <button type="submit" class="settings-button" id="saveRulesButton">
+                        <button type="submit" class="settings-button" id="saveCategoryButton">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                 <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
                             </svg>
-                            {{ __('Save Rules') }}
+                            {{ __('Update') }}
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <div class="modal-footer-info-text">
+                <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                <p>{{ __('When you delete a category, all related tasks will also be deleted! Save the required tasks by moving them to other categories.') }}<p/>
             </div>
         </div>
     </div>
@@ -214,7 +294,6 @@
 
 @section('scripts')
     <script>
-
         // Выносим таймеры в область видимости функции, чтобы их можно было очищать
         let toastTimer1, toastTimer2;
 
@@ -307,7 +386,6 @@
             try {
                 const formData = new URLSearchParams();
                 formData.append('check', 'Yes');
-                // formData.append('ButtonReset', 'RESET');
                 formData.append(buttonName, buttonValue);
                 formData.append('_token', token);
                 console.log("form data - ", formData)
@@ -335,10 +413,59 @@
             }
         }
 
+        function listCategoriesEdit(){
+            const categoryTags = document.querySelectorAll('.category-tag');
+            const clearTagsbutton = document.querySelector('.clear-button');
+            const categoryInput = document.getElementById('categoryName');
+            const commandSelect = document.getElementById('command');
+
+            clearTagsbutton.addEventListener('click', function() {
+                // Set input value
+                categoryInput.value = '';
+
+                // Auto-select delete option
+                commandSelect.value = 'add';
+
+                // Focus the input
+                categoryInput.focus();
+                categoryTags.forEach(t => t.classList.remove('category-tag-selected'));
+            });
+
+            categoryTags.forEach(tag => {
+                // Add pointer cursor
+                tag.style.cursor = 'pointer';
+
+                // Add click handler
+                tag.addEventListener('click', function() {
+                    const categoryName = this.textContent.trim();
+
+                    // Set input value
+                    categoryInput.value = categoryName;
+
+                    // Auto-select delete option
+                    commandSelect.value = 'delete';
+
+                    // Focus the input
+                    categoryInput.focus();
+
+                    // Optional: Highlight the selected tag
+                    categoryTags.forEach(t => t.classList.remove('category-tag-selected'));
+                    this.classList.add('category-tag-selected');
+                });
+            });
+
+            // Optional: Clear selection when input is modified manually
+            categoryInput.addEventListener('input', function() {
+                categoryTags.forEach(t => t.classList.remove('category-tag-selected'));
+            });
+        }
+
         // Инициализация всех форм на странице
         document.addEventListener('DOMContentLoaded', function() {
-            const Settings = {!! json_encode(\App\Models\Settings::find(1)) !!};
+            const Settings = {!! json_encode($Sett) !!};
             const checkboxes0 = document.querySelectorAll('.CHECKBOX');
+
+            listCategoriesEdit();
 
             // Инициализация переключателей
             checkboxes0.forEach(checkbox => {
@@ -347,7 +474,7 @@
                     name = 'Logout'
                 }
                 const settingValue = Settings[name];
-                checkbox.checked = settingValue === 'yes';
+                checkbox.checked = settingValue;
             });
 
             // Показываем инструкцию только при первом посещении
@@ -423,26 +550,67 @@
                     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка...';
 
                     try {
-                        let buttonName, buttonValue;
+                        let formData;
 
-                        // Определяем сообщения в зависимости от формы
-                        if (form.id === 'MyFormReset') {
-                            buttonName = 'ButtonReset';
-                            buttonValue = 'RESET';
-                        } else if (form.id === 'MyFormDeleteAll') {
-                            buttonName = 'ButtonReset';
-                            buttonValue = 'DELETEALL';
-                        } else if (form.id === 'MyFormChngRules') {
-                            buttonName = 'ButtonChangeRull';
-                            buttonValue = 'CHNGRULL';
+                        // Для форм с текстовыми полями используем FormData
+                        if (form.id === 'MyFormChngRules' || form.id === 'MyFormAddCategory') {
+                            formData = new FormData(form);
+                            if (form.id === 'MyFormChngRules') {
+                                formData.set('check', 'Yes');
+                                formData.set('ButtonChangeRull', 'CHNGRULL');
+                            } else if (form.id === 'MyFormAddCategory') {
+                                formData.set('check', 'Yes');
+                                formData.set('ButtonAddCategory', 'ADDCATEGORY');
+                            }
+                        } else {
+                            // Для остальных форм оставляем URLSearchParams
+                            formData = new URLSearchParams();
+                            formData.append('check', 'Yes');
+
+                            let buttonName, buttonValue;
+                            if (form.id === 'MyFormReset') {
+                                buttonName = 'ButtonReset';
+                                buttonValue = 'RESET';
+                            } else if (form.id === 'MyFormDeleteAll') {
+                                buttonName = 'ButtonReset';
+                                buttonValue = 'DELETEALL';
+                            }
+                            formData.append(buttonName, buttonValue);
                         }
 
-                        await submitFormAsync(form, buttonName, buttonValue);
+                        formData.append('_token', token);
 
-                        // Закрываем модальное окно, если это форма редактирования правил
-                        if (form.id === 'MyFormChngRules') {
-                            closeModal();
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (form.id === 'MyFormAddCategory') {
+                            const htmlcategorylist = data.categories.map(item => `
+                            <div class="category-tag">${item}</div>
+                        `).join("");
+                            const Element = document.querySelector('.categories-list-scroll');
+                            Element.innerHTML = htmlcategorylist;
+                            listCategoriesEdit();
                         }
+
+                        if (response.ok && data.success) {
+                            showToast('success', 'Успех', data.message || 'Операция выполнена успешно');
+
+                            // Закрываем модальное окно, если это форма редактирования правил
+                            if (form.id === 'MyFormChngRules') {
+                                closeModal();
+                            }
+                        } else {
+                            showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+                        }
+                    } catch (error) {
+                        showToast('error', 'Ошибка', 'Произошла ошибка при отправке запроса');
                     } finally {
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
@@ -451,6 +619,7 @@
             });
 
             // Управление модальным окном для правил
+            const appContent = document.querySelector('.app-content');
             const rulesModal = document.getElementById('rulesModal');
             const editRulesButton = document.getElementById('editRulesButton');
             const cancelRulesButton = document.getElementById('cancelRulesButton');
@@ -460,12 +629,15 @@
             editRulesButton.addEventListener('click', function() {
                 rulesModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
+                appContent.style.filter = 'blur(4px)';
             });
 
             // Закрытие модального окна
             function closeModal() {
                 rulesModal.classList.remove('active');
                 document.body.style.overflow = '';
+                appContent.style.filter = '';
+
             }
 
             cancelRulesButton.addEventListener('click', closeModal);
@@ -478,28 +650,70 @@
                 }
             });
 
+            // Управление модальным окном для категорий
+            const categoryModal = document.getElementById('categoryModal');
+            const addCategoryButton = document.getElementById('addCategoryButton');
+            const cancelCategoryButton = document.getElementById('cancelCategoryButton');
+            const categoryModalClose = document.querySelector('#categoryModal .modal-close');
+
+            // Открытие модального окна
+            addCategoryButton.addEventListener('click', function() {
+                categoryModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                appContent.style.filter = 'blur(4px)';
+            });
+
+            // Закрытие модального окна
+            function closeCategoryModal() {
+                categoryModal.classList.remove('active');
+                document.body.style.overflow = '';
+                appContent.style.filter = '';
+            }
+
+            cancelCategoryButton.addEventListener('click', closeCategoryModal);
+            categoryModalClose.addEventListener('click', closeCategoryModal);
+
+            // Закрытие при клике вне модального окна
+            categoryModal.addEventListener('click', function(e) {
+                if (e.target === categoryModal) {
+                    closeCategoryModal();
+                }
+            });
+
             // Закрытие по ESC
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && rulesModal.classList.contains('active')) {
-                    closeModal();
+                if (e.key === 'Escape') {
+                    if (rulesModal.classList.contains('active')) {
+                        closeModal();
+                    }
+                    if (categoryModal.classList.contains('active')) {
+                        closeCategoryModal();
+                    }
                 }
             });
 
             // Автоматическая высота textarea
             const textarea = document.getElementById('TextAreaRull');
+            const categoryDescription = document.getElementById('categoryDescription');
 
-            function adjustTextareaHeight() {
-                textarea.style.height = 'auto';
+            function adjustTextareaHeight(element) {
+                element.style.height = 'auto';
                 const maxHeight = window.innerHeight * 0.6;
-                const newHeight = Math.min(textarea.scrollHeight, maxHeight);
-                textarea.style.height = `${newHeight}px`;
+                const newHeight = Math.min(element.scrollHeight, maxHeight);
+                element.style.height = `${newHeight}px`;
             }
 
-            textarea.addEventListener('input', adjustTextareaHeight);
-            window.addEventListener('resize', adjustTextareaHeight);
+            if (textarea) {
+                textarea.addEventListener('input', () => adjustTextareaHeight(textarea));
+                window.addEventListener('resize', () => adjustTextareaHeight(textarea));
+                adjustTextareaHeight(textarea);
+            }
 
-            // Инициализация при загрузке
-            adjustTextareaHeight();
+            if (categoryDescription) {
+                categoryDescription.addEventListener('input', () => adjustTextareaHeight(categoryDescription));
+                window.addEventListener('resize', () => adjustTextareaHeight(categoryDescription));
+                adjustTextareaHeight(categoryDescription);
+            }
         });
     </script>
 @endsection

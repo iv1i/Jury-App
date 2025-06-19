@@ -185,7 +185,7 @@
             <div class="products-row ${item.BorderStyle}">
                 <div class="product-cell image">
                     <img class="logo_sc" src="${url + item.teamlogo}" alt="teamlogo">
-                    <span class="span-name">${item.name} ${item.GuestLogo}</span>
+                    <span class="span-name">${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
                 </div>
                 <div class="product-cell sales"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
                 <div class="product-cell price" style="display: flex; flex-wrap: wrap;"><span class="cell-label">{{ __('Tasks') }}:</span>

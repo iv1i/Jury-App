@@ -9,8 +9,7 @@
     box-shadow: 0 0 10px #333;
     overflow: hidden;
     transition: .3s;
-    left: 90%;
-    top: 72%;
+    left: 93%;
 }
 
 .DeleteFilesButton:hover {

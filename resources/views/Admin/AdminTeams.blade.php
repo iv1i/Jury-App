@@ -2,10 +2,14 @@
 
 @section('css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('style/css/Notif.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/AdminTasks.css') }}">
+    <link rel="stylesheet" href="{{ asset('style/css/AdminTeams.css') }}">
+    <link rel="stylesheet" href="{{ asset('style/css/AdminTask.css') }}">
     <link rel="stylesheet" href="{{ asset('style/scss/buttoncheckflag.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/InputFile.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/Statistic.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         {!! Vite::content('resources/js/app.js') !!}
     </script>
@@ -14,6 +18,29 @@
 @section('title', 'AltayCTF-Admin')
 
 @section('appcontent')
+    <div class="notifications">
+        <div class="toast ">
+            <div  class="toast-content">
+                <i class="fas fa-solid fa-check check"></i>
+
+                <div class="message">
+                    <span class="text text-1"></span>
+                    <span class="text text-2"></span>
+                    <span class="text text-3"></span>
+                </div>
+            </div>
+            <i style="color: var(--app-bg-inv)" class="fa-solid fa-xmark close">
+            </i>
+            <style>
+                .toast .progress:before {
+                    background-color: #f4406a;
+                }
+            </style>
+            <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
+            <div  class="progress"></div>
+        </div>
+    </div>
+    <div class="Teams-Container"></div>
     <div class="app-content">
         <div id="FormSwitchTheme" class="app-content-header">
             <h1 class="app-content-headerText">{{ __('Teams') }}</h1>
@@ -131,44 +158,23 @@
         <div class="products-area-wrapper tableView">
             <div class="products-header">
                 <div class="product-cell image">
-                    Name
+                    {{ __('Name')}}
                 </div>
-                <div class="product-cell category">Players
-                </div>
-                <div class="product-cell status-cell">Where-from
-                </div>
-                <div class="product-cell sales">ID
-                </div>
-                <div class="product-cell stock">Guest
-                </div>
+                <div class="product-cell category">{{ __('Players') }}</div>
+                <div class="product-cell status-cell">{{ __('Where-From') }}</div>
+                <div class="product-cell sales">{{ __('ID') }}</div>
+                <div class="product-cell category">{{ __('Guest') }}</div>
             </div>
-            <div class="products-row">
-                <button class="cell-more-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                         class="feather feather-more-vertical">
-                        <circle cx="12" cy="12" r="1"/>
-                        <circle cx="12" cy="5" r="1"/>
-                        <circle cx="12" cy="19" r="1"/>
-                    </svg>
-                </button>
-                <div class="product-cell image">
-                    <span>Жуколовы</span>
-                </div>
-                <div class="product-cell category"><span class="cell-label">Category:</span>7</div>
-                <div class="product-cell status-cell">
-                    <span class="cell-label">Status:</span>
-                    <span class="status">АГТУ</span>
-                </div>
-                <div class="product-cell sales"><span class="cell-label">ID:</span>11</div>
-                <div class="product-cell stock"><span class="cell-label">Guest:</span>No</div>
+            <div class="Product-body">
+
             </div>
         </div>
+        <div class="CloseTeamBanner" style="display: none; width: 100%; height: 100%; background-color: white; position:absolute; opacity: .0;" onclick="closeAllTeams()"></div>
     </div>
-    <div class="topmost-div-task-minus">
+    <div style="display:none;" class="topmost-div-task-minus">
         <div style="text-align: center; color: white; height: 3vw;">
             <h1 class="TaskH1">{{ __('Delete Teams') }}</h1>
-            <button id="CloseBtn2" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
+            <button id="CloseBtnMinus" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
             </button>
         </div>
         <form method="POST" class="form" id="MyFormMinus" action="/Admin/Teams/Delete">
@@ -205,10 +211,10 @@
         </form>
         <h1></h1>
     </div>
-    <div class="topmost-div-task-plus">
+    <div style="display:none;" class="topmost-div-task-plus">
         <div style="text-align: center; color: white; height: 3vw;">
             <h1 class="TaskH1">{{ __('Add Teams') }}</h1>
-            <button id="CloseBtn" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
+            <button id="CloseBtnPlus" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
             </button>
         </div>
         <form action="/Admin/Teams/Add" method="POST" id="MyFormPlus" class="form" enctype="multipart/form-data">
@@ -243,7 +249,7 @@
                 <div class="form_item">Стандартный логотип
                     <input type="checkbox" name="standartlogo" class="standartlogo">
                 </div>
-                <button style="width: 90%;" class="btnchk" onClick={console.log("click")} type="submit">
+                <button class="btnchk" onClick={console.log("click")} type="submit">
                     {{ __('Add') }}
                     <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g filter="url(#filter0_f_618_1123)">
@@ -271,55 +277,517 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/Admin/AdminTasks.js') }}"></script>
-    <script id="FormaPlussPluss">
-        document.getElementById('MyFormPlus').addEventListener('submit', function (event) {
-            event.preventDefault(); // предотвращаем стандартное поведение формы
+    <script>
+        // Обработчики для всех дроп-контейнеров и изображений
+        document.addEventListener('DOMContentLoaded', function() {
+            // Делегирование событий для динамически созданных элементов
+            document.addEventListener('dragover', function(e) {
+                if (e.target.closest('.drop-container')) {
+                    e.preventDefault();
+                }
+            }, false);
 
-            const formData = new FormData(this); // создаем объект FormData из формы
+            document.addEventListener('dragenter', function(e) {
+                const dropContainer = e.target.closest('.drop-container');
+                if (dropContainer) {
+                    dropContainer.classList.add("drag-active");
+                }
+            });
 
-            fetch('/Admin/Teams/Add', {
-                method: 'POST',
-                body: formData,
-            })
+            document.addEventListener('dragleave', function(e) {
+                const dropContainer = e.target.closest('.drop-container');
+                if (dropContainer && !dropContainer.contains(e.relatedTarget)) {
+                    dropContainer.classList.remove("drag-active");
+                }
+            });
+
+            document.addEventListener('drop', function(e) {
+                const dropContainer = e.target.closest('.drop-container');
+                if (dropContainer) {
+                    e.preventDefault();
+                    dropContainer.classList.remove("drag-active");
+
+                    // Получаем ID команды из класса контейнера
+                    const teamId = dropContainer.className.match(/team-id(\d+)/)?.[1];
+                    if (!teamId) return;
+
+                    const fileInput = dropContainer.querySelector('input[type="file"]');
+                    const img = document.getElementById(`teamlogoimg${teamId}`);
+
+                    if (fileInput && img && e.dataTransfer.files.length) {
+                        fileInput.files = e.dataTransfer.files;
+                        previewImage(fileInput.files[0], img);
+                    }
+                }
+            });
+
+            // Обработчик изменения файла для всех инпутов
+            document.addEventListener('change', function(e) {
+                if (e.target.matches('input[type="file"]')) {
+                    const teamId = e.target.closest('.drop-container').className.match(/team-id(\d+)/)?.[1];
+                    if (!teamId) return;
+
+                    const img = document.getElementById(`teamlogoimg${teamId}`);
+                    if (img && e.target.files.length) {
+                        previewImage(e.target.files[0], img);
+                    }
+                }
+            });
+
+            // Функция для предпросмотра изображения
+            function previewImage(file, imgElement) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imgElement.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
         });
     </script>
-    <script id="FormaMinusMinus">
-        document.getElementById('MyFormMinus').addEventListener('submit', function (event) {
-            event.preventDefault(); // предотвращаем стандартное поведение формы
 
-            const formData = new FormData(this); // создаем объект FormData из формы
-
-            fetch('/Admin/Teams/Delete', {
-                method: 'POST',
-                body: formData,
-            })
-        });
-    </script>
     <script type="text/javascript">
-        const data = {!! json_encode(\App\Models\User::all()) !!};
-        const svg = `{!! view('SVG.GuestSVG') !!}`;
+        const CloseTeamBanner = document.querySelector('.CloseTeamBanner');
 
-        for (let i = 0; i < data.length; i++) {
-            if (data[i].guest == 'Yes') {
-                data[i].GuestLogo = svg;
+        function closeAllTeams() {
+            const hiddenElements = document.querySelectorAll('.topmost-div[class*="Teams-id-"]');
+            const AppContent = document.querySelector('.app-content');
+            const CloseTeamBanner = document.querySelector('.CloseTeamBanner');
+            const TopmostDivPluss = document.querySelector('.topmost-div-task-plus');
+            const TopmostDivMinuss = document.querySelector('.topmost-div-task-minus');
+
+            const minusButton = document.querySelector('.button-minus');
+            const plusButton = document.querySelector('.button-plus');
+            plusButton.style.display = 'block';
+            minusButton.style.display = 'block';
+
+            if (AppContent) {
+                AppContent.style.filter = 'none';
+            }
+            if (CloseTeamBanner) {
+                CloseTeamBanner.style.display = 'none';
+            }
+            hiddenElements.forEach(element => {
+                element.style.display = 'none';
+            });
+            TopmostDivPluss.style.display = 'none';
+            TopmostDivMinuss.style.display = 'none';
+        }
+
+        // Функция для создания формы команды
+        function createTeamsForm(team) {
+            const formId = `Teams-id-${team.id}`;
+            const formHtml = `
+        <div class="topmost-div ${formId}" style="display: none;">
+            <div style="text-align: center; color: white; height: 3vw;">
+                <h1 class="TaskH1">{{ __('Change Teams') }} #${team.id}</h1>
+                <div id="CloseBtn" class="btnclose" onclick="Teamid${team.id}close(); return false;">
+                    <img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
+                </div>
+            </div>
+            <form action="/Admin/Teams/Change" method="POST" id="MyFormChange${team.id}" class="form" enctype="multipart/form-data">
+                @csrf
+            @method('PATCH')
+            <div class="form_item"><div>Название</div>
+                <input type="text" name="name" class="" required="" value="${team.name}">
+                </div>
+                <div class="form_item"><div>Кол-во игроков</div>
+                    <input type="text" name="players" class="" value="${team.players}">
+                </div>
+                <div class="form_item"><div>Учебное заведение</div>
+                    <input type="text" name="WhereFrom" class="" value="${team.wherefrom}">
+                </div>
+                <div class="form_item"><div>Токен</div>
+                    <input type="text" name="token" placeholder="{{ __('New Token') }}" class="">
+                </div>
+                <div class="form_item">
+                    <div>Лого</div><div><img id="teamlogoimg${team.id}" class="teamlogoimg" style="height: 7vw;" src="/storage/teamlogo/${team.teamlogo}"></div>
+                    <label for="images${team.id}" class="drop-container team-id${team.id}" id="dropcontainer">
+                        <span class="drop-title">{{ __('Drop files here') }}</span>
+                        <input type="file" name="file" id="images${team.id}">
+                    </label>
+                </div>
+                <div class="form_item">Гостевая
+                    <input type="checkbox" name="IsGuest" class="is_guest" ${team.guest === 'Yes' ? 'checked' : ''}>
+                </div>
+                <div class="form_item">Стандартный логотип
+                    <input type="checkbox" name="standartlogo" class="is_guest" ${team.teamlogo}>
+                </div>
+                <input type="hidden" name="id" value="${team.id}">
+                <div class="form_item">
+                    <button class="btnchk" type="submit">
+                        {{ __('Update') }}
+            <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g filter="url(#filter0_f_618_1123)">
+                    <path d="M42.9 2H76.5L34.5 44H2L42.9 2Z" fill="url(#paint0_linear_618_1123)"/>
+                </g>
+                <defs>
+                    <filter id="filter0_f_618_1123" x="0" y="0" width="78.5" height="46" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                        <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+                        <feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_618_1123"/>
+                    </filter>
+                    <linearGradient id="paint0_linear_618_1123" x1="76.5" y1="2.00002" x2="34.5" y2="44" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white" stop-opacity="0.6"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0.05"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </button>
+    </div>
+</form>
+<h1></h1>
+</div>
+`;
+
+            const container = document.querySelector('.Teams-Container');
+            container.insertAdjacentHTML('beforeend', formHtml);
+
+            // Добавляем обработчики событий для новой формы
+            document.getElementById(`MyFormChange${team.id}`).addEventListener('submit', async function(event) {
+                event.preventDefault();
+                await submitTeamFormAsync(this, team.id);
+            });
+
+            // Создаем функции для открытия/закрытия
+            window[`Teamid${team.id}`] = function() {
+                closeAllTeams(); // Закрываем все другие формы
+                const div = document.querySelector(`.topmost-div.Teams-id-${team.id}`);
+                const AppContent = document.querySelector('.app-content');
+                const CloseTeamBanner = document.querySelector('.CloseTeamBanner');
+
+                if (div) {
+                    if (AppContent) AppContent.style.filter = 'blur(4px)';
+                    if (CloseTeamBanner) CloseTeamBanner.style.display = 'block';
+                    div.style.display = 'block';
+                }
+            };
+
+            window[`Teamid${team.id}close`] = function() {
+                const div = document.querySelector(`.topmost-div.Teams-id-${team.id}`);
+                const AppContent = document.querySelector('.app-content');
+                const CloseTeamBanner = document.querySelector('.CloseTeamBanner');
+
+                if (div) {
+                    if (AppContent) AppContent.style.filter = 'none';
+                    if (CloseTeamBanner) CloseTeamBanner.style.display = 'none';
+                    div.style.display = 'none';
+                }
+            };
+        }
+
+        // Функция для экранирования HTML
+        function escapeHtml(unsafe) {
+            return unsafe
+                ? unsafe.toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;")
+                : '';
+        }
+
+        // Асинхронная отправка формы команды
+        async function submitTeamFormAsync(form, teamId) {
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+
+            try {
+                // Показываем индикатор загрузки
+                submitButton.disabled = true;
+                submitButton.innerHTML = 'Обновление...';
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error('Сетевая ошибка: ' + response.statusText);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Сохраняем данные формы перед любыми действиями
+                    const formValues = Object.fromEntries(formData.entries());
+
+                    showToast('success', 'Успех', data.message || 'Операция выполнена успешно', data.actions);
+
+                    // Обновляем данные на странице без перезагрузки
+                    updateTeamDataOnPage(teamId, formValues);
+
+                    // Не закрываем форму автоматически
+                    // window[`Teamid${teamId}close`]();
+
+                } else {
+                    // Сохраняем данные формы даже при ошибке
+                    const formValues = Object.fromEntries(formData.entries());
+
+                    showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+
+                    // Обновляем данные на странице даже при ошибке
+                    updateTeamDataOnPage(teamId, formValues);
+                }
+
+                return data;
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showToast('error', 'Ошибка', 'Произошла ошибка при отправке формы');
+                throw error;
+            } finally {
+                // Восстанавливаем кнопку в исходное состояние
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
             }
         }
+
+        // Функция для обновления данных на странице
+        function updateTeamDataOnPage(teamId, newData) {
+            // Находим элемент команды в списке
+            const teamElement = document.querySelector(`.teamlink[onclick="Teamid${teamId}()"]`);
+        }
+
+        // Инициализация существующих форм
+        @foreach ($Teams as $T)
+        createTeamsForm({!! $T !!});
+        @endforeach
+
+        // Обработчик событий для новых задач
+        Echo.private(`channel-admin-teams`).listen('AdminTeamsEvent', (e) => {
+            const teams = e.teams;
+            console.log(teams);
+            localStorage.setItem('DataAdmin', JSON.stringify(teams));
+
+            // Находим текущую открытую форму (если есть)
+            const openForm = document.querySelector('.topmost-div[class*="Teams-id-"][style*="display: block"]');
+            let openFormId = null;
+            if (openForm) {
+                const classList = Array.from(openForm.classList);
+                const teamClass = classList.find(cls => cls.startsWith('Teams-id-'));
+                openFormId = teamClass ? teamClass.split('Teams-id-')[1] : null;
+            }
+
+            // Удаляем все существующие формы, кроме открытой (если есть)
+            document.querySelectorAll('.topmost-div[class*="Teams-id-"]').forEach(el => {
+                if (!openFormId || !el.classList.contains(`Teams-id-${openFormId}`)) {
+                    el.remove();
+                }
+            });
+
+            // Создаем формы для всех задач
+            teams.forEach(team => {
+                // Не создаем форму заново, если она уже есть и открыта
+                if (!openFormId || team.id !== openFormId) {
+                    createTeamsForm(team);
+                }
+            });
+        });
+
+        let toastTimer1, toastTimer2;
+
+        function showToast(type, title, message, actions = null) {
+            const toast = document.querySelector(".toast");
+            const toastContent = toast.querySelector(".toast-content");
+            const checkIcon = toast.querySelector(".check");
+            const messageText1 = toast.querySelector(".text-1");
+            const messageText2 = toast.querySelector(".text-2");
+            const messageText3 = toast.querySelector(".text-3");
+            const progress = toast.querySelector(".progress");
+
+            // Очищаем предыдущие таймеры
+            clearTimeout(toastTimer1);
+            clearTimeout(toastTimer2);
+
+            // Сбрасываем анимацию прогресс-бара
+            progress.classList.remove("active");
+            // Принудительный рефлоу для сброса анимации
+            void progress.offsetWidth;
+
+            // Удаляем предыдущие добавленные стили
+            const existingStyles = document.querySelectorAll('style[data-toast-style]');
+            existingStyles.forEach(style => style.remove());
+
+            toast.style.display = "flex";
+
+            // Set icon and colors based on type
+            if (type === 'success') {
+                checkIcon.className = "fas fa-solid fa-check check";
+                checkIcon.style.backgroundColor = "#40f443";
+                const style = document.createElement('style');
+                style.innerHTML = '.toast .progress:before { background-color: #40f443 !important; }';
+                style.setAttribute('data-toast-style', 'true');
+                document.head.appendChild(style);
+            } else {
+                checkIcon.className = "fas fa-solid fa-times check";
+                checkIcon.style.backgroundColor = "#f4406a";
+                const style = document.createElement('style');
+                style.innerHTML = '.toast .progress:before { background-color: #f4406a !important; }';
+                style.setAttribute('data-toast-style', 'true');
+                document.head.appendChild(style);
+            }
+
+            messageText1.textContent = title;
+            messageText2.textContent = message;
+
+            // Очищаем предыдущие действия
+            messageText3.innerHTML = '';
+
+            // Добавляем действия с новой строки для каждого
+            if (actions && actions.length > 0) {
+                actions.forEach(action => {
+                    const actionElement = document.createElement('div');
+                    actionElement.textContent = `• ${action}`;
+                    messageText3.appendChild(actionElement);
+                });
+            }
+
+            toast.classList.add("active");
+
+            // Запускаем анимацию прогресс-бара снова
+            setTimeout(() => {
+                progress.classList.add("active");
+            }, 10);
+
+            const closeIcon = document.querySelector('.close');
+
+            if (toast) {
+                toastTimer1 = setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 5000);
+
+                toastTimer2 = setTimeout(() => {
+                    progress.classList.remove('active');
+                }, 5300);
+
+                if (closeIcon) {
+                    closeIcon.removeEventListener('click', closeToast);
+                    closeIcon.addEventListener('click', closeToast);
+                }
+            }
+        }
+
+        function closeToast() {
+            const toast = document.querySelector(".toast");
+            const progress = toast.querySelector(".progress");
+
+            toast.classList.remove('active');
+
+            setTimeout(() => {
+                progress.classList.remove('active');
+            }, 300);
+
+            clearTimeout(toastTimer1);
+            clearTimeout(toastTimer2);
+        }
+
+        document.getElementById('MyFormPlus').addEventListener('submit', async function (event) {
+            event.preventDefault(); // предотвращаем стандартное поведение формы
+
+            const formData = new FormData(this); // создаем объект FormData из формы
+            const responseplus = await fetch('/Admin/Teams/Add', {
+                method: 'POST',
+                body: formData,
+            })
+
+            const data = await responseplus.json();
+
+            if (responseplus.ok && data.success) {
+                showToast('success', 'Успех', data.message || 'Операция выполнена успешно');
+                return data;
+            } else {
+                showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+                return data;
+            }
+        });
+
+        document.getElementById('MyFormMinus').addEventListener('submit', async function (event) {
+            event.preventDefault(); // предотвращаем стандартное поведение формы
+
+            const formData = new FormData(this); // создаем объект FormData из формы
+
+            const responseminus = await fetch('/Admin/Teams/Delete', {
+                method: 'POST',
+                body: formData,
+            })
+
+
+            const data = await responseminus.json();
+
+            if (responseminus.ok && data.success) {
+                showToast('success', 'Успех', data.message || 'Операция выполнена успешно');
+                return data;
+            } else {
+                showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+                return data;
+            }
+        });
+
+        const blurButton = document.getElementById('CloseBtnPlus');
+        blurButton.addEventListener('click', function() {
+            const TopmostDiv = document.querySelector('.topmost-div-task-plus');
+            const appContent = document.querySelector('.app-content');
+            const minusButton = document.querySelector('.button-minus');
+            const plusButton = document.querySelector('.button-plus');
+            plusButton.style.display = 'block';
+            minusButton.style.display = 'block';
+            appContent.style.filter = 'none';
+            TopmostDiv.style.display = 'none';
+            CloseTeamBanner.style.display = 'none';
+        });
+
+        const blurButton2 = document.getElementById('CloseBtnMinus');
+        blurButton2.addEventListener('click', function() {
+            const TopmostDiv = document.querySelector('.topmost-div-task-minus');
+            const appContent = document.querySelector('.app-content');
+            const plusButton = document.querySelector('.button-plus');
+            const minusButton = document.querySelector('.button-minus');
+            minusButton.style.display = 'block';
+            plusButton.style.display = 'block';
+            appContent.style.filter = 'none';
+            TopmostDiv.style.display = 'none';
+            CloseTeamBanner.style.display = 'none';
+
+        });
+
+        const plusButton = document.getElementById('button-plus');
+        plusButton.addEventListener('click', function() {
+            const TopmostDiv = document.querySelector('.topmost-div-task-plus');
+            const appContent = document.querySelector('.app-content');
+            const minusButton = document.querySelector('.button-minus');
+            const plusButton = document.querySelector('.button-plus');
+            plusButton.style.display = 'none';
+            minusButton.style.display = 'none';
+            appContent.style.filter = 'blur(4px)';
+            TopmostDiv.style.display = 'block';
+            CloseTeamBanner.style.display = 'block';
+        });
+
+        const minusButton = document.getElementById('button-minus');
+        minusButton.addEventListener('click', function() {
+            const TopmostDiv = document.querySelector('.topmost-div-task-minus');
+            const appContent = document.querySelector('.app-content');
+            const plusButton = document.querySelector('.button-plus');
+            const minusButton = document.querySelector('.button-minus');
+            minusButton.style.display = 'none';
+            plusButton.style.display = 'none';
+            appContent.style.filter = 'blur(4px)';
+            TopmostDiv.style.display = 'block';
+            CloseTeamBanner.style.display = 'block';
+        });
+
+        const data = {!! json_encode($Teams) !!};
 
         //const sortedData = data.sort((a, b) => b.score - a.score);
         //console.log(sortedData);
 
-        const divElement = document.querySelector('.tableView');
+        const divElement = document.querySelector('.Product-body');
         MakeHTML(data, divElement);
 
         Echo.private(`channel-admin-teams`).listen('AdminTeamsEvent', (e) => {
             const valueToDisplay = e.teams;
             console.log('Принято!');
-            for (let i = 0; i < valueToDisplay.length; i++) {
-                if (valueToDisplay[i].guest == 'Yes') {
-                    valueToDisplay[i].GuestLogo = svg;
-                }
-            }
             //const sortedData = valueToDisplay.sort((a, b) => b.score - a.score);
             //console.log(sortedData);
            MakeHTML(valueToDisplay, divElement);
@@ -331,7 +799,7 @@
             const protocol = window.location.protocol;
             const port = window.location.port;
             const url = protocol + '//' + host + ':' + port + '/storage/teamlogo/';
-            const html0 = `<div class="products-header">
+            const htmlheader = `<div class="products-header">
                 <div class="product-cell image">
                     {{ __('Name')}}
                 </div>
@@ -340,14 +808,11 @@
                 <div class="product-cell sales">{{ __('ID') }}</div>
                 <div class="product-cell category">{{ __('Guest') }}</div>
             </div>`;
-            const html1 = Data.map(item => `
-            <a href="/Admin/Teams/${item.id}" class="products-row teamlink">
-                <button class="cell-more-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                </button>
+            const htmlbody = Data.map(item => `
+            <div style="cursor: pointer" class="products-row teamlink" onclick="Teamid${item.id}()">
                 <div class="product-cell image">
                 <img src="${url + item.teamlogo}" alt="product">
-                    <span>${item.name} ${item.GuestLogo}</span>
+                    <span>${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
                 </div>
                 <div class="product-cell category"><span class="cell-label">{{__('Players')}}:</span>${item.players}</div>
                 <div class="product-cell status-cell">
@@ -356,53 +821,20 @@
                 </div>
                 <div class="product-cell sales"><span class="cell-label">{{ __('ID') }}:</span>${item.id}</div>
                 <div class="product-cell category"><span class="cell-label">{{ __('Guest') }}:</span>${item.guest}</div>
-            </a>
+            </div>
         `).join("");
-            const HTML = html0 + html1;
+            const HTML = htmlbody;
             Element.innerHTML = HTML;
         }
-    </script>
-    <script type="text/javascript">
-        const dropContainer = document.getElementById("dropcontainer")
-        const fileInput = document.getElementById("images")
 
-        dropContainer.addEventListener("dragover", (e) => {
-            // prevent default to allow drop
-            e.preventDefault()
-        }, false)
-
-        dropContainer.addEventListener("dragenter", () => {
-            dropContainer.classList.add("drag-active")
-        })
-
-        dropContainer.addEventListener("dragleave", () => {
-            dropContainer.classList.remove("drag-active")
-        })
-
-        dropContainer.addEventListener("drop", (e) => {
-            e.preventDefault()
-            dropContainer.classList.remove("drag-active")
-            fileInput.files = e.dataTransfer.files
-            const input = document.querySelector('input[type="file"]');
-            const img = document.querySelector('#teamlogoimg');
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                img.src = e.target.result;
-                img.style.display = '';
-            };
-            reader.readAsDataURL(input.files[0]);
-        })
-
-        const input = document.querySelector('input[type="file"]');
-        const img = document.querySelector('#teamlogoimg');
-
-        input.addEventListener('change', function () {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                img.src = e.target.result;
-                img.style.display = '';
-            };
-            reader.readAsDataURL(input.files[0]);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработчик нажатия клавиш
+            document.addEventListener('keydown', function (event) {
+                // Проверяем, нажата ли клавиша Esc (код 27)
+                if (event.key === 'Escape' || event.keyCode === 27) {
+                    closeAllTeams();
+                }
+            });
         });
     </script>
 @endsection

@@ -20,7 +20,7 @@ class SettingsSeeder extends Seeder
             'Scoreboard' => 'yes',
             'Statistics' => 'yes',
             'Logout' => 'yes',
-            'Rule' => 'Правила редактируются в Админке!'
+            'Rule' => '¯\_(ツ)_/¯'
         ]);
     }
 }

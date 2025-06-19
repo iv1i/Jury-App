@@ -1,3 +1,172 @@
-.tasklink{
-    text-decoration: none; /* no underline */
+/* Основной контейнер задачи */
+.topmost-div[class*="Task-id-"] {
+    position: fixed;
+    top: 50%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    width: 60vw;
+    max-width: 800px;
+    min-width: 320px;
+    max-height: 85vh;
+    background-color: var(--app-bg-2);
+    border-radius: 12px;
+    box-shadow: var(--filter-shadow);
+    padding: 25px;
+    z-index: 9999;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid var(--app-border-color);
+    display: none; /* Изначально скрыт */
+}
+
+/* Заголовок задачи */
+.topmost-div[class*="Task-id-"] > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--app-border-color);
+    position: relative;
+}
+
+.TaskH1 {
+    color: var(--sidebar-main-color);
+    font-size: 1.8rem;
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+    padding: 0 30px;
+    word-break: break-word;
+}
+
+/* Кнопка закрытия */
+.btnclosetask {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.btnclosetask:hover {
+    background-color: var(--sidebar-hover-link);
+}
+
+.closeicontask {
+    width: 24px;
+    height: 24px;
+    filter: invert(80%);
+}
+
+/* Блок с описанием задачи */
+.description {
+    color: var(--sidebar-main-color);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    padding: 0 10px;
+    font-weight: 500;
+}
+
+.description p {
+    margin: 0 0 15px 0;
+}
+
+.description a {
+    color: var(--action-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.description a:hover {
+    color: var(--action-color-hover);
+    text-decoration: underline;
+}
+
+/* Сложность задачи */
+.taskID_complexity {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+/* Стили для сложностей */
+.easy {
+    background-color: rgba(43, 169, 114, 0.2);
+    color: #2ba972;
+}
+
+.medium {
+    background-color: rgba(89, 113, 157, 0.2);
+    color: #59719d;
+}
+
+.hard {
+    background-color: rgba(157, 89, 89, 0.2);
+    color: #9d5959;
+}
+
+/* Блок с файлами */
+.description:last-child {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--app-border-color);
+}
+
+.description:last-child a {
+    display: inline-block;
+    margin-right: 15px;
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    background-color: var(--app-bg);
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.description:last-child a:hover {
+    background-color: var(--action-color);
+    color: white;
+    text-decoration: none;
+}
+
+
+/* Адаптивность */
+@media screen and (max-width: 768px) {
+    .topmost-div[class*="Task-id-"] {
+        padding: 15px;
+    }
+
+    .TaskH1 {
+        font-size: 1.4rem;
+        padding: 0 20px;
+    }
+
+    .description {
+        font-size: 0.95rem;
+    }
+}
+
+/* Анимация появления */
+@keyframes taskFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.topmost-div[class*="Task-id-"].show {
+    display: block;
+    animation: taskFadeIn 0.3s ease-out forwards;
 }

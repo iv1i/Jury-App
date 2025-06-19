@@ -615,52 +615,6 @@ body {
 #TaskLink:hover::before {
   width: 100%; }
 
-.topmost-div {
-  position: fixed;
-  border-radius: 15px;
-  z-index: 9999;
-  top: 10vw;
-  left: 30vw;
-  width: 50vw;
-  background-color: var(--app-bg-2); }
-  @media screen and (max-width: 1024px) {
-    .topmost-div {
-      top: 6em;
-      width: 82vw;
-      left: 14vw; } }
-
-.topmost-div-task-plus {
-  position: fixed;
-  border-radius: 15px;
-  z-index: 9999;
-  top: 8vw;
-  left: 30vw;
-  width: 50vw;
-  background-color: var(--app-bg-2);
-  display: none; }
-
-.topmost-div-task-minus {
-  position: fixed;
-  border-radius: 15px;
-  z-index: 9999;
-  top: 8vw;
-  left: 30vw;
-  width: 50vw;
-  background-color: var(--app-bg-2);
-  display: none; }
-
-.description {
-  word-wrap: break-word;
-  /* Для старых браузеров */
-  overflow-wrap: break-word;
-  /* Для современных браузеров */
-  white-space: normal;
-  /* Позволяет переносить текст */
-  text-align: justify;
-  margin: auto;
-  color: var(--sidebar-main-color);
-  width: 45vw;
-  font-weight: 500; }
   @media screen and (max-width: 1024px) {
     .description {
       width: 90%;
@@ -692,8 +646,6 @@ body {
   width: 2vw;
   height: 2vw;
   position: relative;
-  left: 23.8vw;
-  top: -4.4vw;
   background-color: transparent;
   background-repeat: no-repeat;
   border: none;
@@ -706,11 +658,7 @@ body {
       top: -170%; } }
 
 .btnclosetask {
-  width: 2vw;
-  height: 2vw;
   position: relative;
-  left: 48vw;
-  top: -4.4vw;
   background-color: transparent;
   background-repeat: no-repeat;
   border: none;
@@ -719,8 +667,7 @@ body {
   outline: none; }
   @media screen and (max-width: 1024px) {
     .btnclosetask {
-      left: 42%;
-      top: -170%; } }
+      } }
 
 .dec {
   margin: 0;
@@ -789,5 +736,19 @@ body {
   background-color: rgba(157, 89, 89, 0.2); }
   .hard:before {
     background-color: #9d5959; }
+
+.guest-badge {
+    display: inline-block;
+    padding: 2px 3px;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--app-bg-2);
+    background-color: #4169e1;
+    border-radius: 3px;
+    text-align: center;
+    white-space: nowrap;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
 
 /*# sourceMappingURL=Home.css.map */

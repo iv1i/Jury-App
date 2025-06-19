@@ -3,10 +3,14 @@
 @section('css')
     <link rel="stylesheet" href="{{ asset('style/css/Notif.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/AdminTasks.css') }}">
+    <link rel="stylesheet" href="{{ asset('style/css/AdminTeams.css') }}">
     <link rel="stylesheet" href="{{ asset('style/scss/buttoncheckflag.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/InputFile.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/Statistic.css') }}">
     <link rel="stylesheet" href="{{ asset('style/scss/ChekFlag.css') }}">
+    <script>
+        {!! Vite::content('resources/js/app.js') !!}
+    </script>
     <style>
         :root {
             --app-content-secondary-color: none;
@@ -74,7 +78,7 @@
                 </div>
                 <input type="hidden" name="id" value="{{ $data['id'] }}">
                 <div class="form_item">
-                    <button style="width: 90%;" class="btnchk" onClick={console.log("click")} type="submit">
+                    <button class="btnchk" onClick={console.log("click")} type="submit">
                         {{ __('Update') }}
                         <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g filter="url(#filter0_f_618_1123)">

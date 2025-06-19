@@ -9,7 +9,7 @@
 @section('title', 'AltayCTF-School')
 
 @section('appcontent')
-    <div style="text-align: center; width: 100%; height: 2.2vh; color: var(--app-bg-inv);background-color: var(--app-bg-2); position: fixed; top: 0%; opacity: 0.5;font-family: cursive; font-size: 12px">
+    <div style="display: none; text-align: center; width: 100%; height: 2.2vh; color: var(--app-bg-inv);background-color: var(--app-bg-2); position: fixed; top: 0%; opacity: 0.5;font-family: cursive; font-size: 12px">
         <b>By SharLike</b>
     </div>
     <div class="app-content">
@@ -181,6 +181,13 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
             </div>
         </div>
     </div>
+    <style>
+        .tableView .product-cell img {
+            width: 64px;
+            height: 64px;
+            border-radius: 6px;
+            margin-right: 6px; }
+    </style>
 @endsection
 
 @section('scripts')

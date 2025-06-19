@@ -32,8 +32,8 @@ class TasksController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 200);
-            //return redirect()->back()->withErrors($validator->errors());
+            $firstErrorMessage = $validator->errors()->first();
+            return response()->json(['message' => $firstErrorMessage], 422);
         }
 
         $userAgent = $request->userAgent();
@@ -152,12 +152,11 @@ class TasksController extends Controller
             $this->AppEvents();
             $this->AdminEvents();
 
-            return response()->json(['message' => 'Флаг верный']);
         }
 
         $this->NotifEventsError($userAgent);
 
-        return response()->json(['error' => 'Флаг неверный!'], 200);
+        return response()->json(['success' => false,'message' => 'Флаг неверный!'], 200);
         //return redirect()->route('TasksID', ['id' => $taskid])->with('error', 'Флаг неверный!');
     }
     //----------------------------------------------------------------EVENTS

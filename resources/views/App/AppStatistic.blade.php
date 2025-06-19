@@ -164,7 +164,7 @@
             <a href="/Statistics/ID/${item.id}" class="products-row teamlink ${item.BorderStyle}">
                 <div class="product-cell image">
                     <img class="logo_sc" src="${url + item.teamlogo}" alt="product">
-                    <span class="span-name">${item.name} ${item.GuestLogo}</span>
+                    <span class="span-name">${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
                 </div>
                 <div class="product-cell category"><span class="cell-label">{{ __('Where-From') }}:</span>${item.wherefrom}</div>
 

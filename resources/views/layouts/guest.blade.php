@@ -1,4 +1,5 @@
-<!doctype html>
+@inject('settings', 'App\Services\SettingsService')
+    <!doctype html>
 <html class="" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
@@ -143,7 +144,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
                     <span class="sidebar-list-item-name">{{ __('Authorize') }}</span>
                 </a>
             </li>
-            @if(\App\Models\Settings::find(1)->Rules === 'yes')
+            @if($settings->get('sidebar.Rules', true))
                 <li class="sidebar-list-item Rules">
                     <a href="/Rules">
                         <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -155,7 +156,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
                     </a>
                 </li>
             @endif
-            @if(\App\Models\Settings::find(1)->Projector === 'yes')
+            @if($settings->get('sidebar.Projector', true))
                 <li class="sidebar-list-item">
                     <a href="/Projector">
                         <svg class="proj" width="22px" height="22px" viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg">

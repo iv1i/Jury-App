@@ -84,7 +84,7 @@
         }
 
         .scrollable-table {
-            max-height: 360px;
+            max-height: 330px;
             overflow-y: auto;
             margin-top: 15px;
             border-radius: 8px;
@@ -309,10 +309,11 @@
 
 @section('scripts')
     <script type="text/javascript">
-        let Tasks = {!! json_encode(\App\Models\Tasks::all()) !!};
-        let Teams = {!! json_encode(\App\Models\User::all()) !!};
-        let CheckTask = {!! json_encode(\App\Models\CheckTasks::all()) !!};
-        let infoTasks = {!! json_encode(\App\Models\infoTasks::all()) !!};
+        let Tasks = {!! json_encode($data[0]) !!};
+        let Teams = {!! json_encode($data[1]) !!};
+        let infoTasks = {!! json_encode($data[2]) !!};
+        let CheckTask = {!! json_encode($data[3]) !!};
+
 
         // Обновляем диаграмму команд
         function updateTeamsChart(options = {}) {
@@ -410,43 +411,31 @@
         // Обновляем данные на странице
         function updateDashboard(data) {
             const { Tasks = [], Teams = [], infoTasks = [{}], CheckTask = [] } = data;
-            const maxTasks = Math.max(
-                infoTasks[0]?.easy || 0,
-                infoTasks[0]?.medium || 0,
-                infoTasks[0]?.hard || 0,
-                10
-            );
+            const maxTasks = infoTasks.sumary;
 
             // Обновляем карточки статистики
-            if (infoTasks[0]) {
-                document.getElementById('total-tasks').textContent = infoTasks[0].sumary || 0;
-                document.getElementById('easy-tasks').textContent = infoTasks[0].easy || 0;
-                document.getElementById('medium-tasks').textContent = infoTasks[0].medium || 0;
-                document.getElementById('hard-tasks').textContent = infoTasks[0].hard || 0;
+            if (infoTasks) {
+                document.getElementById('total-tasks').textContent = infoTasks.sumary || 0;
+                document.getElementById('easy-tasks').textContent = infoTasks.easy || 0;
+                document.getElementById('medium-tasks').textContent = infoTasks.medium || 0;
+                document.getElementById('hard-tasks').textContent = infoTasks.hard || 0;
 
                 // Анимируем прогресс-бары
-                animateProgress('total-progress', (infoTasks[0].sumary || 0) / maxTasks * 100);
-                animateProgress('easy-progress', (infoTasks[0].easy || 0) / maxTasks * 100);
-                animateProgress('medium-progress', (infoTasks[0].medium || 0) / maxTasks * 100);
-                animateProgress('hard-progress', (infoTasks[0].hard || 0) / maxTasks * 100);
+                animateProgress('total-progress', (infoTasks.sumary || 0) / maxTasks * 100);
+                animateProgress('easy-progress', (infoTasks.easy || 0) / maxTasks * 100);
+                animateProgress('medium-progress', (infoTasks.medium || 0) / maxTasks * 100);
+                animateProgress('hard-progress', (infoTasks.hard || 0) / maxTasks * 100);
             }
 
             // Обновляем категории
-            if (infoTasks[0]) {
-                const categories = [
-                    { name: 'admin', value: infoTasks[0].admin },
-                    { name: 'recon', value: infoTasks[0].recon },
-                    { name: 'crypto', value: infoTasks[0].crypto },
-                    { name: 'stegano', value: infoTasks[0].stegano },
-                    { name: 'ppc', value: infoTasks[0].ppc },
-                    { name: 'pwn', value: infoTasks[0].pwn },
-                    { name: 'web', value: infoTasks[0].web },
-                    { name: 'forensic', value: infoTasks[0].forensic },
-                    { name: 'joy', value: infoTasks[0].joy },
-                    { name: 'misc', value: infoTasks[0].misc },
-                    { name: 'osint', value: infoTasks[0].osint },
-                    { name: 'reverse', value: infoTasks[0].reverse }
-                ].filter(cat => cat.value > 0);
+            if (infoTasks) {
+                // Создаем массив категорий динамически из ключей infoTasks
+                const categories = Object.keys(infoTasks)
+                    .map(name => ({
+                        name: name,
+                        value: infoTasks[name] // или можно проверить, является ли значение числом, если нужно
+                    }))
+                    .filter(cat => cat.name !== "easy" && cat.name !== "medium" && cat.name !== "hard" && cat.name !== "sumary" && cat.value > 0); // или другая проверка в зависимости от типа значения
 
                 const categoriesContainer = document.getElementById('categories-container');
                 if (categoriesContainer) {

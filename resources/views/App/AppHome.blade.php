@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{{ asset('style/scss/ChekFlag.css') }}">
     <link rel="stylesheet" href="{{ asset('style/scss/buttoncheckflag.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/HomeTask.css') }}">
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
     <script>
         {!! Vite::content('resources/js/app.js') !!}
     </script>
@@ -14,57 +14,30 @@
 @section('title', 'AltayCTF-Sch-Home')
 
 @section('appcontent')
-    <div class="notifications"></div>
-    <div class="Tasks-Container">
-        @foreach (\App\Models\Tasks::all() as $T)
-            <div style="display: none" class="topmost-div Task-id-{{ $T->id }}">
-                <div style="text-align: center; height: 3em;" ><h1 class="TaskH1">{{ $T->name }}</h1><div id="CloseBtn" class="btnclosetask" onclick="Taskid{{ $T->id }}close()"><img class="closeicontask" src="{{ asset('/media/icon/close.png') }}"></div>
+    <div class="notifications">
+        <div class="toast ">
+            <div  class="toast-content">
+                <i class="fas fa-solid fa-check check"></i>
+
+                <div class="message">
+                    <span class="text text-1"></span>
+                    <span class="text text-2"></span>
+                    <span class="text text-3"></span>
                 </div>
-                <div class="description">
-                    <div class="{{ $T->complexity }} taskID_complexity">{{ Str::of($T->complexity)->upper() }}</div>
-                    {!! $T->description !!}
-                </div>
-                <div class="description">
-                    @isset($T->FILES)
-                        @foreach(explode(";", $T->FILES) as $k => $file)
-                            @if($file)
-                                <a href="{{ asset('/Download/File/' . md5($file)) }}{{ '/' . $T->id }}"> {{ 'Файл#' . $k+1 }}</a>
-                            @endif
-                        @endforeach
-                    @endisset
-                </div>
-                <form id="MyFormPlus{{ $T->id }}" class="MyFormSellFlag" action="/Home/Tasks/Check" method="post">
-                    @csrf
-                    <div class="form__group field">
-                        <input type="input" class="form__field" placeholder="Name" name="flag" id='name{{ $T->id }}' required autocomplete="off"/>
-                        <label for="name{{ $T->id }}" class="form__label">school{...}</label>
-                        <input type="hidden" name="ID" value="{{ $T->id }}">
-                        <input type="hidden" name="complexity" value="{{ $T->complexity }}">
-                    </div>
-                    <div style="position: relative; left: 5%">
-                        <button class="btnchk" onClick={console.log("click")} >
-                            {{ __('Check') }}
-                            <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <g filter="url(#filter0_f_618_1123)">
-                                    <path d="M42.9 2H76.5L34.5 44H2L42.9 2Z" fill="url(#paint0_linear_618_1123)"/>
-                                </g>
-                                <defs>
-                                    <filter id="filter0_f_618_1123" x="0" y="0" width="78.5" height="46" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                                        <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-                                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-                                        <feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_618_1123"/>
-                                    </filter>
-                                    <linearGradient id="paint0_linear_618_1123" x1="76.5" y1="2.00002" x2="34.5" y2="44" gradientUnits="userSpaceOnUse">
-                                        <stop stop-color="white" stop-opacity="0.6"/>
-                                        <stop offset="1" stop-color="white" stop-opacity="0.05"/>
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                        </button>
-                    </div>
-                </form>
             </div>
-        @endforeach
+            <i style="color: var(--app-bg-inv)" class="fa-solid fa-xmark close">
+            </i>
+            <style>
+                .toast .progress:before {
+                    background-color: #f4406a;
+                }
+            </style>
+            <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
+            <div  class="progress"></div>
+        </div>
+    </div>
+    <div class="Tasks-Container">
+
     </div>
     <div class="app-content" style="filter: none;">
         <div class="app-content-header">
@@ -88,25 +61,16 @@
                     <label>{{ __('Category') }}</label>
                     <select name="category" id="category">
                         <option value="All Categories">{{ __('All Categories') }}</option>
-                        <option>admin</option>
-                        <option>recon</option>
-                        <option>crypto</option>
-                        <option>stegano</option>
-                        <option>ppc</option>
-                        <option>pwn</option>
-                        <option>web</option>
-                        <option>forensic</option>
-                        <option>joy</option>
-                        <option>misc</option>
-                        <option>osint</option>
-                        <option>reverse</option>
+                        @foreach($categories as $category => $count)
+                            <option>{{ $category }}</option>
+                        @endforeach
                     </select>
                     <label>{{ __('Complexity') }}</label>
                     <select name="complexity" id="complexity">
                         <option value="All Complexity">{{ __('All Complexity') }}</option>
-                        <option>easy</option>
-                        <option>medium</option>
-                        <option>hard</option>
+                        @foreach($complexities as $complexity => $count)
+                            <option>{{ $complexity }}</option>
+                        @endforeach
                     </select>
                     <div class="filter-menu-buttons">
                         <button class="filter-button reset" id="ResetBtn">
@@ -172,6 +136,8 @@
 
 @section('scripts')
     <script id="TasksBlock-Script">
+        const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
+
         function closeAllTasks(){
             // Получаем все элементы с классом, содержащим 'Task-id-'
             const hiddenElements = document.querySelectorAll('div[class*="Task-id-"]');
@@ -188,78 +154,285 @@
                 element.style.display = 'none'; // или 'flex', в зависимости от ваших нужд
             });
         }
-        @foreach (\App\Models\Tasks::all() as $T)
-        function Taskid{{ $T->id }}() {
-            // Находим элемент с классом 'topmost-div Task-id-4'
-            const div = document.querySelector('.topmost-div.Task-id-{{ $T->id }}');
-            const AppContent = document.querySelector(`.app-content`);
-            const CloseTaskBanner = document.querySelector(`.CloseTaskBanner`);
+        // Функция для создания формы задачи
+        function createTaskForm(task) {
 
-            // Проверяем, существует ли элемент
-            if (div) {
-                // Удаляем стиль display: none
-                if (AppContent) {
-                    AppContent.style.filter = 'blur(4px)'; // Показываем элемент
+            const formHtml = `
+    <div style="display: none" class="topmost-div Task-id-${task.id}">
+        <div style="text-align: center; height: 3em;" >
+            <h1 class="TaskH1">${task.name}</h1>
+            <div id="CloseBtn" class="btnclosetask" onclick="Taskid${task.id}close()">
+                <img class="closeicontask" src="{{ asset('/media/icon/close.png') }}">
+            </div>
+        </div>
+        <div class="${task.complexity} taskID_complexity">${task.complexity.toUpperCase()}</div>
+        <div class="description">
+            ${task.description}
+        </div>
+        <div class="description">
+            ${task.FILES ? task.FILES.split(";").map((file, k) =>
+                file ? `<a href="{{ asset('/Download/File/') }}${md5(file)}/${task.id}">Файл#${k+1}</a>` : ''
+            ).join('') : ''}
+        </div>
+        <form id="MyFormChange${task.id}" class="MyFormSellFlag" action="/Home/Tasks/Check" method="post">
+            @csrf
+            <div class="form__group field">
+                <input type="input" class="form__field" placeholder="Name" name="flag" id='name${task.id}' required autocomplete="off"/>
+                <label for="name${task.id}" class="form__label">school{...}</label>
+                <input type="hidden" name="ID" value="${task.id}">
+                <input type="hidden" name="complexity" value="${task.complexity}">
+            </div>
+            <div style="position: relative; left: 5%">
+                <button type="submit" class="btnchk" onClick={console.log("click")}>
+                    {{ __('Check') }}
+            <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g filter="url(#filter0_f_618_1123)">
+                    <path d="M42.9 2H76.5L34.5 44H2L42.9 2Z" fill="url(#paint0_linear_618_1123)"/>
+                </g>
+                <defs>
+                    <filter id="filter0_f_618_1123" x="0" y="0" width="78.5" height="46" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                        <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+                        <feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_618_1123"/>
+                    </filter>
+                    <linearGradient id="paint0_linear_618_1123" x1="76.5" y1="2.00002" x2="34.5" y2="44" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white" stop-opacity="0.6"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0.05"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </button>
+    </div>
+</form>
+</div>
+`;
+
+            // Остальной код функции остается без изменений
+            const container = document.querySelector('.Tasks-Container');
+            container.insertAdjacentHTML('beforeend', formHtml);
+
+            // Добавляем обработчики событий для новой формы
+            document.getElementById(`MyFormChange${task.id}`).addEventListener('submit', async function(event) {
+                event.preventDefault();
+                await submitFormAsync(this, task.id);
+            });
+
+            // Добавляем функции для открытия/закрытия
+            window[`Taskid${task.id}`] = function() {
+                const div = document.querySelector(`.topmost-div.Task-id-${task.id}`);
+                const AppContent = document.querySelector('.app-content');
+
+                if (div) {
+                    if (AppContent) AppContent.style.filter = 'blur(4px)';
+                    if (CloseTaskBanner) CloseTaskBanner.style.display = 'block';
+                    div.style.display = 'block';
                 }
-                if (CloseTaskBanner) {
-                    CloseTaskBanner.style.display = 'block'; // Показываем элемент
+            };
+
+            window[`Taskid${task.id}close`] = function() {
+                const div = document.querySelector(`.topmost-div.Task-id-${task.id}`);
+                const AppContent = document.querySelector('.app-content');
+                const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
+
+                if (div) {
+                    if (AppContent) AppContent.style.filter = 'none';
+                    if (CloseTaskBanner) CloseTaskBanner.style.display = 'none';
+                    div.style.display = 'none';
                 }
-                div.style.display = 'block';
-            } else {
-                console.log('Элемент не найден');
-            }
+            };
         }
 
-        function Taskid{{ $T->id }}close() {
-            // Находим элемент с классом 'topmost-div Task-id-4'
-            const div = document.querySelector('.topmost-div.Task-id-{{ $T->id }}');
-            const AppContent = document.querySelector(`.app-content`);
-            const CloseTaskBanner = document.querySelector(`.CloseTaskBanner`);
-
-            // Проверяем, существует ли элемент
-            if (div) {
-                // Удаляем стиль display: none
-                if (AppContent) {
-                    AppContent.style.filter = 'none'; // Показываем элемент
-                }
-                if (CloseTaskBanner) {
-                    CloseTaskBanner.style.display = 'none'; // Показываем элемент
-                }
-                div.style.display = 'none';
-            } else {
-                console.log('Элемент не найден');
-            }
+        // Функция для экранирования HTML
+        function escapeHtml(unsafe) {
+            return unsafe
+                ? unsafe.toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;")
+                : '';
         }
 
-        document.getElementById('MyFormPlus{{ $T->id }}').addEventListener('submit', async function(event) {
-            event.preventDefault(); // предотвращаем стандартное поведение формы
-
-            const formData = new FormData(this); // создаем объект FormData из формы
+        // Асинхронная отправка формы
+        async function submitFormAsync(form, taskId) {
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
 
             try {
-                const response = await fetch('/Home/Tasks/Check', {
+                // Показываем индикатор загрузки
+                submitButton.disabled = true;
+                submitButton.innerHTML = 'Обновление...';
+
+                const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
                 });
 
-                // Проверяем, успешен ли ответ
                 if (!response.ok) {
                     throw new Error('Сетевая ошибка: ' + response.statusText);
                 }
 
-                const data = await response.json(); // предполагаем, что сервер возвращает JSON
-                console.log('Успех:', data); // обрабатываем успешный ответ от сервера
+                const data = await response.json();
 
-                // Здесь вы можете обновить интерфейс или выполнить другие действия после успешной отправки формы
+                if (data.success) {
+                    showToast('success', 'Успех', data.message || 'Операция выполнена успешно', data.actions);
 
+                    // Обновляем данные в localStorage
+                    const adminData = JSON.parse(localStorage.getItem('DataAdmin') || '[]');
+                    const taskIndex = adminData.findIndex(t => t.id == taskId);
+
+                    if (taskIndex !== -1) {
+                        // Обновляем данные задачи
+                        if (form.querySelector('input[name="deleteFilesFromTask"]')) {
+                            adminData[taskIndex].FILES = null;
+                        } else {
+                            // Обновляем другие поля из формы
+                            adminData[taskIndex].name = form.querySelector('input[name="name"]').value;
+                            adminData[taskIndex].category = form.querySelector('select[name="category"]').value;
+                            adminData[taskIndex].complexity = form.querySelector('select[name="complexity"]').value;
+                            adminData[taskIndex].oldprice = form.querySelector('input[name="points"]').value;
+                            adminData[taskIndex].description = form.querySelector('textarea[name="description"]').value;
+                            adminData[taskIndex].flag = form.querySelector('input[name="flag"]').value;
+
+                            // Если были загружены новые файлы, сервер должен вернуть их список в data.files
+                            if (data.files) {
+                                adminData[taskIndex].FILES = data.files.join(';');
+                            }
+                        }
+
+                        localStorage.setItem('DataAdmin', JSON.stringify(adminData));
+
+                        // Обновляем форму на странице без закрытия
+                        const formContainer = document.querySelector(`.Task-id-${taskId}`);
+                        if (formContainer) {
+                            formContainer.remove(); // Удаляем старую форму
+                            createTaskForm(adminData[taskIndex]); // Создаем новую с обновленными данными
+                            window[`Taskid${taskId}`](); // Открываем форму после обновления
+                        }
+                    }
+                } else {
+                    showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+                }
+
+                return data;
             } catch (error) {
-                console.error('Ошибка:', error); // обрабатываем ошибки
+                console.error('Ошибка:', error);
+                showToast('error', 'Ошибка', 'Произошла ошибка при отправке формы');
+                throw error;
+            } finally {
+                // Восстанавливаем кнопку в исходное состояние
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
             }
-        });
+        }
+
+        // Инициализация существующих форм
+        @foreach ($Tasks as $T)
+        createTaskForm({!! $T !!});
         @endforeach
 
-    </script>
-    <script id="TasksID_Notification" type="text/javascript">
+        // Обработчик событий для новых задач
+
+        let toastTimer1, toastTimer2;
+
+        function showToast(type, title, message, actions = null) {
+            const toast = document.querySelector(".toast");
+            const toastContent = toast.querySelector(".toast-content");
+            const checkIcon = toast.querySelector(".check");
+            const messageText1 = toast.querySelector(".text-1");
+            const messageText2 = toast.querySelector(".text-2");
+            const messageText3 = toast.querySelector(".text-3");
+            const progress = toast.querySelector(".progress");
+
+            // Очищаем предыдущие таймеры
+            clearTimeout(toastTimer1);
+            clearTimeout(toastTimer2);
+
+            // Сбрасываем анимацию прогресс-бара
+            progress.classList.remove("active");
+            // Принудительный рефлоу для сброса анимации
+            void progress.offsetWidth;
+
+            // Удаляем предыдущие добавленные стили
+            const existingStyles = document.querySelectorAll('style[data-toast-style]');
+            existingStyles.forEach(style => style.remove());
+
+            toast.style.display = "flex";
+
+            // Set icon and colors based on type
+            if (type === 'success') {
+                checkIcon.className = "fas fa-solid fa-check check";
+                checkIcon.style.backgroundColor = "#40f443";
+                const style = document.createElement('style');
+                style.innerHTML = '.toast .progress:before { background-color: #40f443 !important; }';
+                style.setAttribute('data-toast-style', 'true');
+                document.head.appendChild(style);
+            } else {
+                checkIcon.className = "fas fa-solid fa-times check";
+                checkIcon.style.backgroundColor = "#f4406a";
+                const style = document.createElement('style');
+                style.innerHTML = '.toast .progress:before { background-color: #f4406a !important; }';
+                style.setAttribute('data-toast-style', 'true');
+                document.head.appendChild(style);
+            }
+
+            messageText1.textContent = title;
+            messageText2.textContent = message;
+
+            // Очищаем предыдущие действия
+            messageText3.innerHTML = '';
+
+            // Добавляем действия с новой строки для каждого
+            if (actions && actions.length > 0) {
+                actions.forEach(action => {
+                    const actionElement = document.createElement('div');
+                    actionElement.textContent = `• ${action}`;
+                    messageText3.appendChild(actionElement);
+                });
+            }
+
+            toast.classList.add("active");
+
+            // Запускаем анимацию прогресс-бара снова
+            setTimeout(() => {
+                progress.classList.add("active");
+            }, 10);
+
+            const closeIcon = document.querySelector('.close');
+
+            if (toast) {
+                toastTimer1 = setTimeout(() => {
+                    toast.classList.remove('active');
+                }, 5000);
+
+                toastTimer2 = setTimeout(() => {
+                    progress.classList.remove('active');
+                }, 5300);
+
+                if (closeIcon) {
+                    closeIcon.removeEventListener('click', closeToast);
+                    closeIcon.addEventListener('click', closeToast);
+                }
+            }
+        }
+
+        function closeToast() {
+            const toast = document.querySelector(".toast");
+            const progress = toast.querySelector(".progress");
+
+            toast.classList.remove('active');
+
+            setTimeout(() => {
+                progress.classList.remove('active');
+            }, 300);
+
+            clearTimeout(toastTimer1);
+            clearTimeout(toastTimer2);
+        }
+
+
         const divElement11 = document.querySelector('.notifications');
         const Id = {{ auth()->id() }};
         Echo.private(`channel-app-checktask.${Id}`).listen('AppCheckTaskEvent', (e) => {
@@ -267,68 +440,27 @@
             const Notification = e.data;
             //console.log(Notification);
             console.log('Принято!');
-
-            const html0 = `<div class="toast active">
-
-                <div  class="toast-content">
-                    <i style="background-color: ${Notification.color}" class="fas fa-solid fa-check check"></i>
-
-                    <div class="message">
-                        <span class="text text-1">${Notification.message}</span>
-                        <span class="text text-2">${Notification.text}</span>
-                    </div>
-                </div>
-                <i class="fa-solid fa-xmark close">
-                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Menu / Close_SM"> <path id="Vector" d="M16 16L12 12M12 12L8 8M12 12L16 8M12 12L8 16" stroke="#77767b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
-                </i>
-                <style>
-                    .progress.active:before {
-                        background-color: ${Notification.color};
-                    }
-                </style>
-                <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
-                <div  class="progress active"></div>
-            </div>`;
-            const HtMl = html0;
             const userAgent = navigator.userAgent;
             if (userAgent === Notification.userAgent) {
-                divElement11.style.display = "";
-                divElement11.innerHTML = HtMl;
-                const toast = document.querySelector(".toast");
-                (closeIcon = document.querySelector(".close")),
-                    (progress = document.querySelector(".progress"));
-
-                let timer1, timer2;
-
-                timer1 = setTimeout(() => {
-                    toast.classList.remove("active");
-
-                }, 5000); //1s = 1000 milliseconds
-
-                timer2 = setTimeout(() => {
-                    //progress.classList.remove("active");
-                    //progress.style.display = "none";
-                }, 5300);
-
-                closeIcon.addEventListener("click", () => {
-                    toast.classList.remove("active");
-
-                    setTimeout(() => {
-                        progress.classList.remove("active");
-                        //divElement11.style.display = "none";
-                    }, 300);
-
-                    clearTimeout(timer1);
-                    clearTimeout(timer2);
-                });
+                showToast('success', 'Успех', Notification.text);
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработчик нажатия клавиш
+            document.addEventListener('keydown', function (event) {
+                // Проверяем, нажата ли клавиша Esc (код 27)
+                if (event.key === 'Escape' || event.keyCode === 27) {
+                    closeAllTasks();
+                }
+            });
         });
 
     </script>
     <script id="MAIN-JS-SCRIPT" type="text/javascript">
         const teamid = {{ auth()->id() }};
-        const data = {!! json_encode(\App\Models\Tasks::all()) !!};
-        const solvedtasks = {!! json_encode(\App\Models\User::find(auth()->id())->solvedTasks) !!};
+        const data = {!! json_encode($Tasks) !!};
+        const solvedtasks = {!! json_encode($SolvedTasks) !!};
         var SortedItemsColumn = data;
 
         for (let i = 0; i < data.length; i++) {

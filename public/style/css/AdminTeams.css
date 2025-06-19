@@ -1,0 +1,139 @@
+/* Team Edit Block Styles */
+.topmost-div {
+    position: fixed;
+    border-radius: 12px;
+    z-index: 1;
+    top: 50%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    width: 50vw;
+    max-width: 700px;
+    min-width: 300px;
+    background-color: var(--app-bg-2);
+    box-shadow: var(--filter-shadow);
+    padding: 20px;
+    border: 1px solid var(--app-border-color);
+    max-height: 75vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.topmost-div > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--app-border-color);
+}
+
+/* Form Elements */
+.topmost-div .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.topmost-div .form_item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.topmost-div .form_item > div:first-child {
+    color: var(--app-content-main-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.topmost-div input[type="text"] {
+    background-color: var(--app-bg);
+    border: 1px solid var(--app-border-color);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    color: var(--app-content-main-color);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.topmost-div input[type="text"]:focus {
+    outline: none;
+    border-color: var(--action-color);
+    box-shadow: 0 0 0 2px rgba(40, 105, 255, 0.2);
+}
+
+/* Team Logo Section */
+.teamlogoimg {
+    max-height: 100px;
+    width: auto;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    object-fit: contain;
+    background-color: var(--app-bg);
+    padding: 0.5rem;
+    border: 1px solid var(--app-border-color);
+}
+
+/* Checkbox Styles */
+.topmost-div .is_guest {
+    margin-left: 0.75rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--action-color);
+    cursor: pointer;
+}
+
+.topmost-div .form_item:has(.is_guest) {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .topmost-div {
+        padding: 1.25rem;
+    }
+
+    #teamlogoimg {
+        max-height: 80px;
+    }
+
+    .topmost-div .form_item:has(.is_guest) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Existing styles you want to keep (unchanged) */
+.drop-container {
+    /* Your existing drop container styles */
+}
+
+.btnchk {
+    /* Your existing btnchk styles */
+}
+
+.btnclose, .closeicontask {
+    /* Your existing close button styles */
+}
+
+/* Анимация появления форм */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.topmost-div-task-plus,
+.topmost-div-task-minus,
+.topmost-div[class*="Teams-id-"] {
+    animation: slideIn 0.3s ease-out forwards;
+}

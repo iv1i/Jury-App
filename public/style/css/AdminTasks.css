@@ -15,3 +15,62 @@
     position: relative;
     left: 2vw;
 }
+
+/* Стили для кнопки и секции дополнительных файлов */
+.additional-files-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid var(--app-content-secondary-color);
+    color: var(--app-content-main-color);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.additional-files-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.additional-files-toggle svg {
+    width: 16px;
+    height: 16px;
+}
+
+.additional-files-section {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed var(--app-content-secondary-color);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.delete-task-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+    color: #f4406a;
+    transition: all 0.3s ease;
+}
+
+.delete-task-btn:hover {
+    color: #ff1a4f;
+    transform: scale(1.1);
+}
+
+.delete-task-btn svg {
+    width: 18px;
+    height: 18px;
+}

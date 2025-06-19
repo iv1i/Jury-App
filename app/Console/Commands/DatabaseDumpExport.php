@@ -27,7 +27,6 @@ class DatabaseDumpExport extends Command
     public function handle()
     {
         try {
-            //$path = storage_path('app/sql_dump/dump.sql');
             $path = database_path('schema/dump.sql');
 
             $database = env('DB_DATABASE');
@@ -35,14 +34,16 @@ class DatabaseDumpExport extends Command
             $password = env('DB_PASSWORD');
             $host = env('DB_HOST', '127.0.0.1');
 
-            $command = "mysqldump --user={$username} --password={$password} --host={$host} {$database} > {$path}";
+            $command = "mysqldump --user={$username} --password={$password} --host={$host} --no-tablespaces {$database} > {$path} 2>/dev/null";
 
-            exec($command);
+            exec($command, $output, $returnVar);
 
-            $this->info('Дамп базы данных успешно создан: ' . $path);
-        }
-        catch (\Exception $e) {
-            // Обработка ошибки
+            if ($returnVar === 0) {
+                $this->info('Дамп базы данных успешно создан: ' . $path);
+            } else {
+                $this->error('Ошибка при создании дампа базы данных');
+            }
+        } catch (\Exception $e) {
             $this->error('Ошибка при создании дампа базы данных: '. $e->getMessage());
         }
     }

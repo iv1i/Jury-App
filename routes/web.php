@@ -33,6 +33,8 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('/Admin/Settings/DeleteAll', [AdminController::class, 'SettingsDeleteAll'])->name('AdminSettingsDeleteAll');
     Route::post('/Admin/Settings/Slidebars', [AdminController::class, 'SettingsSlidebars'])->name('AdminSettingsSlidebars');
     Route::post('/Admin/Settings/ChngRull', [AdminController::class, 'SettingsChngRules'])->name('AdminSettingsChngRules');
+    Route::post('/Admin/Settings/ChngCategory', [AdminController::class, 'SettingsChgCategory'])->name('AdminSettingsChgCategoryes');
+
 
     Route::put('/Admin/Tasks/Add', [AdminController::class, 'AddTasks']);
     Route::patch('/Admin/Tasks/Change', [AdminController::class, 'ChangeTasks']);
