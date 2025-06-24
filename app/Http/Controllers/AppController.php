@@ -8,26 +8,53 @@ use App\Models\User;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 
 class AppController extends Controller
 {
     //----------------------------------------------------------------Auth
-    public function AuthTeam(Request $request)
+    public function AuthTeam(Request $request, SettingsService $settings)
     {
-        //dd($request);
-        $credentials = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'password' => ['required'],
-        ]);
+        $auth = $settings->get('auth');
+        $credentials = [];
+        if ($auth === 'base') {
+            $credentials = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'password' => ['required'],
+            ]);
+        }
+        if ($auth === 'token') {
+            $user = User::where('token', $request->token)->first();
+            //dd($request);
+
+            $credentials = [];
+            if ($user){
+                $credentials = ['name' => $user->name, 'password' => Crypt::decrypt($user->password_encr)];
+            }
+        }
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            $url = url("/Home");
-            return redirect()->intended($url);
+
+            // Возвращаем JSON с URL для редиректа
+            return response()->json([
+                'success' => true,
+                'redirect_url' => url("/Home"), // или ->intended() если нужно
+            ]);
+
+//            $url = url("/Home");
+//            return redirect()->intended($url);
         }
 
-        return redirect()->back()->withErrors([__('Incorrect username or password.')]);
+        if ($auth === 'base') {
+            return response()->json(['success' => false,'message' => __('Incorrect username or password')], 401);
+        }
+        if ($auth === 'token') {
+            return response()->json(['success' => false,'message' => __('Incorrect token')], 401);
+        }
+
+        return response()->json(['success' => false,'message' => __('Auth error')], 500);
     }
     public function logout(Request $request, SettingsService $settings)
     {
@@ -98,7 +125,7 @@ class AppController extends Controller
         if(!$settings->get('sidebar.Home')){
             abort(403);
         }
-        $Tasks = Tasks::all()->makeVisible('flag');
+        $Tasks = Tasks::all();
         $SolvedTasks = User::find(auth()->id())->solvedTasks;
         $universalResult = $this->processTasksUniversal($Tasks);
 
@@ -137,6 +164,9 @@ class AppController extends Controller
             abort(403);
         }
         $sett = $settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
+        if (Auth::check()) {
+            return view('App.AppRules', compact('sett'));
+        }
         return view('Guest.rules', compact('sett'));
     }
     public function AuthView()

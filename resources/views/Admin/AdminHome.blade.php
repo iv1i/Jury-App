@@ -309,12 +309,13 @@
 
 @section('scripts')
     <script type="text/javascript">
+        //--------------------------------Init-Of-Data
         let Tasks = {!! json_encode($data[0]) !!};
         let Teams = {!! json_encode($data[1]) !!};
         let infoTasks = {!! json_encode($data[2]) !!};
         let CheckTask = {!! json_encode($data[3]) !!};
 
-
+        //--------------------------------Functions
         // Обновляем диаграмму команд
         function updateTeamsChart(options = {}) {
             const { searchQuery = '', showTop = null, currentPage = 1, itemsPerPage = 15 } = options;
@@ -407,7 +408,6 @@
                 chartContainer.innerHTML = digramhtml;
             }
         }
-
         // Обновляем данные на странице
         function updateDashboard(data) {
             const { Tasks = [], Teams = [], infoTasks = [{}], CheckTask = [] } = data;
@@ -468,7 +468,6 @@
             `).join('');
             }
         }
-
         // Анимация прогресс-баров
         function animateProgress(id, targetPercent) {
             const element = document.getElementById(id);
@@ -489,6 +488,7 @@
             animate();
         }
 
+        //--------------------------------Other
         // Инициализация данных при загрузке
         document.addEventListener('DOMContentLoaded', function() {
             updateTeamsChart();
@@ -512,7 +512,7 @@
             });
         });
 
-        // Обработка событий WebSocket
+        //--------------------------------WebSocket
         Echo.private(`channel-admin-home`).listen('AdminHomeEvent', (e) => {
             console.log('Обновление данных через WebSocket');
 

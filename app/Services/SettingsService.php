@@ -22,6 +22,7 @@ class SettingsService
             'Statistics' => true,
             'Logout' => true,
         ],
+        'auth' => 'base',
         'AppRulesTB' => '<div class="dec">
     <p style="text-indent: 1vw; padding-left: 20px; padding-right: 20px">
         1. Длительность соревнований - 6 часов + час перерыва на обед.
@@ -239,7 +240,7 @@ class SettingsService
      */
     public function __construct()
     {
-        $this->path = storage_path('app/settings.json');
+        $this->path = storage_path('app/private/settings.json');
         $this->initializeSettings();
         $this->loadSettings();
     }

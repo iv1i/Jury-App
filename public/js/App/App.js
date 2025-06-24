@@ -17,6 +17,17 @@ if (document.querySelector(".jsFilter")){
             filterMenu.classList.remove("active");
         }
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработчик нажатия клавиш
+        document.addEventListener('keydown', function(event) {
+            // Проверяем, нажата ли клавиша Esc (код 27)
+            const filterMenu = document.querySelector(".filter-menu");
+            if (event.key === 'Escape' || event.keyCode === 27) {
+                filterMenu.classList.remove("active");
+            }
+        });
+    });
 }
 
 

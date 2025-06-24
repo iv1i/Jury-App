@@ -22,11 +22,13 @@ use App\Models\User;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -37,22 +39,29 @@ class AdminController extends Controller
     // ----------------------------------------------------------------AUTH
     public function AdminAuth(Request $request)
     {
-        //dd($request);
         $credentials = $request->validate([
             'name' => ['max:255'],
             'password' => ['required'],
         ]);
         $remember = $request->has('remember');
 
-        //dd($credentials);
         if (Auth::guard('admin')->attempt($credentials, $remember)) {
-            // Authentication passed...
             $request->session()->regenerate();
-            $url = url("/Admin");
-            return redirect()->intended($url);
+
+            // Возвращаем JSON с URL для редиректа
+            return response()->json([
+                'success' => true,
+                'redirect_url' => url("/Admin"), // или ->intended() если нужно
+            ]);
+
+//            $url = url("/Admin");
+//            return redirect()->intended($url);
         }
 
-        return redirect()->back()->withErrors(['No-No-No']);
+        return response()->json([
+            'success' => false,
+            'message' => __('Incorrect credentials'), // Исправлено на "credentials"
+        ], 401); // 401 — Unauthorized
     }
     public function logout(Request $request)
     {
@@ -71,7 +80,7 @@ class AdminController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'players' => ['required', 'integer', 'min:1'],
             'WhereFrom' => ['required', 'string'],
-            'token' => ['required','string','min:6'],
+            'password' => ['required','string','min:6'],
             'file' => [
                 File::image()
                     ->min('1kb')
@@ -113,7 +122,9 @@ class AdminController extends Controller
         $team = new User();
         $team->id = $userId;
         $team->name = $sanitizedName;
-        $team->password = Hash::make($request->input('token'));
+        $team->password = Hash::make($request->input('password'));
+        $team->password_encr = Crypt::encrypt($request->input('password'));
+        $team->token = md5($sanitizedName. Str::random(32) . $userId);
         $team->teamlogo = $filename;
         $team->players = $sanitizedPlayers;
         $team->wherefrom = $sanitizedWhereFrom;
@@ -192,7 +203,7 @@ class AdminController extends Controller
             return response()->json(['success' => true,'message' => 'Команда успешно удалена/удалены!'], 200);
         } catch (\Exception $e) {
             // Обработка ошибки
-            return response()->json(['error' => 'Ошибка при удалении: ' ], 500);
+            return response()->json(['success' => false,'message' => 'Ошибка при удалении!'], 500);
         }
     }
     private function deleteUser(User $user)
@@ -222,8 +233,6 @@ class AdminController extends Controller
         $user->checkTasks()->delete();
 
         $user->delete();
-
-        return response()->json(['success' => true,'message' => 'Команда успешно удалена/удалены!'], 200);
     }
     public function ChangeTeams(Request $request)
     {
@@ -246,47 +255,61 @@ class AdminController extends Controller
 
         if ($validator->fails()) {
             $firstErrorMessage = $validator->errors()->first();
-            return response()->json(['message' => $firstErrorMessage], 422);
+            return response()->json(['success' => false,'message' => $firstErrorMessage], 422);
         }
 
-        $sanitizedName = htmlspecialchars($request->input('name'));
-        $sanitizedPlayers = htmlspecialchars($request->input('players'));
-        $sanitizedWhereFrom = htmlspecialchars($request->input('WhereFrom'));
-
-        if($request->input('standartlogo')){
-            if($team->teamlogo !== 'StandartLogo.png'){
-                $deleteImage = 'public/teamlogo/' . $team->teamlogo;
-                Storage::delete($deleteImage);
-            }
-            $team->teamlogo = 'StandartLogo.png';
-        }
-
-        if ($request->file('file')) {
-            $file = $request->file('file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            if(!$request->input('standartlogo')){
-                $file->storeAs('teamlogo', $filename, 'public');
+        if ($team){
+            if ($request->input('IsGuest') === null){
+                $IsGuest = 'No';
             }
             else{
-                $filename = 'StandartLogo.png';
+                $IsGuest = 'Yes';
             }
-            if($team->teamlogo !== 'StandartLogo.png'){
-                $deleteImage = 'public/teamlogo/' . $team->teamlogo;
-                Storage::delete($deleteImage);
+
+            $sanitizedName = htmlspecialchars($request->input('name'));
+            $sanitizedPlayers = htmlspecialchars($request->input('players'));
+            $sanitizedWhereFrom = htmlspecialchars($request->input('WhereFrom'));
+
+            if($request->input('standartlogo')){
+                if($team->teamlogo !== 'StandartLogo.png'){
+                    $deleteImage = 'public/teamlogo/' . $team->teamlogo;
+                    Storage::delete($deleteImage);
+                }
+                $team->teamlogo = 'StandartLogo.png';
             }
-            $team->teamlogo = $filename;
+
+            if ($request->file('file')) {
+                $file = $request->file('file');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                if(!$request->input('standartlogo')){
+                    $file->storeAs('teamlogo', $filename, 'public');
+                }
+                else{
+                    $filename = 'StandartLogo.png';
+                }
+                if($team->teamlogo !== 'StandartLogo.png'){
+                    $deleteImage = 'public/teamlogo/' . $team->teamlogo;
+                    Storage::delete($deleteImage);
+                }
+                $team->teamlogo = $filename;
+            }
+
+            $team->name = $sanitizedName;
+            if($request->input('password') !== null){
+                $team->password = Hash::make($request->input('password'));
+                $team->password_encr = Crypt::encrypt($request->input('password'));
+                $team->token = md5($sanitizedName. Str::random(32) . $TeamID);
+            }
+
+            $team->players = $sanitizedPlayers;
+            $team->wherefrom = $sanitizedWhereFrom;
+            $team->guest = $IsGuest;
+            $team->save();
         }
+        else {
+            return response()->json(['success' => false,'message' => 'Команда не найдена!'], 200);
 
-        $team->name = $sanitizedName;
-        if($request->input('token') !== null){
-            $team->password = Hash::make($request->input('token'));
         }
-
-        $team->players = $sanitizedPlayers;
-        $team->wherefrom = $sanitizedWhereFrom;
-        $team->guest = $IsGuest;
-        $team->save();
-
 
         $this->AdminEvents();
         $this->AppEvents();
@@ -381,13 +404,13 @@ class AdminController extends Controller
                         $zip->close();
                         Log::error("Error extracting ZIP archive: " . $e->getMessage() . " | Path: " . $zipPath);
                         // Можно добавить возврат ошибки пользователю
-                        return response()->json(['message' => 'Ошибка распаковки архива'], 403);
+                        return response()->json(['message' => 'Ошибка распаковки архива'], 500);
 
                     }
                 } else {
                     $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
                     Log::error($errorMsg);
-                    return response()->json(['message' => 'Ошибка открытия архива'], 403);
+                    return response()->json(['message' => 'Ошибка открытия архива'], 500);
 
                 }
                 $this->smartReplaceDockerPorts($webDirectory, $request->input('web_port'), $request->input('db_port'));
@@ -528,12 +551,12 @@ class AdminController extends Controller
                         } catch (\Exception $e) {
                             $zip->close();
                             Log::error("Error extracting ZIP archive: " . $e->getMessage() . " | Path: " . $zipPath);
-                            return back()->with('error', 'Ошибка распаковки архива: ' . $e->getMessage());
+                            return response()->json(['message' => 'Ошибка распаковки архива'], 500);
                         }
                     } else {
                         $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
                         Log::error($errorMsg);
-                        return back()->with('error', 'Ошибка открытия архива. Код ошибки: ' . $res);
+                        return response()->json(['message' => 'Ошибка открытия архива'], 500);
                     }
                     $this->smartReplaceDockerPorts($webDirectory, $request->input('web_port'), $request->input('db_port'));
                     $actions[] = 'Порты Docker обновлены! ';
@@ -569,12 +592,12 @@ class AdminController extends Controller
                     } catch (\Exception $e) {
                         $zip->close();
                         Log::error("Error extracting ZIP archive: " . $e->getMessage() . " | Path: " . $zipPath);
-                        return back()->with('error', 'Ошибка распаковки архива: ' . $e->getMessage());
+                        return response()->json(['message' => 'Ошибка распаковки архива'], 500);
                     }
                 } else {
                     $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
                     Log::error($errorMsg);
-                    return back()->with('error', 'Ошибка открытия архива. Код ошибки: ' . $res);
+                    return response()->json(['message' => 'Ошибка открытия архива'], 500);
                 }
                 //$this->restartDockerContainer($webDirectory);
                 $dockerRestarted = true;
@@ -1149,6 +1172,23 @@ class AdminController extends Controller
                 ]);
             }
 
+            if ($request->input('TokenAuth') === 'yes'){
+                $auth = 'token';
+                $settings->set('auth', $auth);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Включена авторизация через токены!',
+                ], 200);
+            }
+            if ($request->input('TokenAuth') === 'no') {
+                $auth = 'base';
+                $settings->set('auth', $auth);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Включена авторизация через логин и пароль!',
+                ], 200);
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => 'Нет данных для обновления!'
@@ -1647,7 +1687,7 @@ class AdminController extends Controller
     }
     public function AdminTeamsView()
     {
-        $Teams = User::all();
+        $Teams = User::all()->makeVisible('token');
         return view('Admin.AdminTeams', compact('Teams'));
     }
     public function AdminTasksView(SettingsService $settings)
@@ -1680,8 +1720,9 @@ class AdminController extends Controller
     public function AdminSettingsView(SettingsService $settings)
     {
         $Rules = $settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
-        $Sett = $settings->get('sidebar');
-        return view('Admin.AdminSettings', compact('Rules', 'Sett'));
+        $SettSidebar = $settings->get('sidebar');
+        $TypeAuth = $settings->get('auth');
+        return view('Admin.AdminSettings', compact('Rules', 'SettSidebar', 'TypeAuth'));
     }
     public function AdminHomeView()
     {

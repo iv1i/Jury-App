@@ -294,7 +294,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
             <div class="products-row" ${item.BorderStyle}>
                 <div class="product-cell image projector">
                     <img class="logo_sc" src="${url + item.teamlogo}" alt="product">
-                    <span>${item.name} ${item.GuestLogo}</span>
+                    <span>${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
                 </div>
                 <div class="product-cell sales projector" style="font-size: 25px;font-weight: 999;"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
                 <div class="product-cell price projector" style="display: flex; flex-wrap: wrap;"><span class="cell-label">{{ __('Tasks') }}:</span>

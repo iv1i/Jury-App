@@ -175,8 +175,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
                         </a>
                     </li>
                 @endif
-
-                    @if(Auth::guard('admin')->check())
+                @if(Auth::guard('admin')->check())
                     <li class="sidebar-list-item Admin">
                         <a href="/Admin" id="Admin">
                             <svg fill="#bda50c" height="20px" width="20px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="user-admin"> <path d="M22.3,16.7l1.4-1.4L20,11.6l-5.8,5.8c-0.5-0.3-1.1-0.4-1.7-0.4C10.6,17,9,18.6,9,20.5s1.6,3.5,3.5,3.5s3.5-1.6,3.5-3.5 c0-0.6-0.2-1.2-0.4-1.7l1.9-1.9l2.3,2.3l1.4-1.4l-2.3-2.3l1.1-1.1L22.3,16.7z M12.5,22c-0.8,0-1.5-0.7-1.5-1.5s0.7-1.5,1.5-1.5 s1.5,0.7,1.5,1.5S13.3,22,12.5,22z"></path> <path d="M2,19c0-3.9,3.1-7,7-7c2,0,3.9,0.9,5.3,2.4l1.5-1.3c-0.9-1-1.9-1.8-3.1-2.3C14.1,9.7,15,7.9,15,6c0-3.3-2.7-6-6-6 S3,2.7,3,6c0,1.9,0.9,3.7,2.4,4.8C2.2,12.2,0,15.3,0,19v5h8v-2H2V19z M5,6c0-2.2,1.8-4,4-4s4,1.8,4,4s-1.8,4-4,4S5,8.2,5,6z"></path> </g> </g></svg>
@@ -203,12 +202,12 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
 
 
         </ul>
-        <div class="account-info">
-            <a href="/Statistics/ID/{{ auth()->user()['id'] }}" class="account-info-picture">
+        <a href="/Statistics/ID/{{ auth()->user()['id'] }}" class="account-info tasklink">
+            <div class="account-info-picture">
                 <img src="{{ asset('storage/teamlogo/' . auth()->user()['teamlogo']) }}" alt="Account">
-            </a>
+            </div>
             <div class="account-info-name"><b>{{ Auth::user()['name'] }}</b></div>
-            <a href="/Statistics/ID/{{ auth()->user()['id'] }}" class="account-info-more">
+            <div class="account-info-more">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                      class="feather feather-more-horizontal">
@@ -216,8 +215,8 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
                     <circle cx="19" cy="12" r="1"/>
                     <circle cx="5" cy="12" r="1"/>
                 </svg>
-            </a>
-        </div>
+            </div>
+        </a>
     </div>
     @yield('appcontent')
 </div>

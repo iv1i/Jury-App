@@ -1,0 +1,136 @@
+services:
+    mysql:
+        image: 'mysql/mysql-server:8.0'
+        healthcheck:
+            test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        ports:
+            - '${FORWARD_DB_PORT:-33060}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            #            - './mysql:/var/lib/mysql'
+            - 'sail-mysql:/var/lib/mysql'
+            - './docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+            - './database/schema/dump.sql:/docker-entrypoint-initdb.d/dump.sql'
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'sail-redis:/data'
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+
+    laravel.test:
+        build:
+            context: ./docker/bitnami
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP:-1000}'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - '${REVERB_SERVER_PORT:-8080}:8080'
+        environment:
+            WWWUSER: '${WWWUSER:-sail}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        volumes:
+            - .:/var/www/html
+
+    php-apache-Task1:
+        container_name: php-t1
+        image: apch-php-t1-sql
+        ports:
+            - "4001:80"
+        build: './Task-s/task-1-Sql/php'
+
+    mysql1:
+        container_name: mysql1
+        image: php-mysql
+        ports:
+            - "127.0.0.1:3306:3306"
+        build: './Task-s/task-1-Sql/sql'
+        environment:
+            MYSQL_DATABASE: wet
+            MYSQL_ROOT_PASSWORD: "8927"
+        volumes:
+            - ./Task-s/task-1-Sql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    php-apache-Task2:
+        container_name: php-t2
+        image: apch-php-t2-console
+        ports:
+            - "4002:80"
+        build: './Task-s/task-2-Console/php'
+
+    php-apache-Task3:
+        container_name: php-t3
+        image: apch-php-t3-auth
+        ports:
+            - "4003:80"
+        build: './Task-s/task-3-Auth-W6I2K9I9/php'
+
+    php-apache-Task4:
+        container_name: php-t4
+        image: apch-php-t4-cube
+        ports:
+            - "4004:80"
+        build: './Task-s/task-4-Cube/php'
+
+    php-apache-Task5:
+        container_name: php-t5
+        image: apch-php-t5-xss
+        ports:
+            - "4005:80"
+        build: './Task-s/task-5-XSS/php'
+
+    php-apache-Task6:
+        container_name: php-t6
+        image: apch-php-t6-dirtraver
+        ports:
+            - "4006:80"
+        build: './Task-s/task-6-DirTraver'
+
+    php-apache-Task7:
+        container_name: php-t7
+        image: apch-php-t7-stsess
+        ports:
+            - "4007:80"
+        build: './Task-s/task-7-Stolen-Session'
+
+    php-apache-Task-crypto:
+        container_name: php-tcrypto
+        image: apch-php-t5-crypt
+        ports:
+            - "4008:80"
+        build: './Task-s/Task-Crypto'
+
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-mysql:
+        driver: local
+    sail-redis:
+        driver: local

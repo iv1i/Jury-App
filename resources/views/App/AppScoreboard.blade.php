@@ -197,8 +197,7 @@
             const HTML = html1;
             Element.innerHTML = HTML;
         }
-    </script>
-    <script id="Main-Sort">
+
         const divElementSort = document.querySelector('.Product-body');
         var sortButton0 = document.querySelector('.sort-button-teams');
         var sortButton1 = document.querySelector('.sort-button-scores');
@@ -255,43 +254,13 @@
                 // Сортируем команды по имени
                 M = SortDirect(M, column)
                 // Обновляем HTML с отсортированными данными
-                const html4 = M.map(item =>`
-             <div class="products-row ${item.BorderStyle}">
-                <div class="product-cell image">
-                    <img class="logo_sc" src="${url + item.teamlogo}" alt="teamlogo">
-                    <span class="span-name">${item.name} ${item.GuestLogo}</span>
-                </div>
-                <div class="product-cell sales"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
-                <div class="product-cell price" style="display: flex; flex-wrap: wrap;"><span class="cell-label">{{ __('Tasks') }}:</span>
-                    ${item.style}
-
-                </div>
-            </div>
-        `
-                ).join("");
-                const HTML = html4;
-                divElemSort.innerHTML = HTML;
+                MakeHTML(M, divElemSort);
 
             } else if (isSorted === 2) {
                 // Возвращаемся к исходным данным
                 M = SortReverse(M, column); // Возвращаем оригинальные данные
-
-                const html2 = originalM.map(item =>`
-             <div class="products-row ${item.BorderStyle}">
-                <div class="product-cell image">
-                    <img class="logo_sc" src="${url + item.teamlogo}" alt="teamlogo">
-                    <span class="span-name">${item.name} ${item.GuestLogo}</span>
-                </div>
-                <div class="product-cell sales"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
-                <div class="product-cell price" style="display: flex; flex-wrap: wrap;"><span class="cell-label">{{ __('Tasks') }}:</span>
-                    ${item.style}
-
-                </div>
-            </div>
-        `
-                ).join("");
-                const HTML = html2;
-                divElemSort.innerHTML = HTML;
+                // Обновляем HTML с отсортированными данными
+                MakeHTML(M, divElemSort);
 
             }
         }

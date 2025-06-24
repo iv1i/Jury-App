@@ -10,6 +10,29 @@
 @section('title', 'AltayCTF-Admin')
 
 @section('appcontent')
+    <div class="notifications">
+        <div  class="toast ">
+            <div  class="toast-content">
+                <i class="fas fa-solid fa-check check"></i>
+
+                <div class="message">
+                    <span class="text text-1"></span>
+                    <span class="text text-2"></span>
+                    <span class="text text-3"></span>
+
+                </div>
+            </div>
+            <i style="color: var(--app-bg-inv)" class="fa-solid fa-xmark close">
+            </i>
+            <style>
+                .toast .progress:before {
+                    background-color: #f4406a;
+                }
+            </style>
+            <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
+            <div  class="progress"></div>
+        </div>
+    </div>
     <div class="app-content settings-page">
         <div id="FormSwitchTheme" class="settings-header">
             <h1 class="app-content-headerText">{{ __('Settings') }}</h1>
@@ -21,35 +44,14 @@
                 </svg>
             </button>
         </div>
-        <div class="notifications">
-            <div  class="toast ">
-                <div  class="toast-content">
-                    <i class="fas fa-solid fa-check check"></i>
-
-                    <div class="message">
-                        <span class="text text-1"></span>
-                        <span class="text text-2"></span>
-                    </div>
-                </div>
-                <i style="color: var(--app-bg-inv)" class="fa-solid fa-xmark close">
-                </i>
-                <style>
-                    .toast .progress:before {
-                        background-color: #f4406a;
-                    }
-                </style>
-                <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
-                <div  class="progress"></div>
-            </div>
-        </div>
         <!-- Инструкция-оверлей (показывается только при первом посещении) -->
         <div id="instructionOverlay" class="instruction-overlay" style="display: none;">
             <div class="instruction-box">
                 <h1>Инструкция по управлению настройками</h1>
                 <ul>
-                    <li><strong>Раздел {!! __('Auth') !!}:</strong> Управление видимостью разделов гостя</li>
+                    <li><strong>Раздел {!! __('Guest') !!}:</strong> Управление видимостью разделов гостя</li>
                     <ul>
-                    <li><strong>{{ __('Rules') }}:</strong> Включение/отключение отображения правил для пользователей</li>
+                    <li><strong>{{ __('Rules') }}:</strong> Включение/отключение отображения правил</li>
                     <li><strong>{{ __('Projector') }}:</strong> Включение/отключение отображения проектора</li>
                     </ul>
 
@@ -58,6 +60,10 @@
                     <ul>
                         <li><strong>{{ __('Home') }}/{{ __('Scoreboard') }}/{{ __('Statistics') }}:</strong> Показывать или скрывать соответствующие разделы</li>
                         <li><strong>{{ __('Logout') }}:</strong> Показывать или скрывать кнопку выхода</li>
+                    </ul>
+                    <li><strong>Раздел {!! __('Auth') !!}:</strong> Управление типом авторизации приложения</li>
+                    <ul>
+                        <li><strong>{{ __('Token Authorization') }}:</strong> Включение/отключение авторизации по токену</li>
                     </ul>
 
 
@@ -90,9 +96,9 @@
         </div>
 
         <div class="settings-grid">
-            <!-- Настройки авторизации -->
+            <!-- Настройки гостей -->
             <div class="settings-card">
-                <h2 class="settings-card-title">{!! __('Auth') !!} /sidebar</h2>
+                <h2 class="settings-card-title">{!! __('Guest') !!} /sidebar</h2>
 
                 <div class="settings-item">
                     <span class="settings-label">{{ __('Rules') }}</span>
@@ -143,6 +149,18 @@
                     <span class="settings-label">{{ __('Logout') }}</span>
                     <label class="toggle-switch">
                         <input type="checkbox" id="logout" class="Logout CHECKBOX" name="Logout">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Настройки авторизации -->
+            <div class="settings-card">
+                <h2 class="settings-card-title">{!! __('Auth') !!}</h2>
+                <div class="settings-item">
+                    <span class="settings-label">{{ __('Token Authorization') }}</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="TokenAuth" class="TokenAuth CHECKBOX" name="TokenAuth">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
@@ -293,94 +311,12 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('js/Other/Notifications.js') }}"></script>
     <script>
-        // Выносим таймеры в область видимости функции, чтобы их можно было очищать
-        let toastTimer1, toastTimer2;
-
+        //--------------------------------Init-Of-Data
         const token = '{!! csrf_token() !!}';
 
-        function showToast(type, title, message) {
-            const toast = document.querySelector(".toast");
-            const toastContent = toast.querySelector(".toast-content");
-            const checkIcon = toast.querySelector(".check");
-            const messageText1 = toast.querySelector(".text-1");
-            const messageText2 = toast.querySelector(".text-2");
-            const progress = toast.querySelector(".progress");
-
-            // Очищаем предыдущие таймеры
-            clearTimeout(toastTimer1);
-            clearTimeout(toastTimer2);
-
-            // Сбрасываем анимацию прогресс-бара
-            progress.classList.remove("active");
-            // Принудительный рефлоу для сброса анимации
-            void progress.offsetWidth;
-
-            // Удаляем предыдущие добавленные стили
-            const existingStyles = document.querySelectorAll('style[data-toast-style]');
-            existingStyles.forEach(style => style.remove());
-
-            toast.style.display = "flex";
-
-            // Set icon and colors based on type
-            if (type === 'success') {
-                checkIcon.className = "fas fa-solid fa-check check";
-                checkIcon.style.backgroundColor = "#40f443";
-                const style = document.createElement('style');
-                style.innerHTML = '.toast .progress:before { background-color: #40f443 !important; }';
-                style.setAttribute('data-toast-style', 'true');
-                document.head.appendChild(style);
-            } else {
-                checkIcon.className = "fas fa-solid fa-times check";
-                checkIcon.style.backgroundColor = "#f4406a";
-                const style = document.createElement('style');
-                style.innerHTML = '.toast .progress:before { background-color: #f4406a !important; }';
-                style.setAttribute('data-toast-style', 'true');
-                document.head.appendChild(style);
-            }
-
-            messageText1.textContent = title;
-            messageText2.textContent = message;
-
-            toast.classList.add("active");
-
-            // Запускаем анимацию прогресс-бара снова
-            setTimeout(() => {
-                progress.classList.add("active");
-            }, 10);
-
-            const closeIcon = document.querySelector('.close');
-
-            if (toast) {
-                toastTimer1 = setTimeout(() => {
-                    toast.classList.remove('active');
-                }, 5000);
-
-                toastTimer2 = setTimeout(() => {
-                    progress.classList.remove('active');
-                }, 5300);
-
-                if (closeIcon) {
-                    closeIcon.removeEventListener('click', closeToast);
-                    closeIcon.addEventListener('click', closeToast);
-                }
-            }
-        }
-
-        function closeToast() {
-            const toast = document.querySelector(".toast");
-            const progress = toast.querySelector(".progress");
-
-            toast.classList.remove('active');
-
-            setTimeout(() => {
-                progress.classList.remove('active');
-            }, 300);
-
-            clearTimeout(toastTimer1);
-            clearTimeout(toastTimer2);
-        }
-
+        //--------------------------------Functions
         // Функция для асинхронной отправки форм
         async function submitFormAsync(form, buttonName, buttonValue) {
             try {
@@ -412,7 +348,6 @@
                 return Promise.reject(error);
             }
         }
-
         function listCategoriesEdit(){
             const categoryTags = document.querySelectorAll('.category-tag');
             const clearTagsbutton = document.querySelector('.clear-button');
@@ -460,10 +395,13 @@
             });
         }
 
+        //--------------------------------Other
         // Инициализация всех форм на странице
         document.addEventListener('DOMContentLoaded', function() {
-            const Settings = {!! json_encode($Sett) !!};
+            const SettingsSidebar = {!! json_encode($SettSidebar) !!};
+            const TypeAuth = {!! json_encode($TypeAuth) !!};
             const checkboxes0 = document.querySelectorAll('.CHECKBOX');
+            const checkboxauth = document.getElementById('TokenAuth');
 
             listCategoriesEdit();
 
@@ -473,9 +411,14 @@
                 if(name === 'logout') {
                     name = 'Logout'
                 }
-                const settingValue = Settings[name];
+                const settingValue = SettingsSidebar[name];
                 checkbox.checked = settingValue;
             });
+
+            if (TypeAuth === 'token'){
+                checkboxauth.checked = true;
+                checkboxauth.setAttribute('checked', 'checked');
+            }
 
             // Показываем инструкцию только при первом посещении
             const instructionOverlay = document.getElementById('instructionOverlay');
@@ -601,11 +544,6 @@
 
                         if (response.ok && data.success) {
                             showToast('success', 'Успех', data.message || 'Операция выполнена успешно');
-
-                            // Закрываем модальное окно, если это форма редактирования правил
-                            if (form.id === 'MyFormChngRules') {
-                                closeModal();
-                            }
                         } else {
                             showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
                         }

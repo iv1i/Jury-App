@@ -137,3 +137,87 @@
 .topmost-div[class*="Teams-id-"] {
     animation: slideIn 0.3s ease-out forwards;
 }
+.product-cell.token-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--table-border);
+    transition: all 0.2s ease;
+    font-family: inherit;
+    color: var(--app-content-main-color);
+}
+
+.product-cell.token-cell:hover {
+    background-color: var(--sidebar-hover-link);
+    border-color: var(--action-color);
+}
+
+.cell-label {
+    font-weight: 500;
+    color: var(--app-content-main-color);
+    font-size: 13px;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.token-value {
+    font-family: 'Roboto Mono', monospace;
+    background-color: var(--app-bg-tasks);
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--app-content-main-color);
+    font-weight: 500;
+    font-size: 13px;
+    border: 1px solid var(--table-border);
+    cursor: pointer;
+    transition: all 0.2s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 272px;
+}
+
+.token-value:hover {
+    background-color: var(--sidebar-active-link);
+    border-color: var(--action-color);
+}
+
+.fa-clone {
+    color: var(--action-color);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.7;
+}
+
+.fa-clone:hover {
+    opacity: 1;
+    color: var(--action-color-hover);
+}
+
+/* Анимация при копировании */
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(5px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.copied {
+    color: var(--action-color-hover);
+    animation: fadeIn 0.3s ease;
+}
+
+/* Для светлой темы */
+.light .product-cell.token-cell {
+    background-color: var(--app-bg-2);
+    border-color: var(--app-border-color);
+}
+
+.light .token-value {
+    background-color: var(--app-bg-tasks);
+    border-color: var(--app-border-color);
+}
+
+.light .fa-clone {
+    color: var(--action-color);
+}

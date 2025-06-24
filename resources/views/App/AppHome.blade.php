@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="{{ asset('style/scss/ChekFlag.css') }}">
     <link rel="stylesheet" href="{{ asset('style/scss/buttoncheckflag.css') }}">
     <link rel="stylesheet" href="{{ asset('style/css/HomeTask.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
     <script>
         {!! Vite::content('resources/js/app.js') !!}
@@ -135,8 +136,59 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('js/Other/Notifications.js') }}"></script>
     <script id="TasksBlock-Script">
+        const divElement = document.querySelector('.Product-body');
         const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
+
+        const teamid = {{ auth()->id() }};
+        const solvedtasks = {!! json_encode($SolvedTasks) !!};
+        const complexityOrder = { easy: 1, medium: 2, hard: 3 };
+        const divElementSort = document.querySelector('.Product-body');
+        const sortButtons = {
+            'name': '.sort-button-Name',
+            'category': '.sort-button-Category',
+            'complexity': '.sort-button-Complexity',
+            'solved': '.sort-button-Solved',
+            'price': '.sort-button-Price'
+        };
+
+        let data = {!! json_encode($Tasks) !!};
+        let sortStates = { name: 0, category: 0, complexity: 0, solved: 0, price: 0 };
+        let originalTeams = [...data];
+        let currentSort = { column: null, direction: 0 };
+
+
+        let SortedItemsColumn = data;
+        let taskcomplexity = localStorage.getItem('taskcomplexity');
+        let taskcategory = localStorage.getItem('taskcategory');
+        let SortedTasksCol = JSON.parse(localStorage.getItem('SortingTasksColumn'));
+        //const storedSort = JSON.parse(localStorage.getItem('SortingTasksColumn'));
+        data = FirsFilter(data, solvedtasks);
+        let TASKS = JSON.parse(localStorage.getItem('data'));
+
+        function callShowToast(data){
+            const type = data.type || (data.success ? 'success' : 'error');
+            const defaultTitles = {
+                error: 'Ошибка',
+                success: 'Успех',
+                warning: 'Предупреждение',
+                info: 'Информация'
+            };
+            const defaultMessages = {
+                error: 'Произошла ошибка',
+                success: 'Операция выполнена успешно',
+                warning: 'Обратите внимание',
+                info: 'Информационное сообщение'
+            };
+
+            showToast(
+                type,
+                defaultTitles[type] || 'Уведомление',
+                data.message || defaultMessages[type],
+                data.actions
+            );
+        }
 
         function closeAllTasks(){
             // Получаем все элементы с классом, содержащим 'Task-id-'
@@ -241,7 +293,6 @@
                 }
             };
         }
-
         // Функция для экранирования HTML
         function escapeHtml(unsafe) {
             return unsafe
@@ -253,7 +304,6 @@
                     .replace(/'/g, "&#039;")
                 : '';
         }
-
         // Асинхронная отправка формы
         async function submitFormAsync(form, taskId) {
             const formData = new FormData(form);
@@ -263,57 +313,43 @@
             try {
                 // Показываем индикатор загрузки
                 submitButton.disabled = true;
-                submitButton.innerHTML = 'Обновление...';
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Проверка...';
 
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
                 });
 
-                if (!response.ok) {
-                    throw new Error('Сетевая ошибка: ' + response.statusText);
-                }
-
                 const data = await response.json();
+                const LocalData = JSON.parse(localStorage.getItem('data') || '[]');
+                const taskIndex = LocalData.findIndex(t => t.id == taskId);
 
                 if (data.success) {
-                    showToast('success', 'Успех', data.message || 'Операция выполнена успешно', data.actions);
-
-                    // Обновляем данные в localStorage
-                    const adminData = JSON.parse(localStorage.getItem('DataAdmin') || '[]');
-                    const taskIndex = adminData.findIndex(t => t.id == taskId);
-
                     if (taskIndex !== -1) {
-                        // Обновляем данные задачи
-                        if (form.querySelector('input[name="deleteFilesFromTask"]')) {
-                            adminData[taskIndex].FILES = null;
-                        } else {
-                            // Обновляем другие поля из формы
-                            adminData[taskIndex].name = form.querySelector('input[name="name"]').value;
-                            adminData[taskIndex].category = form.querySelector('select[name="category"]').value;
-                            adminData[taskIndex].complexity = form.querySelector('select[name="complexity"]').value;
-                            adminData[taskIndex].oldprice = form.querySelector('input[name="points"]').value;
-                            adminData[taskIndex].description = form.querySelector('textarea[name="description"]').value;
-                            adminData[taskIndex].flag = form.querySelector('input[name="flag"]').value;
-
-                            // Если были загружены новые файлы, сервер должен вернуть их список в data.files
-                            if (data.files) {
-                                adminData[taskIndex].FILES = data.files.join(';');
-                            }
-                        }
-
-                        localStorage.setItem('DataAdmin', JSON.stringify(adminData));
-
                         // Обновляем форму на странице без закрытия
                         const formContainer = document.querySelector(`.Task-id-${taskId}`);
                         if (formContainer) {
-                            formContainer.remove(); // Удаляем старую форму
-                            createTaskForm(adminData[taskIndex]); // Создаем новую с обновленными данными
-                            window[`Taskid${taskId}`](); // Открываем форму после обновления
+                            // Плавное исчезновение
+                            formContainer.style.opacity = '0';
+                            formContainer.style.transition = 'opacity 0.2s ease';
+
+                            setTimeout(() => {
+                                formContainer.remove(); // Удаляем после исчезновения
+                                createTaskForm(LocalData[taskIndex]); // Создаём новую
+                                window[`Taskid${taskId}`](); // Открываем
+
+                                // Плавное появление (если createTaskForm не делает это само)
+                                const newForm = document.querySelector(`.Task-id-${taskId}`);
+                                if (newForm) {
+                                    newForm.style.opacity = '0';
+                                    setTimeout(() => { newForm.style.opacity = '1'; }, 10);
+                                }
+                            }, 200); // Ждём завершения анимации
                         }
                     }
+                    callShowToast(data);
                 } else {
-                    showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
+                    callShowToast(data);
                 }
 
                 return data;
@@ -333,171 +369,7 @@
         createTaskForm({!! $T !!});
         @endforeach
 
-        // Обработчик событий для новых задач
 
-        let toastTimer1, toastTimer2;
-
-        function showToast(type, title, message, actions = null) {
-            const toast = document.querySelector(".toast");
-            const toastContent = toast.querySelector(".toast-content");
-            const checkIcon = toast.querySelector(".check");
-            const messageText1 = toast.querySelector(".text-1");
-            const messageText2 = toast.querySelector(".text-2");
-            const messageText3 = toast.querySelector(".text-3");
-            const progress = toast.querySelector(".progress");
-
-            // Очищаем предыдущие таймеры
-            clearTimeout(toastTimer1);
-            clearTimeout(toastTimer2);
-
-            // Сбрасываем анимацию прогресс-бара
-            progress.classList.remove("active");
-            // Принудительный рефлоу для сброса анимации
-            void progress.offsetWidth;
-
-            // Удаляем предыдущие добавленные стили
-            const existingStyles = document.querySelectorAll('style[data-toast-style]');
-            existingStyles.forEach(style => style.remove());
-
-            toast.style.display = "flex";
-
-            // Set icon and colors based on type
-            if (type === 'success') {
-                checkIcon.className = "fas fa-solid fa-check check";
-                checkIcon.style.backgroundColor = "#40f443";
-                const style = document.createElement('style');
-                style.innerHTML = '.toast .progress:before { background-color: #40f443 !important; }';
-                style.setAttribute('data-toast-style', 'true');
-                document.head.appendChild(style);
-            } else {
-                checkIcon.className = "fas fa-solid fa-times check";
-                checkIcon.style.backgroundColor = "#f4406a";
-                const style = document.createElement('style');
-                style.innerHTML = '.toast .progress:before { background-color: #f4406a !important; }';
-                style.setAttribute('data-toast-style', 'true');
-                document.head.appendChild(style);
-            }
-
-            messageText1.textContent = title;
-            messageText2.textContent = message;
-
-            // Очищаем предыдущие действия
-            messageText3.innerHTML = '';
-
-            // Добавляем действия с новой строки для каждого
-            if (actions && actions.length > 0) {
-                actions.forEach(action => {
-                    const actionElement = document.createElement('div');
-                    actionElement.textContent = `• ${action}`;
-                    messageText3.appendChild(actionElement);
-                });
-            }
-
-            toast.classList.add("active");
-
-            // Запускаем анимацию прогресс-бара снова
-            setTimeout(() => {
-                progress.classList.add("active");
-            }, 10);
-
-            const closeIcon = document.querySelector('.close');
-
-            if (toast) {
-                toastTimer1 = setTimeout(() => {
-                    toast.classList.remove('active');
-                }, 5000);
-
-                toastTimer2 = setTimeout(() => {
-                    progress.classList.remove('active');
-                }, 5300);
-
-                if (closeIcon) {
-                    closeIcon.removeEventListener('click', closeToast);
-                    closeIcon.addEventListener('click', closeToast);
-                }
-            }
-        }
-
-        function closeToast() {
-            const toast = document.querySelector(".toast");
-            const progress = toast.querySelector(".progress");
-
-            toast.classList.remove('active');
-
-            setTimeout(() => {
-                progress.classList.remove('active');
-            }, 300);
-
-            clearTimeout(toastTimer1);
-            clearTimeout(toastTimer2);
-        }
-
-
-        const divElement11 = document.querySelector('.notifications');
-        const Id = {{ auth()->id() }};
-        Echo.private(`channel-app-checktask.${Id}`).listen('AppCheckTaskEvent', (e) => {
-
-            const Notification = e.data;
-            //console.log(Notification);
-            console.log('Принято!');
-            const userAgent = navigator.userAgent;
-            if (userAgent === Notification.userAgent) {
-                showToast('success', 'Успех', Notification.text);
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Обработчик нажатия клавиш
-            document.addEventListener('keydown', function (event) {
-                // Проверяем, нажата ли клавиша Esc (код 27)
-                if (event.key === 'Escape' || event.keyCode === 27) {
-                    closeAllTasks();
-                }
-            });
-        });
-
-    </script>
-    <script id="MAIN-JS-SCRIPT" type="text/javascript">
-        const teamid = {{ auth()->id() }};
-        const data = {!! json_encode($Tasks) !!};
-        const solvedtasks = {!! json_encode($SolvedTasks) !!};
-        var SortedItemsColumn = data;
-
-        for (let i = 0; i < data.length; i++) {
-            data[i].decide = '';
-        }
-        for (let i = 0; i < data.length; i++) {
-            //console.log(data[i].id);
-            for (let j = 0; j < solvedtasks.length; j++) {
-                if (solvedtasks[j].tasks_id === data[i].id) {
-                    data[i].decide = `style="color: var(--app-bg-tasks);"`;
-                    //console.log(data[i].decide);
-                    //data.splice(i, 1);
-                }
-            }
-        }
-        data.sort((a, b) => {
-            const complexityOrder = {easy: 1, medium: 2, hard: 3};
-            return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-        });
-        data.sort((a, b) => {
-            //console.log(a.decide);
-            // Если a.decide пустой, он должен быть перед b.decide
-            if (a.decide === '' && b.decide !== '') {
-                return -1; // a перед b
-            }
-            if (a.decide !== '' && b.decide === '') {
-                return 1; // b перед a
-            }
-            return 0; // оставляем порядок неизменным
-        });
-        const divElement = document.querySelector('.Product-body');
-
-        localStorage.setItem('data', JSON.stringify(data));
-
-        let taskcomplexity = localStorage.getItem('taskcomplexity');
-        let taskcategory = localStorage.getItem('taskcategory');
-        let SortedTasksCol = JSON.parse(localStorage.getItem('SortingTasksColumn'));
         if (SortedTasksCol) {
             const { N: field, isSort: order } = SortedTasksCol;
 
@@ -562,121 +434,6 @@
         }
 
         Filtereed(data, taskcomplexity, taskcategory);
-        Echo.private(`channel-app-home`).listen('AppHomeEvent', (e) => {
-            const valueToDisplay = e.tasks;
-            let Tasks = valueToDisplay.Tasks;
-            let SolvedTaasks = valueToDisplay.SolvedTasks;
-
-            let SolvedTasksOnThisAuthUser = [];
-            for (let i = 0; i < SolvedTaasks.length; i++) {
-                if (SolvedTaasks[i].user_id === teamid) {
-                    SolvedTasksOnThisAuthUser.push(valueToDisplay.SolvedTasks[i]);
-                }
-            }
-
-            //console.log(SolvedTasksOnThisAuthUser);
-            let Solvedtasks = [];
-            for (let i = 0; i < Tasks.length; i++) {
-                for (let j = 0; j < SolvedTasksOnThisAuthUser.length; j++) {
-                    if (SolvedTasksOnThisAuthUser[j].tasks_id === Tasks[i].id) {
-                        Solvedtasks.push(Tasks[i]);
-                    }
-                }
-            }
-
-            for (let i = 0; i < Tasks.length; i++) {
-                Tasks[i].decide = '';
-            }
-
-            for (let i = 0; i < Tasks.length; i++) {
-                //console.log(data[i].id);
-                for (let j = 0; j < SolvedTasksOnThisAuthUser.length; j++) {
-                    if (SolvedTasksOnThisAuthUser[j].tasks_id === Tasks[i].id) {
-                        Tasks[i].decide = `style="color: #2c394f;filter: blur(0.7px);"`;
-                        //data.splice(i, 1);
-                    }
-                }
-            }
-
-            Tasks.sort((a, b) => {
-                const complexityOrder = {easy: 1, medium: 2, hard: 3};
-                return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-            });
-
-            Tasks.sort((a, b) => {
-                //console.log(a.decide);
-                // Если a.decide пустой, он должен быть перед b.decide
-                if (a.decide === '' && b.decide !== '') {
-                    return -1; // a перед b
-                }
-                if (a.decide !== '' && b.decide === '') {
-                    return 1; // b перед a
-                }
-                return 0; // оставляем порядок неизменным
-            });
-
-            //console.log(Tasks);
-            //console.log(Solvedtasks);
-
-            localStorage.setItem('data', JSON.stringify(Tasks));
-            console.log('Принято!');
-
-            //const sortedData = valueToDisplay.sort((a, b) => b.score - a.score);
-            //console.log(sortedData);
-
-            let taskcomplexity = localStorage.getItem('taskcomplexity');
-            let taskcategory = localStorage.getItem('taskcategory');
-
-            let SortedTasksColEcho = JSON.parse(localStorage.getItem('SortingTasksColumn'));
-            if (SortedTasksColEcho) {
-                const { N: field, isSort: order } = SortedTasksColEcho;
-
-                const createComparator = (field, order) => {
-                    const isReverseBase = field === 'solved';
-                    const baseDirection = isReverseBase ? -1 : 1;
-                    const direction = baseDirection * (order === 1 ? 1 : -1);
-
-                    return (a, b) => {
-                        const aHasDecide = a.decide?.trim() !== '';
-                        const bHasDecide = b.decide?.trim() !== '';
-
-                        if (aHasDecide !== bHasDecide) {
-                            return aHasDecide ? 1 : -1;
-                        }
-
-                        const getValue = (obj) => {
-                            const value = obj[field];
-                            return ['solved', 'price'].includes(field) ? Number(value) : value?.toLowerCase();
-                        };
-
-                        const aValue = getValue(a);
-                        const bValue = getValue(b);
-
-                        return aValue < bValue ? -direction : aValue > bValue ? direction : 0;
-                    };
-                };
-
-                const validFields = ['name', 'category', 'complexity', 'solved', 'price'];
-                if (validFields.includes(field)) {
-                    Tasks.sort(createComparator(field, order));
-                }
-                if(field === 'complexity'){
-                    if(order === 1)
-                        Tasks.sort((a, b) => {
-                            const complexityOrder = {easy: 1, medium: 2, hard: 3};
-                            return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-                        });
-                    if (order === 2)
-                        Tasks.sort((a, b) => {
-                            const complexityOrder = {easy: 3, medium: 2, hard: 1};
-                            return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-                        });
-                }
-            }
-
-            Filtereed(Tasks, taskcomplexity, taskcategory);
-            //console.log(e.test);
-        });
 
         document.getElementById('ApplyBtn').addEventListener('click', function () {
             let taskcomplexity = document.getElementById('complexity').value;
@@ -713,6 +470,40 @@
             MakeHTML(data, divElement);
         });
 
+        function FirsFilter(data, solvedtasks){
+            for (let i = 0; i < data.length; i++) {
+                data[i].decide = '';
+            }
+            for (let i = 0; i < data.length; i++) {
+                //console.log(data[i].id);
+                for (let j = 0; j < solvedtasks.length; j++) {
+                    if (solvedtasks[j].tasks_id === data[i].id) {
+                        data[i].decide = `style="color: var(--app-bg-tasks);"`;
+                        //console.log(data[i].decide);
+                        //data.splice(i, 1);
+                    }
+                }
+            }
+            data.sort((a, b) => {
+                const complexityOrder = {easy: 1, medium: 2, hard: 3};
+                return complexityOrder[a.complexity] - complexityOrder[b.complexity];
+            });
+            data.sort((a, b) => {
+                //console.log(a.decide);
+                // Если a.decide пустой, он должен быть перед b.decide
+                if (a.decide === '' && b.decide !== '') {
+                    return -1; // a перед b
+                }
+                if (a.decide !== '' && b.decide === '') {
+                    return 1; // b перед a
+                }
+                return 0; // оставляем порядок неизменным
+            });
+
+            localStorage.setItem('data', JSON.stringify(data));
+            return data;
+        }
+
         function Filtereed(DATA, taskcomplexity, taskcategory){
             if (taskcategory && taskcomplexity) {
                 setSelection(taskcomplexity, taskcategory);
@@ -733,24 +524,8 @@
         }
 
         function MakeHTML(Data, Element) {
-            const html0 = `<div class="products-header">
-                <div class="product-cell image">{{ __('Name') }}<button class="sort-button sort-button-Name">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
-                <div class="product-cell category">{{ __('Category') }}<button class="sort-button sort-button-Category">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
-                <div class="product-cell complexity">{{ __('Complexity') }}<button class="sort-button sort-button-Complexity">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
-                <div class="product-cell solved">{{ __('Solved') }}<button class="sort-button sort-button-Solved">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
-                <div class="product-cell price">{{ __('Price') }}<button class="sort-button sort-button-Price">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
-            </div>`;
-            const html1 = Data.map(item => `
+
+            const htmlbody = Data.map(item => `
             <div style="cursor: pointer" href="/Home/${item.id}" class="products-row tasklink" onclick="Taskid${item.id}()">
                 <div class="product-cell image" ${item.decide}>
                     <span>${item.name}</span>
@@ -765,56 +540,7 @@
             </div>
         `).join("");
 
-            const htmlTasks = Data.map(item => `
-           <div style="display: none" class="topmost-div Task-id-${item.id}">
-                <div style="text-align: center; height: 3em;" ><h1 class="TaskH1">${item.name}</h1><div id="CloseBtn" class="btnclosetask" onclick="Taskid${item.id}close()"><img class="closeicontask" src="{{ asset('/media/icon/close.png') }}"></div>
-                </div>
-                <div class="description">
-                    <div class="${item.complexity} taskID_complexity">${item.complexity}</div>
-                    ${item.description}
-            </div>
-            <div class="description">
-            @isset($T->FILES)
-            @foreach(explode(";", $T->FILES) as $k => $file)
-            @if($file)
-            <a href="{{ asset('/Download/File/' . md5($file)) }}{{ '/' . $T->id }}"> {{ 'Файл#' . $k+1 }}</a>
-                            @endif
-            @endforeach
-            @endisset
-            </div>
-            <form id="MyFormPlus${item.id}" class="MyFormSellFlag" action="/Home/Tasks/Check" method="post">
-                    @csrf
-            <div class="form__group field">
-                <input type="input" class="form__field" placeholder="Name" name="flag" id='name${item.id}' required autocomplete="off"/>
-                        <label for="name${item.id}" class="form__label">school{...}</label>
-                        <input type="hidden" name="ID" value="${item.id}">
-                        <input type="hidden" name="complexity" value="${item.complexity}">
-                    </div>
-                    <div style="position: relative; left: 5%">
-                        <button class="btnchk" onClick={console.log("click")} >
-                            {{ __('Check') }}
-            <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g filter="url(#filter0_f_618_1123)">
-                    <path d="M42.9 2H76.5L34.5 44H2L42.9 2Z" fill="url(#paint0_linear_618_1123)"/>
-                </g>
-                <defs>
-                    <filter id="filter0_f_618_1123" x="0" y="0" width="78.5" height="46" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                        <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-                        <feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_618_1123"/>
-                    </filter>
-                    <linearGradient id="paint0_linear_618_1123" x1="76.5" y1="2.00002" x2="34.5" y2="44" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="white" stop-opacity="0.6"/>
-                        <stop offset="1" stop-color="white" stop-opacity="0.05"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-        </button>
-    </div>
-</form>
-</div>
-        `).join("");
-            const HTML = html1;
+            const HTML = htmlbody;
             Element.innerHTML = HTML;
         }
 
@@ -896,146 +622,6 @@
         localStorage.removeItem('DataAdmin');
         localStorage.removeItem('taskcategoryAdmin');
         localStorage.removeItem('taskcomplexityAdmin');
-    </script>
-    {{--<script id="Main-Sort">
-        const divElementSort = document.querySelector('.Product-body');
-        const sortButtons = {
-            'name': '.sort-button-Name',
-            'category': '.sort-button-Category',
-            'complexity': '.sort-button-Complexity',
-            'solved': '.sort-button-Solved',
-            'price': '.sort-button-Price'
-        };
-
-        const complexityOrder = { easy: 1, medium: 2, hard: 3 };
-        let sortStates = { name: 0, category: 0, complexity: 0, solved: 0, price: 0 };
-        let originalTeams = [...data];
-        let currentSort = { column: null, direction: 0 };
-
-        // Инициализация состояния из localStorage
-        const storedSort = JSON.parse(localStorage.getItem('SortingTasksColumn'));
-        if (storedSort) {
-            sortStates[storedSort.N] = storedSort.isSort;
-            currentSort = { column: storedSort.N, direction: storedSort.isSort };
-        }
-
-        // Первоначальная сортировка
-        data.sort((a, b) => complexityOrder[a.complexity] - complexityOrder[b.complexity]);
-        data.sort(sortByDecide);
-
-        // Обработчики событий
-        Object.entries(sortButtons).forEach(([column, selector]) => {
-            document.querySelector(selector).addEventListener('click', () => handleSort(column));
-        });
-
-        function handleSort(column) {
-            if(localStorage.getItem('taskcomplexity') && localStorage.getItem('taskcategory')) {
-                if (localStorage.getItem('taskcategory') !== 'All Categories' || localStorage.getItem('taskcomplexity') !== 'All Complexity') {
-                    return null;
-                }
-            }
-            currentSort.direction = currentSort.column === column ? ++currentSort.direction : 1;
-            currentSort.column = column;
-
-            // Сброс других сортировок
-            Object.keys(sortStates).forEach(k => sortStates[k] = k === column ? currentSort.direction : 0);
-
-
-            // Обновление данных и интерфейса
-            const sortedData = getSortedData(column, currentSort.direction);
-            updateUI(sortedData);
-
-            // Сохранение состояния
-            let sortState = { N: column, isSort: currentSort.direction };
-            localStorage.setItem('SortingTasksColumn', JSON.stringify(sortState));
-
-            if (currentSort.direction === 3) {
-                localStorage.removeItem('SortingTasksColumn');
-                currentSort.direction = 0;
-            }
-        }
-        function getSortedData(column, direction) {
-            if (direction === 3) return JSON.parse(localStorage.getItem('data'));
-
-            return direction === 1
-                ? [...data].sort((a, b) => customSort(a, b, column, 'asc'))
-                : [...data].sort((a, b) => customSort(a, b, column, 'desc'));
-        }
-        function customSort(a, b, column, dir) {
-            // Приоритет для элементов с decide
-            if (a.decide && !b.decide) return 1;
-            if (!a.decide && b.decide) return -1;
-
-            // Определение направления
-            const modifier = dir === 'asc' ? 1 : -1;
-            const valA = getSortValue(a, column);
-            const valB = getSortValue(b, column);
-
-            return (valA > valB ? 1 : -1) * modifier;
-        }
-
-        function getSortValue(item, column) {
-            switch(column) {
-                case 'complexity': return complexityOrder[item.complexity];
-                case 'solved': return Number(item.solved);
-                case 'price': return Number(item.price);
-                default: return item[column].toLowerCase();
-            }
-        }
-
-        function sortByDecide(a, b) {
-            if (a.decide === '' && b.decide !== '') return -1;
-            if (a.decide !== '' && b.decide === '') return 1;
-            return 0;
-        }
-
-        function updateUI(data) {
-            divElementSort.innerHTML = data.map(item => `
-            <div href="/Home/${item.id}" class="products-row tasklink" onclick="Taskid${item.id}()">
-                <div class="product-cell image" ${item.decide}>
-                    <span>${item.name}</span>
-                </div>
-                <div class="product-cell category" ${item.decide}>
-                    <span class="cell-label">{{ __('Category') }}:</span>${item.category.toUpperCase()}
-                </div>
-                <div class="product-cell complexity" ${item.decide}>
-                    <span class="cell-label">{{ __('Complexity') }}:</span>
-                    <span class="status ${item.decide}${item.complexity}">${item.complexity.toUpperCase()}</span>
-                </div>
-                <div class="product-cell solved" ${item.decide}>
-                    <span class="cell-label">{{ __('Solved') }}:</span>${item.solved}
-                </div>
-                <div class="product-cell price" ${item.decide}>
-                    <span class="cell-label">{{ __('Price') }}:</span>${item.price}
-                </div>
-            </div>
-        `).join('');
-        }
-
-    </script>--}}
-
-    <script id="Main-Sort">
-        let TASKS = JSON.parse(localStorage.getItem('data'));
-        const divElementSort = document.querySelector('.Product-body');
-        const sortButtons = {
-            'name': '.sort-button-Name',
-            'category': '.sort-button-Category',
-            'complexity': '.sort-button-Complexity',
-            'solved': '.sort-button-Solved',
-            'price': '.sort-button-Price'
-        };
-
-        const complexityOrder = { easy: 1, medium: 2, hard: 3 };
-        let sortStates = { name: 0, category: 0, complexity: 0, solved: 0, price: 0 };
-        let originalTeams = [...data];
-        let currentSort = { column: null, direction: 0 };
-
-        // Инициализация состояния из localStorage
-        const storedSort = JSON.parse(localStorage.getItem('SortingTasksColumn'));
-        if (storedSort) {
-            sortStates[storedSort.N] = storedSort.isSort;
-            currentSort = { column: storedSort.N, direction: storedSort.isSort };
-        }
 
         // Первоначальная сортировка
         TASKS.sort((a, b) => complexityOrder[a.complexity] - complexityOrder[b.complexity]);
@@ -1071,7 +657,7 @@
 
             // Обновление данных и интерфейса
             const sortedData = getSortedData(column, currentSort.direction);
-            updateUI(sortedData);
+            MakeHTML(sortedData, divElement)
 
             // Сохранение состояния (не сохраняем состояние 0 для complexity)
             if (currentSort.direction !== 0) {
@@ -1122,29 +708,130 @@
             return 0;
         }
 
-        function updateUI(data) {
-            // Без изменений
-            divElementSort.innerHTML = data.map(item => `
-            <div style="cursor: pointer" href="/Home/${item.id}" class="products-row tasklink" onclick="Taskid${item.id}()">
-                <div class="product-cell image" ${item.decide}>
-                    <span>${item.name}</span>
-                </div>
-                <div class="product-cell category" ${item.decide}>
-                    <span class="cell-label">{{ __('Category') }}:</span>${item.category.toUpperCase()}
-                </div>
-                <div class="product-cell complexity" ${item.decide}>
-                    <span class="cell-label">{{ __('Complexity') }}:</span>
-                    <span class="status ${item.decide}${item.complexity}">${item.complexity.toUpperCase()}</span>
-                </div>
-                <div class="product-cell solved" ${item.decide}>
-                    <span class="cell-label">{{ __('Solved') }}:</span>${item.solved}
-                </div>
-                <div class="product-cell price" ${item.decide}>
-                    <span class="cell-label">{{ __('Price') }}:</span>${item.price}
-                </div>
-            </div>
-        `).join('');
+        function findDifference(obj1, obj2) {
+            const diff = {};
+
+            // Получаем все ключи из первого объекта
+            const keys = Object.keys(obj1);
+
+            // Проходим по каждому ключу
+            for (const key of keys) {
+                // Если ключа нет во втором объекте или значения разные
+                if (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {
+                    diff[key] = obj1[key]; // Записываем разницу
+                }
+            }
+
+            return diff;
         }
+
+
+        Echo.private(`channel-app-home`).listen('AppHomeEvent', (e) => {
+            const valueToDisplay = e.tasks;
+            let Tasks = valueToDisplay.Tasks;
+            let SolvedTaasks = valueToDisplay.SolvedTasks;
+            let SolvedTasksOnThisAuthUser = [];
+
+            for (let i = 0; i < SolvedTaasks.length; i++) {
+                if (SolvedTaasks[i].user_id === teamid) {
+                    SolvedTasksOnThisAuthUser.push(valueToDisplay.SolvedTasks[i]);
+                }
+            }
+
+            //console.log(SolvedTasksOnThisAuthUser);
+            let Solvedtasks = [];
+            for (let i = 0; i < Tasks.length; i++) {
+                for (let j = 0; j < SolvedTasksOnThisAuthUser.length; j++) {
+                    if (SolvedTasksOnThisAuthUser[j].tasks_id === Tasks[i].id) {
+                        Solvedtasks.push(Tasks[i]);
+                    }
+                }
+            }
+
+            Tasks = FirsFilter(Tasks, SolvedTaasks);
+
+            localStorage.setItem('data', JSON.stringify(data));
+
+            console.log('Принято!');
+
+            //const sortedData = valueToDisplay.sort((a, b) => b.score - a.score);
+            //console.log(sortedData);
+
+            let taskcomplexity = localStorage.getItem('taskcomplexity');
+            let taskcategory = localStorage.getItem('taskcategory');
+
+            let SortedTasksColEcho = JSON.parse(localStorage.getItem('SortingTasksColumn'));
+            if (SortedTasksColEcho) {
+                const { N: field, isSort: order } = SortedTasksColEcho;
+
+                const createComparator = (field, order) => {
+                    const isReverseBase = field === 'solved';
+                    const baseDirection = isReverseBase ? -1 : 1;
+                    const direction = baseDirection * (order === 1 ? 1 : -1);
+
+                    return (a, b) => {
+                        const aHasDecide = a.decide?.trim() !== '';
+                        const bHasDecide = b.decide?.trim() !== '';
+
+                        if (aHasDecide !== bHasDecide) {
+                            return aHasDecide ? 1 : -1;
+                        }
+
+                        const getValue = (obj) => {
+                            const value = obj[field];
+                            return ['solved', 'price'].includes(field) ? Number(value) : value?.toLowerCase();
+                        };
+
+                        const aValue = getValue(a);
+                        const bValue = getValue(b);
+
+                        return aValue < bValue ? -direction : aValue > bValue ? direction : 0;
+                    };
+                };
+
+                const validFields = ['name', 'category', 'complexity', 'solved', 'price'];
+                if (validFields.includes(field)) {
+                    Tasks.sort(createComparator(field, order));
+                }
+                if(field === 'complexity'){
+                    if(order === 1)
+                        Tasks.sort((a, b) => {
+                            const complexityOrder = {easy: 1, medium: 2, hard: 3};
+                            return complexityOrder[a.complexity] - complexityOrder[b.complexity];
+                        });
+                    if (order === 2)
+                        Tasks.sort((a, b) => {
+                            const complexityOrder = {easy: 3, medium: 2, hard: 1};
+                            return complexityOrder[a.complexity] - complexityOrder[b.complexity];
+                        });
+                }
+            }
+
+
+
+            // Удаляем все существующие формы
+            document.querySelectorAll('.topmost-div[class*="Task-id-"]').forEach(el => el.remove());
+
+            // Создаем формы для всех задач
+            Tasks.forEach(task => {
+                createTaskForm(task);
+            });
+
+            Filtereed(Tasks, taskcomplexity, taskcategory);
+            //console.log(e.test);
+        });
+
+
+        // Обработчик событий для новых задач
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработчик нажатия клавиш
+            document.addEventListener('keydown', function (event) {
+                // Проверяем, нажата ли клавиша Esc (код 27)
+                if (event.key === 'Escape' || event.keyCode === 27) {
+                    closeAllTasks();
+                }
+            });
+        });
     </script>
 @endsection
 

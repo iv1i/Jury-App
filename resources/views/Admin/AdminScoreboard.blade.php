@@ -97,21 +97,13 @@
 
 @section('scripts')
     <script type="text/javascript">
+        //--------------------------------Init-Of-Data
         const data = {!! json_encode($Users) !!};
         const desidedteams = {!! json_encode($DesidedT) !!};
         const divElement = document.querySelector('.products-area-wrapper');
 
-        MakeHTML(MakeMassive(data, desidedteams), divElement);
-
-        Echo.private(`channel-admin-scoreboard`).listen('AdminScoreboardEvent', (e) => {
-            const valueToDisplay = e.scoreboard;
-            const data = valueToDisplay.Teams;
-            const desidedteams = valueToDisplay.DesidedT;
-
-            console.log('Принято!');
-            MakeHTML(MakeMassive(data, desidedteams), divElement);
-        });
-
+        //--------------------------------Functions
+        // Создает массив
         function MakeMassive(data2, DesidedTeams){
             const svg = `{!! view('SVG.GuestSVG') !!}`;
             const desidedteams = DesidedTeams;
@@ -142,6 +134,7 @@
 
             return sortedData;
         }
+        // Формирование данных на странице
         function MakeHTML(Data, Element) {
             const host = window.location.hostname;
             const protocol = window.location.protocol;
@@ -165,6 +158,19 @@
             const HTML = html0 + html1;
             Element.innerHTML = HTML;
         }
+
+        //--------------------------------Start-Functions
+        MakeHTML(MakeMassive(data, desidedteams), divElement);
+
+        //--------------------------------WebSocket
+        Echo.private(`channel-admin-scoreboard`).listen('AdminScoreboardEvent', (e) => {
+            const valueToDisplay = e.scoreboard;
+            const data = valueToDisplay.Teams;
+            const desidedteams = valueToDisplay.DesidedT;
+
+            console.log('Принято!');
+            MakeHTML(MakeMassive(data, desidedteams), divElement);
+        });
     </script>
 @endsection
 

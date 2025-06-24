@@ -154,10 +154,10 @@
         </div>
         <div class="products-area-wrapper tableView">
             <div class="products-header">
+                <div class="product-cell id">{{ __('ID') }}</div>
                 <div class="product-cell image">{{ __('Name') }}</div>
                 <div class="product-cell category">{{ __('Category') }}</div>
                 <div class="product-cell status-cell">{{ __('Complexity') }}</div>
-                <div class="product-cell sales">{{ __('ID') }}</div>
                 <div class="product-cell price">{{ __('Price') }}</div>
                 <div class="product-cell action">{{ __('Action') }}</div>
             </div>
@@ -314,8 +314,19 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('js/Other/Notifications.js') }}"></script>
+    <script src="{{ asset('js/Admin/AdminOpenBlock.js') }}"></script>
     <script id="Main-Script">
+        //--------------------------------Init-Of-Data
+        const data = {!! json_encode($Tasks) !!};
         const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
+        const divElement = document.querySelector('.Product-body');
+
+        let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
+        let taskcategory = localStorage.getItem('taskcategoryAdmin');
+
+        //--------------------------------Functions
+        // Форма для закрытия всех форм
         function closeAllTasks() {
             const hiddenElements = document.querySelectorAll('div[class*="Task-id-"]');
             const AppContent = document.querySelector('.app-content');
@@ -340,7 +351,6 @@
             TopmostDivPluss.style.display = 'none';
             TopmostDivMinuss.style.display = 'none';
         }
-
         // Функция для создания формы задачи
         function createTaskForm(task) {
 
@@ -459,7 +469,7 @@
             // Добавляем обработчики событий для новой формы
             document.getElementById(`MyFormChange${task.id}`).addEventListener('submit', async function(event) {
                 event.preventDefault();
-                await submitFormAsync(this, task.id);
+                await submitTaskFormAsync(this, task.id);
             });
 
             if (task.FILES) {
@@ -473,7 +483,7 @@
                         input.name = 'deleteFilesFromTask';
                         form.appendChild(input);
 
-                        await submitFormAsync(form, task.id);
+                        await submitTaskFormAsync(form, task.id);
                     }
                 });
             }
@@ -502,7 +512,6 @@
                 }
             };
         }
-
         // Функция для экранирования HTML
         function escapeHtml(unsafe) {
             return unsafe
@@ -514,9 +523,8 @@
                     .replace(/'/g, "&#039;")
                 : '';
         }
-
         // Асинхронная отправка формы
-        async function submitFormAsync(form, taskId) {
+        async function submitTaskFormAsync(form, taskId) {
             const formData = new FormData(form);
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
@@ -524,7 +532,7 @@
             try {
                 // Показываем индикатор загрузки
                 submitButton.disabled = true;
-                submitButton.innerHTML = 'Обновление...';
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обновление...';
 
                 const response = await fetch(form.action, {
                     method: 'POST',
@@ -588,275 +596,7 @@
                 submitButton.innerHTML = originalButtonText;
             }
         }
-
-        // Инициализация существующих форм
-        @foreach ($Tasks as $T)
-        createTaskForm({!! $T !!});
-        @endforeach
-
-        // Обработчик событий для новых задач
-        Echo.private(`channel-admin-tasks`).listen('AdminTasksEvent', (e) => {
-            const tasks = e.tasks;
-            console.log(tasks);
-            localStorage.setItem('DataAdmin', JSON.stringify(tasks));
-
-            // Удаляем все существующие формы
-            document.querySelectorAll('.topmost-div[class*="Task-id-"]').forEach(el => el.remove());
-
-            // Создаем формы для всех задач
-            tasks.forEach(task => {
-                createTaskForm(task);
-            });
-
-            // Обновляем список задач
-            let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
-            let taskcategory = localStorage.getItem('taskcategoryAdmin');
-            Filtereed(tasks, taskcomplexity, taskcategory);
-        });
-
-        let toastTimer1, toastTimer2;
-
-        function showToast(type, title, message, actions = null) {
-            const toast = document.querySelector(".toast");
-            const toastContent = toast.querySelector(".toast-content");
-            const checkIcon = toast.querySelector(".check");
-            const messageText1 = toast.querySelector(".text-1");
-            const messageText2 = toast.querySelector(".text-2");
-            const messageText3 = toast.querySelector(".text-3");
-            const progress = toast.querySelector(".progress");
-
-            // Очищаем предыдущие таймеры
-            clearTimeout(toastTimer1);
-            clearTimeout(toastTimer2);
-
-            // Сбрасываем анимацию прогресс-бара
-            progress.classList.remove("active");
-            // Принудительный рефлоу для сброса анимации
-            void progress.offsetWidth;
-
-            // Удаляем предыдущие добавленные стили
-            const existingStyles = document.querySelectorAll('style[data-toast-style]');
-            existingStyles.forEach(style => style.remove());
-
-            toast.style.display = "flex";
-
-            // Set icon and colors based on type
-            if (type === 'success') {
-                checkIcon.className = "fas fa-solid fa-check check";
-                checkIcon.style.backgroundColor = "#40f443";
-                const style = document.createElement('style');
-                style.innerHTML = '.toast .progress:before { background-color: #40f443 !important; }';
-                style.setAttribute('data-toast-style', 'true');
-                document.head.appendChild(style);
-            } else {
-                checkIcon.className = "fas fa-solid fa-times check";
-                checkIcon.style.backgroundColor = "#f4406a";
-                const style = document.createElement('style');
-                style.innerHTML = '.toast .progress:before { background-color: #f4406a !important; }';
-                style.setAttribute('data-toast-style', 'true');
-                document.head.appendChild(style);
-            }
-
-            messageText1.textContent = title;
-            messageText2.textContent = message;
-
-            // Очищаем предыдущие действия
-            messageText3.innerHTML = '';
-
-            // Добавляем действия с новой строки для каждого
-            if (actions && actions.length > 0) {
-                actions.forEach(action => {
-                    const actionElement = document.createElement('div');
-                    actionElement.textContent = `• ${action}`;
-                    messageText3.appendChild(actionElement);
-                });
-            }
-
-            toast.classList.add("active");
-
-            // Запускаем анимацию прогресс-бара снова
-            setTimeout(() => {
-                progress.classList.add("active");
-            }, 10);
-
-            const closeIcon = document.querySelector('.close');
-
-            if (toast) {
-                toastTimer1 = setTimeout(() => {
-                    toast.classList.remove('active');
-                }, 5000);
-
-                toastTimer2 = setTimeout(() => {
-                    progress.classList.remove('active');
-                }, 5300);
-
-                if (closeIcon) {
-                    closeIcon.removeEventListener('click', closeToast);
-                    closeIcon.addEventListener('click', closeToast);
-                }
-            }
-        }
-
-        function closeToast() {
-            const toast = document.querySelector(".toast");
-            const progress = toast.querySelector(".progress");
-
-            toast.classList.remove('active');
-
-            setTimeout(() => {
-                progress.classList.remove('active');
-            }, 300);
-
-            clearTimeout(toastTimer1);
-            clearTimeout(toastTimer2);
-        }
-
-        document.getElementById('MyFormPlus').addEventListener('submit', async function (event) {
-            event.preventDefault(); // предотвращаем стандартное поведение формы
-
-            const formData = new FormData(this); // создаем объект FormData из формы
-            const responseplus = await fetch('/Admin/Tasks/Add', {
-                method: 'POST',
-                body: formData,
-            })
-
-            const data = await responseplus.json();
-
-            if (responseplus.ok && data.success) {
-                showToast('success', 'Успех', data.message || 'Операция выполнена успешно');
-                return data;
-            } else {
-                showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
-                return data;
-            }
-        });
-
-        document.getElementById('MyFormMinus').addEventListener('submit', async function (event) {
-            event.preventDefault(); // предотвращаем стандартное поведение формы
-
-            const formData = new FormData(this); // создаем объект FormData из формы
-
-            const responseminus = await fetch('/Admin/Tasks/Delete', {
-                method: 'POST',
-                body: formData,
-            })
-
-
-            const data = await responseminus.json();
-
-            if (responseminus.ok && data.success) {
-                showToast('success', 'Успех', data.message || 'Операция выполнена успешно');
-                return data;
-            } else {
-                showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
-                return data;
-            }
-        });
-
-        const blurButton = document.getElementById('CloseBtnPlus');
-        blurButton.addEventListener('click', function() {
-            const TopmostDiv = document.querySelector('.topmost-div-task-plus');
-            const appContent = document.querySelector('.app-content');
-            const minusButton = document.querySelector('.button-minus');
-            const plusButton = document.querySelector('.button-plus');
-            plusButton.style.display = 'block';
-            minusButton.style.display = 'block';
-            appContent.style.filter = 'none';
-            TopmostDiv.style.display = 'none';
-            CloseTaskBanner.style.display = 'none';
-        });
-
-        const blurButton2 = document.getElementById('CloseBtnMinus');
-        blurButton2.addEventListener('click', function() {
-            const TopmostDiv = document.querySelector('.topmost-div-task-minus');
-            const appContent = document.querySelector('.app-content');
-            const plusButton = document.querySelector('.button-plus');
-            const minusButton = document.querySelector('.button-minus');
-            minusButton.style.display = 'block';
-            plusButton.style.display = 'block';
-            appContent.style.filter = 'none';
-            TopmostDiv.style.display = 'none';
-            CloseTaskBanner.style.display = 'none';
-
-        });
-
-        const plusButton = document.getElementById('button-plus');
-        plusButton.addEventListener('click', function() {
-            const TopmostDiv = document.querySelector('.topmost-div-task-plus');
-            const appContent = document.querySelector('.app-content');
-            const minusButton = document.querySelector('.button-minus');
-            const plusButton = document.querySelector('.button-plus');
-            plusButton.style.display = 'none';
-            minusButton.style.display = 'none';
-            appContent.style.filter = 'blur(4px)';
-            TopmostDiv.style.display = 'block';
-            CloseTaskBanner.style.display = 'block';
-        });
-
-        const minusButton = document.getElementById('button-minus');
-        minusButton.addEventListener('click', function() {
-            const TopmostDiv = document.querySelector('.topmost-div-task-minus');
-            const appContent = document.querySelector('.app-content');
-            const plusButton = document.querySelector('.button-plus');
-            const minusButton = document.querySelector('.button-minus');
-            minusButton.style.display = 'none';
-            plusButton.style.display = 'none';
-            appContent.style.filter = 'blur(4px)';
-            TopmostDiv.style.display = 'block';
-            CloseTaskBanner.style.display = 'block';
-        });
-
-        const data = {!! json_encode($Tasks) !!};
-        localStorage.setItem('DataAdmin', JSON.stringify(data));
-        const divElement = document.querySelector('.Product-body');
-
-        let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
-        let taskcategory = localStorage.getItem('taskcategoryAdmin');
-        Filtereed(data, taskcomplexity, taskcategory);
-
-        Echo.private(`channel-admin-tasks`).listen('AdminTasksEvent', (e) => {
-            const valueToDisplay = e.tasks;
-            localStorage.setItem('data', JSON.stringify(valueToDisplay));
-            console.log('Принято!');
-
-            let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
-            let taskcategory = localStorage.getItem('taskcategoryAdmin');
-            Filtereed(valueToDisplay, taskcomplexity, taskcategory);
-        });
-        document.getElementById('ApplyBtn').addEventListener('click', function () {
-            let taskcomplexity = document.getElementById('filter-menu-complexity').value;
-            let taskcategory = document.getElementById('filter-menu-category').value;
-
-            localStorage.setItem('taskcomplexityAdmin', taskcomplexity);
-            localStorage.setItem('taskcategoryAdmin', taskcategory);
-
-            if (taskcategory !== 'All Categories' && taskcomplexity !== 'All Complexity') {
-                const data = JSON.parse(localStorage.getItem('DataAdmin'));
-                const newArray = data.filter(item => item.complexity === taskcomplexity && item.category === taskcategory);
-                MakeHTML(newArray, divElement);
-            } else {
-                MakeHTML(data, divElement);
-            }
-            if (taskcategory !== 'All Categories' && taskcomplexity === 'All Complexity') {
-                const data = JSON.parse(localStorage.getItem('DataAdmin'));
-                const newArray = data.filter(item => item.category === taskcategory);
-                MakeHTML(newArray, divElement);
-            }
-            if (taskcategory === 'All Categories' && taskcomplexity !== 'All Complexity') {
-                const data = JSON.parse(localStorage.getItem('DataAdmin'));
-                const newArray = data.filter(item => item.complexity === taskcomplexity);
-                MakeHTML(newArray, divElement);
-            }
-        });
-        document.getElementById('ResetBtn').addEventListener('click', function () {
-            const data = JSON.parse(localStorage.getItem('DataAdmin'));
-            let taskcomplexity = 'All Complexity';
-            let taskcategory = 'All Categories';
-            setSelection(taskcomplexity, taskcategory);
-            localStorage.setItem('taskcomplexityAdmin', taskcomplexity);
-            localStorage.setItem('taskcategoryAdmin', taskcategory);
-            MakeHTML(data, divElement);
-        });
+        // Функция фильтрации
         function Filtereed(DATA, taskcomplexity, taskcategory){
             if (taskcategory && taskcomplexity) {
                 setSelection(taskcomplexity, taskcategory);
@@ -875,6 +615,7 @@
                 MakeHTML(DATA, divElement);
             }
         }
+        // Функция получения печенек
         function getCookie(name) {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
@@ -885,12 +626,14 @@
             }
             return null;
         }
+        // Функция установки печенек
         function setCookie(name, value, days, sameSite, path) {
             const expires = days ? `; expires=${new Date(Date.now() + days * 86400000).toUTCString()}` : '';
             const sameSiteAttribute = sameSite ? `; SameSite=${sameSite}` : '';
             const cookiePath = path ? `; path=${path}` : '';
             document.cookie = `${name}=${encodeURIComponent(value)}${expires}${sameSiteAttribute}${cookiePath}`;
         }
+        // Функция для работы с фильтром
         function setSelection(complx, categ) {
             let select = document.querySelector("select[name='filter-menu-complexity']");
             let select2 = document.querySelector("select[name='filter-menu-category']");
@@ -948,6 +691,7 @@
                 select2.selectedIndex = 12;
             }
         }
+        // Заполнение данных
         function MakeHTML(Data, Element) {
             const htmlheader = `<div class="products-header">
                 <div class="product-cell image">{{ __('Name') }}</div>
@@ -958,6 +702,9 @@
             </div>`;
             const htmlbody = Data.map(item => `
       <div style="cursor: pointer" class="products-row tasklink" onclick="Taskid${item.id}()">
+        <div class="product-cell id">
+            <span class="cell-label">{{ __('ID') }}:</span><span class="cell-value">${item.id}</span>
+        </div>
         <div class="product-cell image">
             <span>${item.name}</span>
         </div>
@@ -967,9 +714,6 @@
         <div class="product-cell status-cell">
             <span class="cell-label">{{ __('Complexity') }}:</span>
             <span class="status ${item.complexity}">${item.complexity.toUpperCase()}</span>
-        </div>
-        <div class="product-cell sales">
-            <span class="cell-label">{{ __('ID') }}:</span>${item.id}
         </div>
         <div class="product-cell price">
             <span class="cell-label">{{ __('Price') }}:</span>${item.price}
@@ -1024,6 +768,50 @@
             });
         }
 
+        //--------------------------------Start-Functions
+        // Инициализация существующих форм
+        @foreach ($Tasks as $T)
+        createTaskForm({!! $T !!});
+        @endforeach
+        OpenBlocks('tasks');
+        Filtereed(data, taskcomplexity, taskcategory);
+
+        //--------------------------------Other
+        localStorage.setItem('DataAdmin', JSON.stringify(data));
+        document.getElementById('ApplyBtn').addEventListener('click', function () {
+            let taskcomplexity = document.getElementById('filter-menu-complexity').value;
+            let taskcategory = document.getElementById('filter-menu-category').value;
+
+            localStorage.setItem('taskcomplexityAdmin', taskcomplexity);
+            localStorage.setItem('taskcategoryAdmin', taskcategory);
+
+            if (taskcategory !== 'All Categories' && taskcomplexity !== 'All Complexity') {
+                const data = JSON.parse(localStorage.getItem('DataAdmin'));
+                const newArray = data.filter(item => item.complexity === taskcomplexity && item.category === taskcategory);
+                MakeHTML(newArray, divElement);
+            } else {
+                MakeHTML(data, divElement);
+            }
+            if (taskcategory !== 'All Categories' && taskcomplexity === 'All Complexity') {
+                const data = JSON.parse(localStorage.getItem('DataAdmin'));
+                const newArray = data.filter(item => item.category === taskcategory);
+                MakeHTML(newArray, divElement);
+            }
+            if (taskcategory === 'All Categories' && taskcomplexity !== 'All Complexity') {
+                const data = JSON.parse(localStorage.getItem('DataAdmin'));
+                const newArray = data.filter(item => item.complexity === taskcomplexity);
+                MakeHTML(newArray, divElement);
+            }
+        });
+        document.getElementById('ResetBtn').addEventListener('click', function () {
+            const data = JSON.parse(localStorage.getItem('DataAdmin'));
+            let taskcomplexity = 'All Complexity';
+            let taskcategory = 'All Categories';
+            setSelection(taskcomplexity, taskcategory);
+            localStorage.setItem('taskcomplexityAdmin', taskcomplexity);
+            localStorage.setItem('taskcategoryAdmin', taskcategory);
+            MakeHTML(data, divElement);
+        });
         document.getElementById('toggleAdditionalFiles').addEventListener('click', function() {
             const section = document.getElementById('additionalFilesSection');
             const isVisible = section.style.display === 'block';
@@ -1040,7 +828,6 @@
                 easing: 'ease-in-out'
             });
         });
-
         document.addEventListener('DOMContentLoaded', function() {
             // Обработчик нажатия клавиш
             document.addEventListener('keydown', function (event) {
@@ -1049,6 +836,30 @@
                     closeAllTasks();
                 }
             });
+        });
+
+        //--------------------------------WebSocket
+        Echo.private(`channel-admin-tasks`).listen('AdminTasksEvent', (e) => {
+            const tasks = e.tasks;
+            localStorage.setItem('DataAdmin', JSON.stringify(tasks));
+
+            // Удаляем все существующие формы
+            document.querySelectorAll('.topmost-div[class*="Task-id-"]').forEach(el => el.remove());
+
+            // Создаем формы для всех задач
+            tasks.forEach(task => {
+                createTaskForm(task);
+            });
+
+            // Обновляем список задач
+            let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
+            let taskcategory = localStorage.getItem('taskcategoryAdmin');
+
+            Filtereed(tasks, taskcomplexity, taskcategory);
+
+            console.log('Принято!');
+
+            Filtereed(tasks, taskcomplexity, taskcategory);
         });
     </script>
 @endsection

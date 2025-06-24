@@ -45,8 +45,8 @@ class TasksController extends Controller
 
         $solved = SolvedTasks::where('user_id', $AuthUserId)->where('tasks_id', $taskid)->exists();
         if ($solved) {
-            $this->NotifEventsOups($userAgent);
-            return response()->json(['warning' => 'Вы уже решили эту задачу'], 200);
+            //$this->NotifEventsOups($userAgent);
+            return response()->json(['type' => 'warning', 'success' => 'true','message' => 'Вы уже решили эту задачу'], 200);
             //return redirect()->route('TasksID', ['id' => $taskid])->with('error', 'Вы уже решили эту задачу');
         }
 
@@ -148,13 +148,15 @@ class TasksController extends Controller
 
             }
 
-            $this->NotifEventsSucces($userAgent);
             $this->AppEvents();
             $this->AdminEvents();
 
+            return response()->json(['success' => true,'message' =>  __('The flag is correct!')], 200);
+            //$this->NotifEventsSucces($userAgent);
+
         }
 
-        $this->NotifEventsError($userAgent);
+        //$this->NotifEventsError($userAgent);
 
         return response()->json(['success' => false,'message' => 'Флаг неверный!'], 200);
         //return redirect()->route('TasksID', ['id' => $taskid])->with('error', 'Флаг неверный!');
@@ -213,7 +215,8 @@ class TasksController extends Controller
     {
         $Teams = User::all();
         $Tasks = Tasks::all();
-        $InfoTasks = infoTasks::all();
+        $universalResult = $this->processTasksUniversal($Tasks);
+        $InfoTasks = $this->formatToLegacyUniversal($universalResult);
         $CheckTasks = CheckTasks::all();
         $DesidedT = desided_tasks_teams::all();
         $data = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
@@ -237,5 +240,84 @@ class TasksController extends Controller
             $id++;
         }
         return $id;
+    }
+    function formatToLegacyUniversal($universalResult) {
+        // Сначала создаем массив только с sumary
+        $legacy = [
+            'sumary' => $universalResult['sumary'] ?? 0
+        ];
+
+        // Стандартные категории из legacy-формата (для обратной совместимости)
+        $legacyCategories = [
+            'admin', 'recon', 'crypto', 'stegano', 'ppc', 'pwn',
+            'web', 'forensic', 'joy', 'misc', 'osint', 'reverse',
+            'easy', 'medium', 'hard' // Добавляем сложности в категории для сортировки
+        ];
+
+        // Собираем все возможные категории
+        $allCategories = array_unique(array_merge(
+            $legacyCategories,
+            array_keys($universalResult['categories'] ?? [])
+        ));
+
+        // Сортируем категории в алфавитном порядке
+        sort($allCategories);
+
+        // Добавляем категории в отсортированном порядке
+        foreach ($allCategories as $category) {
+            // Для сложностей берем из difficulty
+            if (in_array($category, ['easy', 'medium', 'hard'])) {
+                $legacy[$category] = $universalResult['difficulty'][$category] ?? 0;
+            }
+            // Для остальных категорий берем из categories
+            else {
+                $legacy[$category] = $universalResult['categories'][$category] ?? 0;
+            }
+        }
+
+        return $legacy;
+    }
+    function processTasksUniversal($tasks) {
+        $result = [
+            'sumary' => 0,
+            'difficulty' => [],
+            'categories' => []
+        ];
+
+        foreach ($tasks as $task) {
+            $result['sumary']++;
+
+            // Обработка сложности
+            $difficulty = strtolower($task['complexity'] ?? 'unknown');
+            if (!isset($result['difficulty'][$difficulty])) {
+                $result['difficulty'][$difficulty] = 0;
+            }
+            $result['difficulty'][$difficulty]++;
+
+            // Обработка категорий (поддержка задач с несколькими категориями)
+            $categories = $task['category'] ?? 'unknown';
+
+            // Если категория передана как строка (одна категория)
+            if (is_string($categories)) {
+                $categories = array_map('trim', explode(',', $categories));
+            }
+
+            // Если категория передана как массив
+            if (is_array($categories)) {
+                foreach ($categories as $category) {
+                    $category = strtolower(trim($category));
+                    if (!isset($result['categories'][$category])) {
+                        $result['categories'][$category] = 0;
+                    }
+                    $result['categories'][$category]++;
+                }
+            }
+        }
+
+        // Сортируем категории и сложности для удобства
+        ksort($result['difficulty']);
+        ksort($result['categories']);
+
+        return $result;
     }
 }

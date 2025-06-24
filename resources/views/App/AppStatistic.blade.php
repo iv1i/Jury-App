@@ -59,6 +59,9 @@
         </div>
         <div class="products-area-wrapper tableView">
             <div class="products-header">
+                <div class="product-cell id">{{ __('ID') }}<button class="sort-button sort-button-id">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
+                    </button></div>
                 <div class="product-cell image">
                     {{ __('Teams') }}
                     <button class="sort-button sort-button-teams">
@@ -66,10 +69,6 @@
                     </button>
                 </div>
                 <div class="product-cell category">{{ __('Where-From') }}<button class="sort-button sort-button-wherefrom">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
-
-                <div class="product-cell sales">{{ __('ID') }}<button class="sort-button sort-button-id">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
                     </button></div>
                 <div class="product-cell stock">{{ __('Scores') }}<button class="sort-button sort-button-scores">
@@ -143,6 +142,9 @@
             const url = protocol + '//' + host + ':' + port + '/storage/teamlogo/';
             const html0 = `<div class="products-header">
                 <div class="product-cell image">
+                <div class="product-cell id">{{ __('ID') }}<button class="sort-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
+                    </button></div>
                     {{ __('Teams') }}
                     <button class="sort-button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
@@ -152,9 +154,6 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
                     </button></div>
 
-                <div class="product-cell sales">{{ __('ID') }}<button class="sort-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
                 <div class="product-cell stock">{{ __('Scores') }}<button class="sort-button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
                     </button></div>
@@ -162,21 +161,19 @@
 
             const html1 = Data.map(item => `
             <a href="/Statistics/ID/${item.id}" class="products-row teamlink ${item.BorderStyle}">
+                <div class="product-cell id"><span class="cell-label">{{ __('ID') }}:</span>${item.id}</div>
                 <div class="product-cell image">
                     <img class="logo_sc" src="${url + item.teamlogo}" alt="product">
                     <span class="span-name">${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
                 </div>
                 <div class="product-cell category"><span class="cell-label">{{ __('Where-From') }}:</span>${item.wherefrom}</div>
-
-                <div class="product-cell sales"><span class="cell-label">{{ __('ID') }}:</span>${item.id}</div>
                 <div class="product-cell stock"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
             </a>
         `).join("");
             const HTML =html1;
             Element.innerHTML = HTML;
         }
-    </script>
-    <script id="Main-Sort">
+
         const divElementSort = document.querySelector('.Product-body');
         var sortButton0 = document.querySelector('.sort-button-teams');
         var sortButton1 = document.querySelector('.sort-button-wherefrom');
@@ -245,42 +242,12 @@
                 // Сортируем команды по имени
                 M = SortDirect(M, column)
                 // Обновляем HTML с отсортированными данными
-                const html4 = M.map(item =>`
-             <a href="/Statistics/ID/${item.id}" class="products-row teamlink ${item.BorderStyle}">
-                <div class="product-cell image">
-                    <img class="logo_sc" src="${url + item.teamlogo}" alt="product">
-                    <span class="span-name">${item.name} ${item.GuestLogo}</span>
-                </div>
-                <div class="product-cell category"><span class="cell-label">{{ __('Where-From') }}:</span>${item.wherefrom}</div>
-
-                <div class="product-cell sales"><span class="cell-label">{{ __('ID') }}:</span>${item.id}</div>
-                <div class="product-cell stock"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
-            </a>
-        `
-                ).join("");
-                const HTML = html4;
-                divElemSort.innerHTML = HTML;
-
+                MakeHTML(M, divElemSort);
             } else if (isSorted === 2) {
                 // Возвращаемся к исходным данным
                 M = SortReverse(M, column) // Возвращаем оригинальные данные
-
-                const html2 = originalM.map(item =>`
-             <a href="/Statistics/ID/${item.id}" class="products-row teamlink ${item.BorderStyle}">
-                <div class="product-cell image">
-                    <img class="logo_sc" src="${url + item.teamlogo}" alt="product">
-                    <span class="span-name">${item.name} ${item.GuestLogo}</span>
-                </div>
-                <div class="product-cell category"><span class="cell-label">{{ __('Where-From') }}:</span>${item.wherefrom}</div>
-
-                <div class="product-cell sales"><span class="cell-label">{{ __('ID') }}:</span>${item.id}</div>
-                <div class="product-cell stock"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
-            </a>
-        `
-                ).join("");
-                const HTML = html2;
-                divElemSort.innerHTML = HTML;
-
+                // Обновляем HTML с отсортированными данными
+                MakeHTML(M, divElemSort);
             }
         }
 

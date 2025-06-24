@@ -390,6 +390,7 @@ body {
   max-height: 100%;
   padding: 0 4px; }
 
+
 .tableView .products-header {
   display: flex;
   align-items: center;
@@ -408,6 +409,12 @@ body {
     background-color: var(--app-content-secondary-color); }
   .tableView .products-row .cell-more-button {
     display: none; }
+.tableView .product-cell.id {
+    flex: 0.1; }
+.tableView .product-cell.action {
+    flex: 0.2;
+    display: grid;
+}
 .tableView .product-cell {
   flex: 1;
   padding: 8px 16px;
@@ -473,27 +480,27 @@ body {
 
 .status {
   border-radius: 4px;
-  display: flex;
   align-items: center;
-  padding: 4px 8px;
   font-size: 12px; }
   .status:before {
-    content: '';
     width: 4px;
     height: 4px;
     border-radius: 50%;
     margin-right: 4px; }
   .status.easy {
+      padding: 4px 8px;
     color: #2ba972;
     background-color: rgba(43, 169, 114, 0.2); }
     .status.easy:before {
       background-color: #2ba972; }
   .status.medium {
+      padding: 4px 8px;
     color: #59719d;
     background-color: rgba(89, 113, 157, 0.2); }
     .status.medium:before {
       background-color: #59719d; }
   .status.hard {
+      padding: 4px 8px;
     color: #9d5959;
     background-color: rgba(157, 89, 89, 0.2); }
     .status.hard:before {
@@ -673,7 +680,7 @@ body {
   margin: 0;
   text-align: justify;
   word-wrap: break-word;
-  max-height: calc(100vh - 16em);
+  max-height: calc(100vh - 12em);
   overflow-y: auto;
   padding-right: 0.5em;
   font-family: 'Poppins', sans-serif; }
