@@ -123,7 +123,6 @@ class AdminController extends Controller
         $team->id = $userId;
         $team->name = $sanitizedName;
         $team->password = Hash::make($request->input('password'));
-        $team->password_encr = Crypt::encrypt($request->input('password'));
         $team->token = md5($sanitizedName. Str::random(32) . $userId);
         $team->teamlogo = $filename;
         $team->players = $sanitizedPlayers;
@@ -297,7 +296,6 @@ class AdminController extends Controller
             $team->name = $sanitizedName;
             if($request->input('password') !== null){
                 $team->password = Hash::make($request->input('password'));
-                $team->password_encr = Crypt::encrypt($request->input('password'));
                 $team->token = md5($sanitizedName. Str::random(32) . $TeamID);
             }
 
@@ -916,25 +914,7 @@ class AdminController extends Controller
             CheckTasks::truncate();
             User::truncate();
             Tasks::truncate();
-            $infotasks = infoTasks::find(1);
-            if($infotasks){
-                $infotasks->id = 0;
-                $infotasks->sumary = 0;
-                $infotasks->easy = 0;
-                $infotasks->medium = 0;
-                $infotasks->hard = 0;
-                $infotasks->admin = 0;
-                $infotasks->recon = 0;
-                $infotasks->crypto = 0;
-                $infotasks->stegano = 0;
-                $infotasks->ppc = 0;
-                $infotasks->pwn = 0;
-                $infotasks->web = 0;
-                $infotasks->forensic = 0;
-                $infotasks->joy = 0;
-                $infotasks->misc = 0;
-                $infotasks->save();
-            }
+
             $this->AdminEvents();
             $this->AppEvents();
 
@@ -1210,13 +1190,13 @@ class AdminController extends Controller
         $InfoTasks = $this->formatToLegacyUniversal($universalResult);
         $CheckTasks = CheckTasks::all();
         $DesidedT = desided_tasks_teams::all();
-        $data = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
-        $data3 = compact('Teams', 'DesidedT');
+        $dataHome = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
+        $dataScoreboard = [$Teams, $DesidedT];
 
         AdminTasksEvent::dispatch($Tasks);
         AdminTeamsEvent::dispatch($Teams);
-        AdminHomeEvent::dispatch($data);
-        AdminScoreboardEvent::dispatch($data3);
+        AdminHomeEvent::dispatch($dataHome);
+        AdminScoreboardEvent::dispatch($dataScoreboard);
     }
     public function AppEvents()
     {
@@ -1655,30 +1635,6 @@ class AdminController extends Controller
 
 
     // ----------------------------------------------------------------VIEW
-    public function TaskID(int $id)
-    {
-        $task = Tasks::find($id);
-        if($task) {
-
-            $data = compact('id', 'task');
-            return view('Admin.AdminTasksID', compact('data'));
-        }
-        else {
-            return redirect()->back()->with('error', 'Задача не найдена');
-        }
-    }
-    public function TeamsID(int $id)
-    {
-        $team = User::find($id);
-        if($team) {
-            $data = compact('id', 'team');
-            return view('Admin.AdminTeamsID', compact('data'));
-        }
-        else {
-            return redirect()->back()->with('error', 'Команда не найдена');
-        }
-    }
-
     public function AdminScoreboardView()
     {
         $Users = User::all();

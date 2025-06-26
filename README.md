@@ -1,6 +1,6 @@
 <p align="center"><img src="public/media/img/kolos-white.png" width="300" alt="Laravel Logo"></p>
 
-# Checker-App
+# Jury-App
 
 WEB приложение созданное для проведения соревнований AltayCTF-School в формате Task-based;
 
@@ -54,28 +54,15 @@ nvm install 22
 ```
 
 ## <img src="public/media/icon/rocket.png" width="30"> Launch
-#### Checker-App(В дирректории проекта):
+#### Jury-App(В дирректории проекта):
 > [!WARNING]
-> Во время выполнения следующих 3-х комманд при появлении ошибок ничего не предпринимать!
+> Скрипт launch.sh находится в разработке, здесь представлена Alpha версия, использовать с осторожностью!
 ```
 sudo apt update
 composer update
 composer install
 ```
 В дирректории проекта создать файл `.env` и скопировать в него содержимое `.env.example` (чтобы увидеть этот файл нажмите Ctrl + H)
-
-и в файле `.env` изменить `REVERB_HOST="your_ip_address"`. Вместо `your_ip_address` свой IPv4 адрес. (узнать его можно командой `ip a`)
-
-Создайте необходимые дирректории:
-```
-cd storage/
-mkdir -p framework/{sessions,views,cache}
-mkdir -p app/{public,sql_dump,public/teamlogo}
-chmod -R 755 framework
-chmod -R 755 app
-cd ..
-cp public/media/img/StandartLogo.png storage/app/public/teamlogo
-```
 
 Выполните сборку приложени:
 ```
@@ -86,19 +73,11 @@ npm run build
 Для запуска приложения нужно открыть консоль в дирректории проекта, вставить все эти команды одновременно и дождаться их выполнения:
 ```
 ./vendor/bin/sail up --build -d
-sleep 20
-./vendor/bin/sail restart
-sleep 20
-./vendor/bin/sail artisan migrate
-./vendor/bin/sail artisan migrate:fresh --seed
-./vendor/bin/sail artisan storage:link
-sleep 20
-./vendor/bin/sail restart
-echo "Установка Завершена"
+./vendor/bin/sail artisan migrate --seed
 ```
-Чтобы узнать, что все работает, откройте браузер и перейдите к localhost, вы должны увидеть страницу авторизации.
+Чтобы узнать, что все работает, откройте браузер и перейдите к localhost:80,и вы должны увидеть страницу авторизации.
 
-#### Далее для работы с Checker-App используйте следующие команды:
+#### Далее для работы с Jury-App используйте следующие команды:
 
 Чтобы запустить все контейнеры Docker в фоновом режиме введите команду:
 ```
@@ -116,7 +95,7 @@ echo "Установка Завершена"
 - [Возможные решения при появлении ошибок](ISSUES.md)
 ## <img src="public/media/icon/book.png" width="32"> Useful Things
 #### Пароль от Администратора
-находится в файле `.env` и при каждом запуске вашего приложения сохраняется в таблице admins.
+находится в файле `.env` и хрнаится в таблице admins в хешированном виде.
 > [!WARNING]
 > Имя администратора в базе данных изменять нельзя! только для продвинутых пользователей!
 #### Для удобного переноса данных с одного устройства на другое предусмотрено сохранение и загрузка базы данных.
@@ -128,6 +107,6 @@ echo "Установка Завершена"
 При использовании миграций laravel использовать команду:
 
 ```
-./vendor/bin/sail artisan migrate:fresh --seed
+./vendor/bin/sail artisan migrate --seed
 ```
 чтобы произошла начальная загрузка данных в главные таблицы, либо используйте dump базы данных и команды приведенные выше.

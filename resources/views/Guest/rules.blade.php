@@ -173,7 +173,7 @@
     Echo.channel(`channel-updaterules-guest`).listen('UpdateRulesEvent', (e) => {
         const valueToDisplay = e.data;
 
-        const divElement = document.querySelector('.rul');
+        const divElement = document.querySelector('.rules-content');
 
         MakeHTML(e.data, divElement)
     });

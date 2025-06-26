@@ -42,7 +42,7 @@ CREATE TABLE `admins` (
 LOCK TABLES `admins` WRITE;
 /*!40000 ALTER TABLE `admins` DISABLE KEYS */;
 INSERT INTO `admins` VALUES
-(1,'admin','$2y$12$a7z2l4Ttk0pPZnDlG0cdCuE6zegjT8blpkcQ6KxtVslbHNvFZjPcy','t0BSeFMTt1G9xsyeYsFNmPXCdLVZUnPLNx2ZgMAtxmV4kVkTbnGIkxuUD1N4','2024-08-20 05:03:32','2025-06-19 13:23:07');
+(1,'admin','$2y$12$6mO5GgbND9r23TvWrIvWCuiWEBA8w6jZnBMOMzAwLfmSCAbdk/MdK','zpcPB4f2zm6V3FurnRoNHidDyFCFBovi08jwx4WgjBs4Bhzpyzp5Yic1wIOO','2024-08-20 05:03:32','2025-06-26 07:09:21');
 /*!40000 ALTER TABLE `admins` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -73,13 +73,14 @@ CREATE TABLE `check_tasks` (
 LOCK TABLES `check_tasks` WRITE;
 /*!40000 ALTER TABLE `check_tasks` DISABLE KEYS */;
 INSERT INTO `check_tasks` VALUES
-(1,1,0,0,0,0,'2025-02-06 17:28:48','2025-06-17 06:58:35'),
-(2,2,0,0,0,0,'2024-08-25 15:31:53','2025-06-17 06:58:35'),
-(3,3,0,0,0,0,'2024-08-23 06:23:43','2025-06-17 06:58:35'),
-(4,4,0,0,0,0,'2024-08-23 06:23:45','2025-06-17 06:58:35'),
-(5,5,0,0,0,0,'2024-08-23 06:23:48','2025-06-17 06:58:35'),
-(6,6,0,0,0,0,'2024-10-31 16:49:23','2025-06-17 06:58:35'),
-(7,7,0,0,0,0,'2024-08-26 08:04:47','2025-06-17 06:58:35');
+(1,1,0,0,0,0,'2025-02-06 17:28:48','2025-06-26 07:04:58'),
+(2,2,0,0,0,0,'2024-08-25 15:31:53','2025-06-26 07:04:58'),
+(3,3,0,0,0,0,'2024-08-23 06:23:43','2025-06-26 07:04:58'),
+(4,4,0,0,0,0,'2024-08-23 06:23:45','2025-06-26 07:04:58'),
+(5,5,0,0,0,0,'2024-08-23 06:23:48','2025-06-26 07:04:58'),
+(6,6,0,0,0,0,'2024-10-31 16:49:23','2025-06-26 07:04:58'),
+(7,7,0,0,0,0,'2024-08-26 08:04:47','2025-06-26 07:04:58'),
+(8,8,0,0,0,0,'2025-06-21 13:03:18','2025-06-26 07:04:58');
 /*!40000 ALTER TABLE `check_tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -233,9 +234,7 @@ CREATE TABLE `sessions` (
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
 INSERT INTO `sessions` VALUES
-('hVVnunP3OeONooIg3JFQokOUe0GQ09FNAYsrSIeN',NULL,'192.168.1.17','Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0','YTozOntzOjY6Il90b2tlbiI7czo0MDoieEVRZkFaRE1Yb210MGVGSUlSQXpXODVRR3RpTHRiTnpvWExZWWs3MCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MTk6Imh0dHA6Ly8xOTIuMTY4LjEuMTciO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19',1750332181),
-('sdfm4xRsnzuk4qBheNNeX22N9Hr0mphx2tkXEP5L',7,'192.168.1.17','Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0','YTo1OntzOjY6Il90b2tlbiI7czo0MDoiTnlYUWx6amU2N1lScTNIcE5NamhtUHowQnpCRHdtZkg0UU9uTEtrNyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjQ6Imh0dHA6Ly8xOTIuMTY4LjEuMTcvSG9tZSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTI6ImxvZ2luX2FkbWluXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo3O30=',1750339361),
-('YUSFBK166ZkQsvIkSfaQ3YErSgjSj1wp1d06zNJT',NULL,'192.168.1.17','Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0','YTozOntzOjY6Il90b2tlbiI7czo0MDoiUWcySG9MYnZ2RHlrNUpNckVwak01RllHN0tUak90cXg5cXZoczhYaiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjQ6Imh0dHA6Ly8xOTIuMTY4LjEuMTcvQXV0aCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1750332181);
+('37Rofpmk3DPV3sNOLUkoqSTQ19zDZNKKN4lnQcKg',NULL,'192.168.1.17','Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0','YTo0OntzOjY6Il90b2tlbiI7czo0MDoibnFlRzJWSVI3N3k5Z3l3TEtkSjZQYjNRWHljeURkY2hvUjk5QU5CQyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzQ6Imh0dHA6Ly8xOTIuMTY4LjEuMTcvQWRtaW4vU2V0dGluZ3MiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUyOiJsb2dpbl9hZG1pbl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7fQ==',1750921631);
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -331,7 +330,8 @@ INSERT INTO `tasks` VALUES
 (28,'import substitution','osint','medium','Некий с ником taramtaramych представляется сотрудником очень известной компании «Пив Пав». Выясните информацию, которая поможет внедриться в данную компанию.<br>\r\nФормат флага: school{ID No}',NULL,NULL,NULL,NULL,0.00,1000.00,1000.00,'school{Taras-Macha-8chDY-5l7}',NULL,'2024-10-31 17:35:25','2025-02-07 15:07:53'),
 (29,'Adrastei&#039;s…','reverse','hard','Вас пригласили на VIP вечеринку любителей обратной перемотки. Кодовое слово, что у вас спрашивают и будет флагом  <br>\r\nФормат флага: school{A-Z, a-z, 0-1}','336b7abf20c29950c9a3d513b92d0ebe.exe;',NULL,NULL,NULL,0.00,1000.00,1000.00,'school{YlAFRTLM44GC34oPDix7}',NULL,'2024-10-31 17:48:20','2025-02-07 15:07:53'),
 (30,'…sister','reverse','easy','ООО «Гексагон» приглашает вас к себе на работу, но охранник без кодового слова не пускает<br>\r\nФормат флага:school{codeword}','5e635409c4f88692bc544d297b7ee6aa.zip;',NULL,NULL,NULL,0.00,1000.00,1000.00,'school{UPUPDDLRLRBA}',NULL,'2024-10-31 17:51:38','2025-02-07 15:07:53'),
-(31,'&','reverse','hard','Мы отдали разработку кода на аутсорс программистам из индии. В результате буквы разбрелись по консоли. Поставьте их снова в красивый рядочек, что будет флажком<br>\r\nФормат флага: school{A-Z}','75bdd7638cf3a2ced902b6c9dd27dee2.zip;',NULL,NULL,NULL,0.00,1000.00,1000.00,'school{ACDJKBEILSFHMRTGNQUXOPVWY}',NULL,'2024-10-31 17:52:53','2025-02-07 15:07:53');
+(31,'&','reverse','hard','Мы отдали разработку кода на аутсорс программистам из индии. В результате буквы разбрелись по консоли. Поставьте их снова в красивый рядочек, что будет флажком<br>\r\nФормат флага: school{A-Z}','75bdd7638cf3a2ced902b6c9dd27dee2.zip;',NULL,NULL,NULL,0.00,1000.00,1000.00,'school{ACDJKBEILSFHMRTGNQUXOPVWY}',NULL,'2024-10-31 17:52:53','2025-02-07 15:07:53'),
+(32,'AAAAaaaa','web','easy','test',NULL,NULL,NULL,NULL,0.00,1000.00,1000.00,'test',NULL,'2025-06-22 07:52:10','2025-06-25 02:28:41');
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -347,7 +347,6 @@ CREATE TABLE `users` (
   `token` text COLLATE utf8mb4_unicode_ci,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password_encr` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `teamlogo` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `players` int NOT NULL,
   `wherefrom` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -368,13 +367,14 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(1,'c49b5d9263ed3a564bd2e14d80b97404','Team A','$2y$12$JcaGMYj6kLTKjH9ZTTCH5uVEMf.zJcExVk5cXZo2N2bApMEolfTBq','eyJpdiI6IllOOWdQNEVvc0VDT0NHMUdkRGMyUEE9PSIsInZhbHVlIjoib2k4Y1I3eWd6R0NUY0lIOHAzWUt4UT09IiwibWFjIjoiMTc4YjcyOWU0MzFmYjk5YmIyZGExMjExMTkwZTk5YTIwNWExOGMxNmU2MWE2MGVhM2UwZmJhNGUzMDllYjhiOSIsInRhZyI6IiJ9','StandartLogo.png',8,'МАОУ &quot;СОШ №132&quot;  им. Н.М. Малахова г. Барнаул','Yes',0.00,NULL,'2025-02-06 17:28:48','2025-06-19 12:13:27'),
-(2,'4d627164ff7450d40ebe500eb968ba67','Team B','$2y$12$bH7ppx6a8IO4f1HK4fkhBu5.9pAKM3iDJi99OtIbCFhrk3b4cOwJ2','eyJpdiI6IkordHREOTdreGxnRS9CV05RcmlXcEE9PSIsInZhbHVlIjoicWtGTEorODlBUHBxd0NoakRWaTNkQT09IiwibWFjIjoiOTczZmY5YmU4NTE5MTZhN2VlYWZjN2Q4MmY1MDk0OGE3Yzg0YTBkNDdlMmMyMGM0MmIzOGI1NWYzMDUyYmUxMCIsInRhZyI6IiJ9','StandartLogo.png',5,'МАОУ &quot;СОШ №136&quot;;','Yes',0.00,NULL,'2024-08-25 15:31:53','2025-06-19 12:13:43'),
-(3,'c2f6eb504881924eee34a90c1fb6e310','Team C','$2y$12$PYGEPsxZcHCeMYUQ/dMVQ.IhLyZnbwYgcxuT4HN.mf3aIUzDRXbSu','eyJpdiI6InJRSG1aRWxMVXpwSDlJd29vTzNybGc9PSIsInZhbHVlIjoiNllFcHdMR0g5d1FMdGFOZUhrU3Y4Zz09IiwibWFjIjoiNzZiZDFlMTM0YzQ0ZmZkYjY2MWExOGI1MDAzYmFmZDI3MTY2ODBhOTEwZjlkM2U4NWUzNWM0ODYzNmMyMjkxYSIsInRhZyI6IiJ9','StandartLogo.png',5,'БОУ г. Омска &quot;Лицей № 149&quot;','Yes',0.00,NULL,'2024-08-23 06:23:43','2025-06-19 12:13:57'),
-(4,'9b2dcb81d35eb3040ddd6bee9a03680f','Team D','$2y$12$FKq38OSmdxo9mPRdxtK36eri2WdHSTvsXiIndM9KgPiQ3ikbh2G9u','eyJpdiI6Inc2Vjc2ZjlqR3FubEgzZ3lnWVZpZ3c9PSIsInZhbHVlIjoiaE5pdThxVGx4YStwVHlGWlNOQ1ZKQT09IiwibWFjIjoiZDljN2E5NTA1NTY5OGNhYzA3ZjQ1ZWU1NGY5Yzc5NTI1NTlhMTE1N2FmZjFmZDE5M2I1MzBlMmIyOWFmMzQ0YyIsInRhZyI6IiJ9','StandartLogo.png',5,'МБОУ &quot;СОШ №49&quot;; г.Барнаул','Yes',0.00,NULL,'2024-08-23 06:23:45','2025-06-19 12:14:05'),
-(5,'88d6e6bb34b5f0bca0d953a2cb14f69d','Team E','$2y$12$uj9hHrsTXxnLnoUDPpohc.KdMnWrsVdVFRgzW0E1ynQUXqoyLOIX.','eyJpdiI6InBpMXRMTUZXTTVVRm9CN3lJVi9NUHc9PSIsInZhbHVlIjoiYmc3dnRLZ2dPZkFPYS9MaTJmWkNnUT09IiwibWFjIjoiMmQyYzE0MmQwNDc2YTZhMzNkYjc1YWNmMTJmNjllYzQ2OWFmNGM2ZTI0YTk4YjdjYTdlOTRiNDJkMWNhZmYyOSIsInRhZyI6IiJ9','StandartLogo.png',5,'МАОУ «СОШ №134» г. Барнаул','Yes',0.00,NULL,'2024-08-23 06:23:48','2025-06-19 12:14:12'),
-(6,'6cc70190b0720666ae9565d8790814e9','SharLike','$2y$12$6oVOGIbxhjVGeLSQ.MWHtuh91/z9Wm.Fh.GkNyzldBR59nMqbDD2y','eyJpdiI6Im1jSDBod01CRHMwTEZkYTBSNlAvalE9PSIsInZhbHVlIjoiVWxEbUVVUVVPTDZVb1FKKzc3SkVyUT09IiwibWFjIjoiY2NjNWFiZmQ3NjFmYTAxM2JiODQ4YmUwNTFhMGJmZTBmOTg3Nzg4ZTZhYWZkMmQ2ZTY2MjA2YjE4MDk4MGFiOSIsInRhZyI6IiJ9','1730425369_like-button.png',7,'Алтайский государственный технический университет им. И. И. Ползунова','No',0.00,NULL,'2024-10-31 16:49:23','2025-06-17 06:58:35'),
-(7,'ea5f2bf8f22cfd9442db7c2b42e3aaba','Жуколовы','$2y$12$bUPE6JfRNqrs9FPLxQfPFuDZXGwqIcU0vlZyoxMJXZE5LcJKxnHXS','eyJpdiI6Ik9KeWxVdnhYbUJFUjRsTm5NRGwrMVE9PSIsInZhbHVlIjoiWk5hbUNlY0ZkYk1majJWUnlUSWd5dz09IiwibWFjIjoiN2FlZWM3YTgyOGZlYmNlYTBjMmQ2MWQxMGMyZTRmNTc5ZGMyMGY1Nzg5NzIzZmYyNDNlNGE2YTU0MDRmMDE0NyIsInRhZyI6IiJ9','1727521723_New_Logo_Жуколовы-5-full.png',6,'Алтайский государственный технический университет им. И. И. Ползунова','No',0.00,NULL,'2024-08-26 08:04:47','2025-06-19 12:14:19');
+(1,'c49b5d9263ed3a564bd2e14d80b97404','Team A','$2y$12$JcaGMYj6kLTKjH9ZTTCH5uVEMf.zJcExVk5cXZo2N2bApMEolfTBq','StandartLogo.png',8,'МАОУ &quot;СОШ №132&quot;  им. Н.М. Малахова г. Барнаул','Yes',0.00,NULL,'2025-02-06 17:28:48','2025-06-26 07:04:58'),
+(2,'4d627164ff7450d40ebe500eb968ba67','Team B','$2y$12$bH7ppx6a8IO4f1HK4fkhBu5.9pAKM3iDJi99OtIbCFhrk3b4cOwJ2','StandartLogo.png',5,'МАОУ &quot;СОШ №136&quot;','Yes',0.00,NULL,'2024-08-25 15:31:53','2025-06-26 07:04:58'),
+(3,'c2f6eb504881924eee34a90c1fb6e310','Team C','$2y$12$PYGEPsxZcHCeMYUQ/dMVQ.IhLyZnbwYgcxuT4HN.mf3aIUzDRXbSu','StandartLogo.png',5,'БОУ г. Омска &quot;Лицей № 149&quot;','Yes',0.00,NULL,'2024-08-23 06:23:43','2025-06-26 07:04:58'),
+(4,'9b2dcb81d35eb3040ddd6bee9a03680f','Team D','$2y$12$FKq38OSmdxo9mPRdxtK36eri2WdHSTvsXiIndM9KgPiQ3ikbh2G9u','StandartLogo.png',5,'МБОУ &quot;СОШ №49&quot;; г.Барнаул','Yes',0.00,NULL,'2024-08-23 06:23:45','2025-06-26 07:04:58'),
+(5,'88d6e6bb34b5f0bca0d953a2cb14f69d','Team E','$2y$12$uj9hHrsTXxnLnoUDPpohc.KdMnWrsVdVFRgzW0E1ynQUXqoyLOIX.','StandartLogo.png',5,'МАОУ «СОШ №134» г. Барнаул','Yes',0.00,NULL,'2024-08-23 06:23:48','2025-06-26 07:04:58'),
+(6,'6cc70190b0720666ae9565d8790814e9','SharLike','$2y$12$6oVOGIbxhjVGeLSQ.MWHtuh91/z9Wm.Fh.GkNyzldBR59nMqbDD2y','1730425369_like-button.png',7,'Алтайский государственный технический университет им. И. И. Ползунова','No',0.00,NULL,'2024-10-31 16:49:23','2025-06-26 07:04:58'),
+(7,'ea5f2bf8f22cfd9442db7c2b42e3aaba','Жуколовы','$2y$12$bUPE6JfRNqrs9FPLxQfPFuDZXGwqIcU0vlZyoxMJXZE5LcJKxnHXS','1727521723_New_Logo_Жуколовы-5-full.png',6,'Алтайский государственный технический университет им. И. И. Ползунова','No',0.00,NULL,'2024-08-26 08:04:47','2025-06-26 07:04:58'),
+(8,'1ab4a4f51e4934fb976b8100c3b01dc3','test','$2y$12$ICwpys4xenNs72XTkPpVgO7EthEMmIBw8GeKS7H.tUHK300VVF02u','StandartLogo.png',5,'test','Yes',0.00,NULL,'2025-06-21 13:03:18','2025-06-26 07:04:58');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -387,4 +387,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-19 13:23:07
+-- Dump completed on 2025-06-26  7:09:21

@@ -110,3 +110,25 @@ function closeToast() {
     clearTimeout(toastTimer1);
     clearTimeout(toastTimer2);
 }
+function callShowToast(data){
+    const type = data.type || (data.success ? 'success' : 'error');
+    const defaultTitles = {
+        error: 'Ошибка',
+        success: 'Успех',
+        warning: 'Предупреждение',
+        info: 'Информация'
+    };
+    const defaultMessages = {
+        error: 'Произошла ошибка',
+        success: 'Операция выполнена успешно',
+        warning: 'Обратите внимание',
+        info: 'Информационное сообщение'
+    };
+
+    showToast(
+        type,
+        defaultTitles[type] || 'Уведомление',
+        data.message || defaultMessages[type],
+        data.actions
+    );
+}

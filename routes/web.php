@@ -2,59 +2,57 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AppController;
-use App\Http\Controllers\TasksController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ViewController;
 use Illuminate\Support\Facades\Route;
 
 ////////////////////////////////////////////////////////////////---APP---
 Route::middleware('auth')->group(function () {
-    Route::get('/Home', [AppController::class, 'HomeView'])->name('Home');
-    //Route::get('/Home/{id}', [AppController::class, 'TasksIDView'])->name('TasksID');
-    Route::get('/Scoreboard', [AppController::class, 'ScoreboardView']);
-    Route::get('/Statistics', [AppController::class, 'StatisticView']);
-    Route::get('/Statistics/ID/{id}', [AppController::class, 'StatisticIDview']);
-    Route::get('/Logout', [AppController::class, 'logout']);
+    Route::get('/Home', [ViewController::class, 'HomeView'])->name('App-Home-View');
+    Route::get('/Scoreboard', [ViewController::class, 'ScoreboardView'])->name('App-Scoreboard-View');
+    Route::get('/Statistics', [ViewController::class, 'StatisticView'])->name('App-Statistics-View');
+    Route::get('/Statistics/ID/{id}', [ViewController::class, 'StatisticIDview'])->name('App-Statistics-ID-View');
+    Route::get('/Logout', [AuthController::class, 'logoutApp'])->name('App-Logout');
 
-    Route::get('/Download/File/{md5file}/{id}', [AppController::class, 'DwnlFile']);
-    Route::post('/Home/Tasks/Check', [TasksController::class, 'CheckFlag']);
+    Route::get('/Download/File/{md5file}/{id}', [AppController::class, 'DwnlFile'])->name('App-Download-File');
+    Route::post('/Home/Tasks/Check', [AppController::class, 'CheckFlag'])->name('App-Check-Flag');
 });
 
 ////////////////////////////////////////////////////////////////---ADMIN---
 Route::middleware('auth.admin')->group(function () {
-    Route::get('/Admin', [AdminController::class, 'AdminHomeView'])->name('AdminHome');
-    Route::get('/Admin/Scoreboard', [AdminController::class, 'AdminScoreboardView'])->name('AdminScoreboard');
-    Route::get('/Admin/Tasks', [AdminController::class, 'AdminTasksView'])->name('AdminTasks');
-    //Route::get('/Admin/Tasks/{id}', [AdminController::class, 'TaskID']);
-    Route::get('/Admin/Teams', [AdminController::class, 'AdminTeamsView'])->name('AdminTeams');
-    //Route::get('/Admin/Teams/{id}', [AdminController::class, 'TeamsID']);
-    Route::get('/Admin/Settings', [AdminController::class, 'AdminSettingsView']);
-    Route::get('/Admin/Logout', [AdminController::class, 'logout']);
+    Route::get('/Admin', [ViewController::class, 'AdminHomeView'])->name('Admin-Home-View');
+    Route::get('/Admin/Scoreboard', [ViewController::class, 'AdminScoreboardView'])->name('Admin-Scoreboard-View');
+    Route::get('/Admin/Tasks', [ViewController::class, 'AdminTasksView'])->name('Admin-Tasks-View');
+    Route::get('/Admin/Teams', [ViewController::class, 'AdminTeamsView'])->name('Admin-Teams-View');
+    Route::get('/Admin/Settings', [ViewController::class, 'AdminSettingsView'])->name('Admin-Settings-View');
+    Route::get('/Admin/Logout', [AuthController::class, 'logoutAdmin'])->name('Admin-Logout');
 
-    Route::post('/Admin/Settings/Reset', [AdminController::class, 'SettingsReset'])->name('AdminSettingsReset');
-    Route::post('/Admin/Settings/DeleteAll', [AdminController::class, 'SettingsDeleteAll'])->name('AdminSettingsDeleteAll');
-    Route::post('/Admin/Settings/Slidebars', [AdminController::class, 'SettingsSlidebars'])->name('AdminSettingsSlidebars');
-    Route::post('/Admin/Settings/ChngRull', [AdminController::class, 'SettingsChngRules'])->name('AdminSettingsChngRules');
-    Route::post('/Admin/Settings/ChngCategory', [AdminController::class, 'SettingsChgCategory'])->name('AdminSettingsChgCategoryes');
+    Route::post('/Admin/Settings/Reset', [AdminController::class, 'SettingsReset'])->name('Admin-Settings-Reset');
+    Route::post('/Admin/Settings/DeleteAll', [AdminController::class, 'SettingsDeleteAll'])->name('Admin-Settings-DeleteAll');
+    Route::post('/Admin/Settings/Sidebars', [AdminController::class, 'SettingsSlidebars'])->name('Admin-Settings-Sidebars');
+    Route::post('/Admin/Settings/СhangeRull', [AdminController::class, 'SettingsChngRules'])->name('Admin-Settings-Сhange-Rules');
+    Route::post('/Admin/Settings/СhangeCategory', [AdminController::class, 'SettingsChgCategory'])->name('Admin-Settings-Сhange-Categories');
 
 
-    Route::put('/Admin/Tasks/Add', [AdminController::class, 'AddTasks']);
-    Route::patch('/Admin/Tasks/Change', [AdminController::class, 'ChangeTasks']);
-    Route::delete('/Admin/Tasks/Delete', [AdminController::class, 'DeleteTasks']);
+    Route::put('/Admin/Tasks/Add', [AdminController::class, 'AddTasks'])->name('Admin-Tasks-Add');
+    Route::patch('/Admin/Tasks/Change', [AdminController::class, 'ChangeTasks'])->name('Admin-Tasks-Change');
+    Route::delete('/Admin/Tasks/Delete', [AdminController::class, 'DeleteTasks'])->name('Admin-Tasks-Delete');
 
-    Route::put('/Admin/Teams/Add', [AdminController::class, 'AddTeams']);
-    Route::patch('/Admin/Teams/Change', [AdminController::class, 'ChangeTeams']);
-    Route::delete('/Admin/Teams/Delete', [AdminController::class, 'DeleteTeams']);
+    Route::put('/Admin/Teams/Add', [AdminController::class, 'AddTeams'])->name('Admin-Teams-Add');
+    Route::patch('/Admin/Teams/Change', [AdminController::class, 'ChangeTeams'])->name('Admin-Teams-Change');
+    Route::delete('/Admin/Teams/Delete', [AdminController::class, 'DeleteTeams'])->name('Admin-Teams-Delete');
 });
 
 ////////////////////////////////////////////////////////////////---GUEST---
-Route::get('/', [AppController::class, 'SlashView'])->name('login');
-Route::get('/Auth', [AppController::class, 'AuthView'])->name('AuthApp');
-Route::get('/Rules', [AppController::class, 'RulesView']);
-Route::get('/Projector', [AppController::class, 'ProjectorView']);
-Route::get('/Admin/Auth', [AdminController::class, 'AdminAuthView'])->name('Adminlogin');
+Route::get('/', [ViewController::class, 'SlashView'])->name('login');
+Route::get('/Auth', [ViewController::class, 'AuthView'])->name('App-Auth-View');
+Route::get('/Rules', [ViewController::class, 'RulesView'])->name('App-Rules-View');
+Route::get('/Projector', [ViewController::class, 'ProjectorView'])->name('App-Projector-View');
+Route::get('/Admin/Auth', [ViewController::class, 'AdminAuthView'])->name('Admin-Auth-View');
 
 Route::middleware('throttle:AuthApp')->group(function () {
-    Route::post('/Auth', [AppController::class, 'AuthTeam']);
-    Route::post('/Admin/Auth', [AdminController::class, 'AdminAuth']);
+    Route::post('/Auth', [AuthController::class, 'AuthApp']);
+    Route::post('/Admin/Auth', [AuthController::class, 'AuthAdmin']);
 });
 
 ////////////////////////////////////////////////////////////////---OTHER---

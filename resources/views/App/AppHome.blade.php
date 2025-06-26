@@ -1,3 +1,4 @@
+@inject('settings', 'App\Services\SettingsService')
 @extends('layouts.app')
 
 @section('css')
@@ -137,14 +138,13 @@
 
 @section('scripts')
     <script src="{{ asset('js/Other/Notifications.js') }}"></script>
-    <script id="TasksBlock-Script">
+    <script id="TasksBlock-Script-V2">
+        // Constants and DOM elements
         const divElement = document.querySelector('.Product-body');
         const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
-
         const teamid = {{ auth()->id() }};
         const solvedtasks = {!! json_encode($SolvedTasks) !!};
         const complexityOrder = { easy: 1, medium: 2, hard: 3 };
-        const divElementSort = document.querySelector('.Product-body');
         const sortButtons = {
             'name': '.sort-button-Name',
             'category': '.sort-button-Category',
@@ -153,105 +153,162 @@
             'price': '.sort-button-Price'
         };
 
+        // State variables
         let data = {!! json_encode($Tasks) !!};
         let sortStates = { name: 0, category: 0, complexity: 0, solved: 0, price: 0 };
-        let originalTeams = [...data];
         let currentSort = { column: null, direction: 0 };
+        let currentlyOpenTaskId = null;
 
-
-        let SortedItemsColumn = data;
-        let taskcomplexity = localStorage.getItem('taskcomplexity');
-        let taskcategory = localStorage.getItem('taskcategory');
-        let SortedTasksCol = JSON.parse(localStorage.getItem('SortingTasksColumn'));
-        //const storedSort = JSON.parse(localStorage.getItem('SortingTasksColumn'));
-        data = FirsFilter(data, solvedtasks);
+        // Initialize data
+        data = initialFilter(data, solvedtasks);
         let TASKS = JSON.parse(localStorage.getItem('data'));
+        const taskcomplexity = localStorage.getItem('taskcomplexity');
+        const taskcategory = localStorage.getItem('taskcategory');
+        const SortedTasksCol = JSON.parse(localStorage.getItem('SortingTasksColumn'));
 
-        function callShowToast(data){
-            const type = data.type || (data.success ? 'success' : 'error');
-            const defaultTitles = {
-                error: 'Ошибка',
-                success: 'Успех',
-                warning: 'Предупреждение',
-                info: 'Информация'
-            };
-            const defaultMessages = {
-                error: 'Произошла ошибка',
-                success: 'Операция выполнена успешно',
-                warning: 'Обратите внимание',
-                info: 'Информационное сообщение'
-            };
-
-            showToast(
-                type,
-                defaultTitles[type] || 'Уведомление',
-                data.message || defaultMessages[type],
-                data.actions
-            );
+        // Apply sorting if exists in localStorage
+        if (SortedTasksCol) {
+            applySorting(data, SortedTasksCol.N, SortedTasksCol.isSort);
         }
 
-        function closeAllTasks(){
-            // Получаем все элементы с классом, содержащим 'Task-id-'
-            const hiddenElements = document.querySelectorAll('div[class*="Task-id-"]');
-            const AppContent = document.querySelector(`.app-content`);
-            const CloseTaskBanner = document.querySelector(`.CloseTaskBanner`);
-            if (AppContent) {
-                AppContent.style.filter = 'none'; // Показываем элемент
-            }
-            if (CloseTaskBanner) {
-                CloseTaskBanner.style.display = 'none'; // Показываем элемент
-            }
-// Проходим по каждому элементу и изменяем стиль
-            hiddenElements.forEach(element => {
-                element.style.display = 'none'; // или 'flex', в зависимости от ваших нужд
+        // Initial render
+        renderFilteredTasks(data, taskcomplexity, taskcategory);
+
+        // Event listeners
+        document.getElementById('ApplyBtn').addEventListener('click', applyFilters);
+        document.getElementById('ResetBtn').addEventListener('click', resetFilters);
+        document.addEventListener('keydown', handleKeyDown);
+        Object.entries(sortButtons).forEach(([column, selector]) => {
+            document.querySelector(selector).addEventListener('click', () => handleSort(column));
+        });
+
+        // Initialize Echo listener
+        initializeEchoListener();
+
+        // Initialize existing task forms
+        @foreach ($Tasks as $T)
+        createTaskForm({!! $T !!});
+        @endforeach
+
+        // Core functions
+        function initialFilter(data, solvedtasks) {
+            // Mark solved tasks
+            data.forEach(task => {
+                task.decide = solvedtasks.some(solved => solved.tasks_id === task.id)
+                    ? 'style="color: var(--app-bg-tasks);"'
+                    : '';
             });
+
+            // Sort by complexity and solved status
+            data.sort((a, b) => {
+                // First by solved status
+                if (a.decide !== b.decide) return a.decide ? 1 : -1;
+                // Then by complexity
+                return complexityOrder[a.complexity] - complexityOrder[b.complexity];
+            });
+
+            localStorage.setItem('data', JSON.stringify(data));
+            return data;
         }
-        // Функция для создания формы задачи
+
+        function createComparator(field, order) {
+            const isReverseBase = field === 'solved';
+            const baseDirection = isReverseBase ? -1 : 1;
+            const direction = baseDirection * (order === 1 ? 1 : -1);
+
+            return (a, b) => {
+                const aHasDecide = a.decide?.trim() !== '';
+                const bHasDecide = b.decide?.trim() !== '';
+
+                if (aHasDecide !== bHasDecide) return aHasDecide ? 1 : -1;
+
+                const getValue = (obj) => {
+                    const value = obj[field];
+                    return ['solved', 'price'].includes(field) ? Number(value) : value?.toLowerCase();
+                };
+
+                const aValue = getValue(a);
+                const bValue = getValue(b);
+
+                return aValue < bValue ? -direction : aValue > bValue ? direction : 0;
+            };
+        }
+
+        function renderFilteredTasks(data, complexityFilter, categoryFilter) {
+            let filteredData = [...data];
+
+            if (complexityFilter && complexityFilter !== 'All Complexity') {
+                filteredData = filteredData.filter(item => item.complexity === complexityFilter);
+            }
+
+            if (categoryFilter && categoryFilter !== 'All Categories') {
+                filteredData = filteredData.filter(item => item.category === categoryFilter);
+            }
+
+            MakeHTML(filteredData);
+            setSelection(complexityFilter, categoryFilter);
+        }
+
+        function MakeHTML(tasks) {
+            const html = tasks.map(task => `
+            <div style="cursor: pointer" class="products-row tasklink" onclick="Taskid${task.id}()">
+                <div class="product-cell image" ${task.decide}>
+                    <span>${task.name}</span>
+                </div>
+                <div class="product-cell category" ${task.decide}>
+                    <span class="cell-label">{{ __('Category') }}:</span>${task.category.toUpperCase()}
+                </div>
+                <div class="product-cell complexity" ${task.decide}>
+                    <span class="cell-label">{{ __('Complexity') }}:</span>
+                    <span class="status ${task.decide}${task.complexity}">${task.complexity.toUpperCase()}</span>
+                </div>
+                <div class="product-cell solved" ${task.decide}>
+                    <span class="cell-label">{{ __('Solved') }}:</span>${task.solved}
+                </div>
+                <div class="product-cell price" ${task.decide}>
+                    <span class="cell-label">{{ __('Price') }}:</span>${task.price}
+                </div>
+            </div>
+        `).join('');
+
+            divElement.innerHTML = html;
+        }
+
         function createTaskForm(task) {
+            const existingForm = document.querySelector(`.Task-id-${task.id}`);
+            if (existingForm) {
+                updateExistingForm(existingForm, task);
+                return;
+            }
 
             const formHtml = `
-    <div style="display: none" class="topmost-div Task-id-${task.id}">
-        <div style="text-align: center; height: 3em;" >
-            <h1 class="TaskH1">${task.name}</h1>
-            <div id="CloseBtn" class="btnclosetask" onclick="Taskid${task.id}close()">
-                <img class="closeicontask" src="{{ asset('/media/icon/close.png') }}">
-            </div>
-        </div>
-        <div class="${task.complexity} taskID_complexity">${task.complexity.toUpperCase()}</div>
-        <div class="description">
-            ${task.description}
-        </div>
-        <div class="description">
-            ${task.FILES ? task.FILES.split(";").map((file, k) =>
+            <div style="display: none" class="topmost-div Task-id-${task.id}">
+                <div style="text-align: center; height: 3em;">
+                    <h1 class="TaskH1">${task.name}</h1>
+                    <div id="CloseBtn" class="btnclosetask" onclick="Taskid${task.id}close()">
+                        <img class="closeicontask" src="{{ asset('/media/icon/close.png') }}">
+                    </div>
+                </div>
+                <div class="${task.complexity} taskID_complexity">${task.complexity.toUpperCase()}</div>
+                <div class="description">${task.description}</div>
+                <div class="description">
+                    ${task.FILES ? task.FILES.split(";").map((file, k) =>
                 file ? `<a href="{{ asset('/Download/File/') }}${md5(file)}/${task.id}">Файл#${k+1}</a>` : ''
             ).join('') : ''}
-        </div>
-        <form id="MyFormChange${task.id}" class="MyFormSellFlag" action="/Home/Tasks/Check" method="post">
-            @csrf
+                </div>
+                <form id="MyFormChange${task.id}" class="MyFormSellFlag" action="/Home/Tasks/Check" method="post">
+                    @csrf
             <div class="form__group field">
                 <input type="input" class="form__field" placeholder="Name" name="flag" id='name${task.id}' required autocomplete="off"/>
-                <label for="name${task.id}" class="form__label">school{...}</label>
-                <input type="hidden" name="ID" value="${task.id}">
-                <input type="hidden" name="complexity" value="${task.complexity}">
-            </div>
-            <div style="position: relative; left: 5%">
-                <button type="submit" class="btnchk" onClick={console.log("click")}>
-                    {{ __('Check') }}
+                        <label for="name${task.id}" class="form__label">school{...}</label>
+                        <input type="hidden" name="ID" value="${task.id}">
+                        <input type="hidden" name="complexity" value="${task.complexity}">
+                    </div>
+                    <div style="position: relative; left: 5%">
+                        <button type="submit" class="btnchk">
+                            {{ __('Check') }}
             <svg width="79" height="46" viewBox="0 0 79 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g filter="url(#filter0_f_618_1123)">
-                    <path d="M42.9 2H76.5L34.5 44H2L42.9 2Z" fill="url(#paint0_linear_618_1123)"/>
-                </g>
-                <defs>
-                    <filter id="filter0_f_618_1123" x="0" y="0" width="78.5" height="46" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                        <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-                        <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-                        <feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_618_1123"/>
-                    </filter>
-                    <linearGradient id="paint0_linear_618_1123" x1="76.5" y1="2.00002" x2="34.5" y2="44" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="white" stop-opacity="0.6"/>
-                        <stop offset="1" stop-color="white" stop-opacity="0.05"/>
-                    </linearGradient>
-                </defs>
+                <!-- SVG content -->
             </svg>
         </button>
     </div>
@@ -259,59 +316,45 @@
 </div>
 `;
 
-            // Остальной код функции остается без изменений
-            const container = document.querySelector('.Tasks-Container');
-            container.insertAdjacentHTML('beforeend', formHtml);
-
-            // Добавляем обработчики событий для новой формы
-            document.getElementById(`MyFormChange${task.id}`).addEventListener('submit', async function(event) {
-                event.preventDefault();
-                await submitFormAsync(this, task.id);
-            });
-
-            // Добавляем функции для открытия/закрытия
-            window[`Taskid${task.id}`] = function() {
-                const div = document.querySelector(`.topmost-div.Task-id-${task.id}`);
-                const AppContent = document.querySelector('.app-content');
-
-                if (div) {
-                    if (AppContent) AppContent.style.filter = 'blur(4px)';
-                    if (CloseTaskBanner) CloseTaskBanner.style.display = 'block';
-                    div.style.display = 'block';
-                }
-            };
-
-            window[`Taskid${task.id}close`] = function() {
-                const div = document.querySelector(`.topmost-div.Task-id-${task.id}`);
-                const AppContent = document.querySelector('.app-content');
-                const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
-
-                if (div) {
-                    if (AppContent) AppContent.style.filter = 'none';
-                    if (CloseTaskBanner) CloseTaskBanner.style.display = 'none';
-                    div.style.display = 'none';
-                }
-            };
+            document.querySelector('.Tasks-Container').insertAdjacentHTML('beforeend', formHtml);
+            initFormHandlers(task);
         }
-        // Функция для экранирования HTML
-        function escapeHtml(unsafe) {
-            return unsafe
-                ? unsafe.toString()
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;")
-                : '';
+
+        function updateExistingForm(formElement, task) {
+            formElement.querySelector('.TaskH1').textContent = task.name;
+            formElement.querySelector('.taskID_complexity').className = `${task.complexity} taskID_complexity`;
+            formElement.querySelector('.taskID_complexity').textContent = task.complexity.toUpperCase();
+            formElement.querySelector('.description').innerHTML = task.description;
+
+            const filesHtml = task.FILES ? task.FILES.split(";").map((file, k) =>
+                file ? `<a href="{{ asset('/Download/File/') }}${md5(file)}/${task.id}">Файл#${k+1}</a>` : ''
+            ).join('') : '';
+            formElement.querySelectorAll('.description')[1].innerHTML = filesHtml;
+
+            const form = formElement.querySelector('form');
+            form.querySelector('input[name="complexity"]').value = task.complexity;
         }
-        // Асинхронная отправка формы
+
+        function initFormHandlers(task) {
+            const form = document.getElementById(`MyFormChange${task.id}`);
+            if (form) {
+                form.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    await submitFormAsync(this, task.id);
+                });
+            }
+
+            window[`Taskid${task.id}`] = () => openTask(task.id);
+            window[`Taskid${task.id}close`] = () => closeTask(task.id);
+        }
+
         async function submitFormAsync(form, taskId) {
             const formData = new FormData(form);
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
+            const formInput = form.querySelector(`input[id="name${taskId}"]`);
 
             try {
-                // Показываем индикатор загрузки
                 submitButton.disabled = true;
                 submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Проверка...';
 
@@ -321,74 +364,139 @@
                 });
 
                 const data = await response.json();
-                const LocalData = JSON.parse(localStorage.getItem('data') || '[]');
-                const taskIndex = LocalData.findIndex(t => t.id == taskId);
-
-                if (data.success) {
-                    if (taskIndex !== -1) {
-                        // Обновляем форму на странице без закрытия
-                        const formContainer = document.querySelector(`.Task-id-${taskId}`);
-                        if (formContainer) {
-                            // Плавное исчезновение
-                            formContainer.style.opacity = '0';
-                            formContainer.style.transition = 'opacity 0.2s ease';
-
-                            setTimeout(() => {
-                                formContainer.remove(); // Удаляем после исчезновения
-                                createTaskForm(LocalData[taskIndex]); // Создаём новую
-                                window[`Taskid${taskId}`](); // Открываем
-
-                                // Плавное появление (если createTaskForm не делает это само)
-                                const newForm = document.querySelector(`.Task-id-${taskId}`);
-                                if (newForm) {
-                                    newForm.style.opacity = '0';
-                                    setTimeout(() => { newForm.style.opacity = '1'; }, 10);
-                                }
-                            }, 200); // Ждём завершения анимации
-                        }
-                    }
-                    callShowToast(data);
-                } else {
-                    callShowToast(data);
-                }
-
+                formInput.value = '';
+                callShowToast(data);
                 return data;
             } catch (error) {
                 console.error('Ошибка:', error);
                 showToast('error', 'Ошибка', 'Произошла ошибка при отправке формы');
                 throw error;
             } finally {
-                // Восстанавливаем кнопку в исходное состояние
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
             }
         }
 
-        // Инициализация существующих форм
-        @foreach ($Tasks as $T)
-        createTaskForm({!! $T !!});
-        @endforeach
+        function openTask(taskId) {
+            const div = document.querySelector(`.topmost-div.Task-id-${taskId}`);
+            const AppContent = document.querySelector('.app-content');
 
+            if (div) {
+                if (AppContent) AppContent.style.filter = 'blur(4px)';
+                if (CloseTaskBanner) CloseTaskBanner.style.display = 'block';
+                div.style.display = 'block';
+                currentlyOpenTaskId = taskId;
+            }
+        }
 
-        if (SortedTasksCol) {
-            const { N: field, isSort: order } = SortedTasksCol;
+        function closeTask(taskId) {
+            const div = document.querySelector(`.topmost-div.Task-id-${taskId}`);
+            const AppContent = document.querySelector('.app-content');
 
-            const createComparator = (field, order) => {
-                const isReverseBase = field === 'solved';
-                const baseDirection = isReverseBase ? -1 : 1;
-                const direction = baseDirection * (order === 1 ? 1 : -1);
+            if (div) {
+                if (AppContent) AppContent.style.filter = 'none';
+                if (CloseTaskBanner) CloseTaskBanner.style.display = 'none';
+                div.style.display = 'none';
+                currentlyOpenTaskId = null;
+            }
+        }
 
-                return (a, b) => {
+        function closeAllTasks() {
+            document.querySelectorAll('div[class*="Task-id-"]').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            const AppContent = document.querySelector('.app-content');
+            if (AppContent) AppContent.style.filter = 'none';
+
+            if (CloseTaskBanner) CloseTaskBanner.style.display = 'none';
+            currentlyOpenTaskId = null;
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Escape' || event.keyCode === 27) {
+                closeAllTasks();
+            }
+        }
+
+        function setSelection(complexity, category) {
+            const complexitySelect = document.querySelector("select[name='complexity']");
+            const categorySelect = document.querySelector("select[name='category']");
+
+            // Устанавливаем сложность
+            if (complexitySelect) {
+                // Ищем option, значение которого равно complexity (All Complexity, easy, medium, hard)
+                const complexityOptions = Array.from(complexitySelect.options);
+                const complexityIndex = complexityOptions.findIndex(option =>
+                    option.value === complexity || option.text === complexity
+                );
+
+                complexitySelect.selectedIndex = complexityIndex !== -1 ? complexityIndex : 0;
+            }
+
+            // Устанавливаем категорию
+            if (categorySelect) {
+                // Ищем option, текст или значение которого равно category
+                const categoryOptions = Array.from(categorySelect.options);
+                const categoryIndex = categoryOptions.findIndex(option =>
+                    option.value === category || option.text === category
+                );
+
+                categorySelect.selectedIndex = categoryIndex !== -1 ? categoryIndex : 0;
+            }
+        }
+
+        function applyFilters() {
+            const complexity = document.getElementById('complexity').value;
+            const category = document.getElementById('category').value;
+
+            localStorage.setItem('taskcomplexity', complexity);
+            localStorage.setItem('taskcategory', category);
+
+            renderFilteredTasks(data, complexity, category);
+        }
+
+        function resetFilters() {
+            const complexity = 'All Complexity';
+            const category = 'All Categories';
+
+            localStorage.setItem('taskcomplexity', complexity);
+            localStorage.setItem('taskcategory', category);
+
+            renderFilteredTasks(data, complexity, category);
+        }
+
+        function applySorting(data, field, order) {
+            // Сначала сортируем по полю decide (решенные задачи внизу)
+            data.sort((a, b) => {
+                const aHasDecide = a.decide?.trim() !== '';
+                const bHasDecide = b.decide?.trim() !== '';
+                return aHasDecide === bHasDecide ? 0 : aHasDecide ? 1 : -1;
+            });
+
+            // Затем применяем основную сортировку
+            if (field === 'complexity') {
+                const customOrder = order === 1
+                    ? { easy: 1, medium: 2, hard: 3 }
+                    : { easy: 3, medium: 2, hard: 1 };
+
+                data.sort((a, b) => {
+                    // Учитываем decide при сортировке по сложности
                     const aHasDecide = a.decide?.trim() !== '';
                     const bHasDecide = b.decide?.trim() !== '';
+                    if (aHasDecide !== bHasDecide) return aHasDecide ? 1 : -1;
 
-                    // Если у одного из элементов есть decide, а у другого нет,
-                    // элемент с decide всегда будет в конце
-                    if (aHasDecide !== bHasDecide) {
-                        return aHasDecide ? 1 : -1;
-                    }
+                    return customOrder[a.complexity] - customOrder[b.complexity];
+                });
+            } else {
+                const direction = order === 1 ? 1 : -1;
 
-                    // Если оба элемента имеют или не имеют decide, сортируем по указанному полю
+                data.sort((a, b) => {
+                    // Учитываем decide при основной сортировке
+                    const aHasDecide = a.decide?.trim() !== '';
+                    const bHasDecide = b.decide?.trim() !== '';
+                    if (aHasDecide !== bHasDecide) return aHasDecide ? 1 : -1;
+
                     const getValue = (obj) => {
                         const value = obj[field];
                         return ['solved', 'price'].includes(field) ? Number(value) : value?.toLowerCase();
@@ -398,299 +506,56 @@
                     const bValue = getValue(b);
 
                     return aValue < bValue ? -direction : aValue > bValue ? direction : 0;
-                };
-            };
-
-            const validFields = ['name', 'category', 'complexity', 'solved', 'price'];
-            if (validFields.includes(field)) {
-                data.sort(createComparator(field, order));
-            }
-            if (field === 'complexity') {
-                if (order === 1)
-                    data.sort((a, b) => {
-                        const aHasDecide = a.decide?.trim() !== '';
-                        const bHasDecide = b.decide?.trim() !== '';
-
-                        if (aHasDecide !== bHasDecide) {
-                            return aHasDecide ? 1 : -1;
-                        }
-
-                        const complexityOrder = { easy: 1, medium: 2, hard: 3 };
-                        return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-                    });
-                if (order === 2)
-                    data.sort((a, b) => {
-                        const aHasDecide = a.decide?.trim() !== '';
-                        const bHasDecide = b.decide?.trim() !== '';
-
-                        if (aHasDecide !== bHasDecide) {
-                            return aHasDecide ? 1 : -1;
-                        }
-
-                        const complexityOrder = { easy: 3, medium: 2, hard: 1 };
-                        return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-                    });
+                });
             }
         }
-
-        Filtereed(data, taskcomplexity, taskcategory);
-
-        document.getElementById('ApplyBtn').addEventListener('click', function () {
-            let taskcomplexity = document.getElementById('complexity').value;
-            let taskcategory = document.getElementById('category').value;
-
-            localStorage.setItem('taskcomplexity', taskcomplexity);
-            localStorage.setItem('taskcategory', taskcategory);
-
-            if (taskcategory !== 'All Categories' && taskcomplexity !== 'All Complexity') {
-                const data = JSON.parse(localStorage.getItem('data'));
-                const newArray = data.filter(item => item.complexity === taskcomplexity && item.category === taskcategory);
-                MakeHTML(newArray, divElement);
-            } else {
-                MakeHTML(data, divElement);
-            }
-            if (taskcategory !== 'All Categories' && taskcomplexity === 'All Complexity') {
-                const data = JSON.parse(localStorage.getItem('data'));
-                const newArray = data.filter(item => item.category === taskcategory);
-                MakeHTML(newArray, divElement);
-            }
-            if (taskcategory === 'All Categories' && taskcomplexity !== 'All Complexity') {
-                const data = JSON.parse(localStorage.getItem('data'));
-                const newArray = data.filter(item => item.complexity === taskcomplexity);
-                MakeHTML(newArray, divElement);
-            }
-        });
-        document.getElementById('ResetBtn').addEventListener('click', function () {
-            const data = JSON.parse(localStorage.getItem('data'));
-            let taskcomplexity = 'All Complexity';
-            let taskcategory = 'All Categories';
-            setSelection(taskcomplexity, taskcategory);
-            localStorage.setItem('taskcomplexity', taskcomplexity);
-            localStorage.setItem('taskcategory', taskcategory);
-            MakeHTML(data, divElement);
-        });
-
-        function FirsFilter(data, solvedtasks){
-            for (let i = 0; i < data.length; i++) {
-                data[i].decide = '';
-            }
-            for (let i = 0; i < data.length; i++) {
-                //console.log(data[i].id);
-                for (let j = 0; j < solvedtasks.length; j++) {
-                    if (solvedtasks[j].tasks_id === data[i].id) {
-                        data[i].decide = `style="color: var(--app-bg-tasks);"`;
-                        //console.log(data[i].decide);
-                        //data.splice(i, 1);
-                    }
-                }
-            }
-            data.sort((a, b) => {
-                const complexityOrder = {easy: 1, medium: 2, hard: 3};
-                return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-            });
-            data.sort((a, b) => {
-                //console.log(a.decide);
-                // Если a.decide пустой, он должен быть перед b.decide
-                if (a.decide === '' && b.decide !== '') {
-                    return -1; // a перед b
-                }
-                if (a.decide !== '' && b.decide === '') {
-                    return 1; // b перед a
-                }
-                return 0; // оставляем порядок неизменным
-            });
-
-            localStorage.setItem('data', JSON.stringify(data));
-            return data;
-        }
-
-        function Filtereed(DATA, taskcomplexity, taskcategory){
-            if (taskcategory && taskcomplexity) {
-                setSelection(taskcomplexity, taskcategory);
-                let Data = DATA;
-                if (taskcategory !== 'All Categories' && taskcomplexity !== 'All Complexity') {
-                    Data = DATA.filter(item => item.complexity === taskcomplexity && item.category === taskcategory);
-                }
-                if (taskcategory !== 'All Categories' && taskcomplexity === 'All Complexity') {
-                    Data = DATA.filter(item => item.category === taskcategory);
-                }
-                if (taskcategory === 'All Categories' && taskcomplexity !== 'All Complexity') {
-                    Data = DATA.filter(item => item.complexity === taskcomplexity);
-                }
-                MakeHTML(Data, divElement);
-            } else {
-                MakeHTML(DATA, divElement);
-            }
-        }
-
-        function MakeHTML(Data, Element) {
-
-            const htmlbody = Data.map(item => `
-            <div style="cursor: pointer" href="/Home/${item.id}" class="products-row tasklink" onclick="Taskid${item.id}()">
-                <div class="product-cell image" ${item.decide}>
-                    <span>${item.name}</span>
-                </div>
-                <div class="product-cell category" ${item.decide}><span class="cell-label">{{ __('Category') }}:</span>${item.category.toUpperCase()}</div>
-                <div class="product-cell complexity" ${item.decide}>
-                    <span class="cell-label">{{ __('Complexity') }}:</span>
-                    <span class="status ${item.decide}${item.complexity}" >${item.complexity.toUpperCase()}</span>
-                </div>
-                <div class="product-cell solved" ${item.decide}><span class="cell-label">{{ __('Solved') }}:</span>${item.solved}</div>
-                <div class="product-cell price" ${item.decide}><span class="cell-label">{{ __('Price') }}:</span>${item.price}</div>
-            </div>
-        `).join("");
-
-            const HTML = htmlbody;
-            Element.innerHTML = HTML;
-        }
-
-        function getCookie(name) {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const [key, value] = cookies[i].trim().split('=');
-                if (key === name) {
-                    return decodeURIComponent(value);
-                }
-            }
-            return null;
-        }
-
-        function setCookie(name, value, days, sameSite, path) {
-            const expires = days ? `; expires=${new Date(Date.now() + days * 86400000).toUTCString()}` : '';
-            const sameSiteAttribute = sameSite ? `; SameSite=${sameSite}` : '';
-            const cookiePath = path ? `; path=${path}` : '';
-            document.cookie = `${name}=${encodeURIComponent(value)}${expires}${sameSiteAttribute}${cookiePath}`;
-        }
-
-        function setSelection(complx, categ) {
-            let select = document.querySelector("select[name='complexity']");
-            let select2 = document.querySelector("select[name='category']");
-
-            if (complx == 'All Complexity') {
-                select.selectedIndex = 0;
-            }
-            if (complx == 'easy') {
-                select.selectedIndex = 1;
-            }
-            if (complx == 'medium') {
-                select.selectedIndex = 2;
-            }
-            if (complx == 'hard') {
-                select.selectedIndex = 3;
-            }
-            if (categ == 'All Categories') {
-                select2.selectedIndex = 0;
-            }
-            if (categ == 'admin') {
-                select2.selectedIndex = 1;
-            }
-            if (categ == 'recon') {
-                select2.selectedIndex = 2;
-            }
-            if (categ == 'crypto') {
-                select2.selectedIndex = 3;
-            }
-            if (categ == 'stegano') {
-                select2.selectedIndex = 4;
-            }
-            if (categ == 'ppc') {
-                select2.selectedIndex = 5;
-            }
-            if (categ == 'pwn') {
-                select2.selectedIndex = 6;
-            }
-            if (categ == 'web') {
-                select2.selectedIndex = 7;
-            }
-            if (categ == 'forensic') {
-                select2.selectedIndex = 8;
-            }
-            if (categ == 'joy') {
-                select2.selectedIndex = 9;
-            }
-            if (categ == 'misc') {
-                select2.selectedIndex = 10;
-            }
-            if (categ == 'osint') {
-                select2.selectedIndex = 11;
-            }
-            if (categ == 'reverse') {
-                select2.selectedIndex = 12;
-            }
-        }
-
-        localStorage.removeItem('DataAdmin');
-        localStorage.removeItem('taskcategoryAdmin');
-        localStorage.removeItem('taskcomplexityAdmin');
-
-        // Первоначальная сортировка
-        TASKS.sort((a, b) => complexityOrder[a.complexity] - complexityOrder[b.complexity]);
-        TASKS.sort(sortByDecide);
-
-        // Обработчики событий
-        Object.entries(sortButtons).forEach(([column, selector]) => {
-            document.querySelector(selector).addEventListener('click', () => handleSort(column));
-        });
 
         function handleSort(column) {
-            if(localStorage.getItem('taskcomplexity') && localStorage.getItem('taskcategory')) {
-                if (localStorage.getItem('taskcategory') !== 'All Categories' || localStorage.getItem('taskcomplexity') !== 'All Complexity') {
-                    return null;
-                }
-            }
-
-            // Особенная логика для complexity
             if (column === 'complexity') {
-                if (currentSort.column === column) {
-                    currentSort.direction = currentSort.direction === 1 ? 2 : 1;
-                } else {
-                    currentSort.direction = 1; // Начальное состояние при переключении с другой колонки
-                }
+                currentSort.direction = currentSort.column === column
+                    ? (currentSort.direction === 1 ? 2 : 1)
+                    : 1;
             } else {
-                currentSort.direction = currentSort.column === column ? (currentSort.direction + 1) % 3 : 1;
+                currentSort.direction = currentSort.column === column
+                    ? (currentSort.direction + 1) % 3
+                    : 1;
             }
 
             currentSort.column = column;
-
-            // Сброс других сортировок
             Object.keys(sortStates).forEach(k => sortStates[k] = k === column ? currentSort.direction : 0);
 
-            // Обновление данных и интерфейса
             const sortedData = getSortedData(column, currentSort.direction);
-            MakeHTML(sortedData, divElement)
+            MakeHTML(sortedData);
 
-            // Сохранение состояния (не сохраняем состояние 0 для complexity)
             if (currentSort.direction !== 0) {
-                let sortState = { N: column, isSort: currentSort.direction };
-                localStorage.setItem('SortingTasksColumn', JSON.stringify(sortState));
+                localStorage.setItem('SortingTasksColumn', JSON.stringify({
+                    N: column,
+                    isSort: currentSort.direction
+                }));
             }
 
-            // Сброс состояния при достижении 3 (только для других колонок)
             if (column !== 'complexity' && currentSort.direction === 0) {
                 localStorage.removeItem('SortingTasksColumn');
             }
         }
 
         function getSortedData(column, direction) {
-            TASKS = JSON.parse(localStorage.getItem('data'));
-            // Для complexity игнорируем состояние 0
-            if (column !== 'complexity' && direction === 0) return JSON.parse(localStorage.getItem('data'));
+            if (column !== 'complexity' && direction === 0) {
+                return JSON.parse(localStorage.getItem('data'));
+            }
 
-            return direction === 1
-                ? [...TASKS].sort((a, b) => customSort(a, b, column, 'asc'))
-                : [...TASKS].sort((a, b) => customSort(a, b, column, 'desc'));
-        }
+            const sorted = [...TASKS].sort((a, b) => {
+                if (a.decide && !b.decide) return 1;
+                if (!a.decide && b.decide) return -1;
 
-        // Остальные функции остаются без изменений
-        function customSort(a, b, column, dir) {
-            if (a.decide && !b.decide) return 1;
-            if (!a.decide && b.decide) return -1;
+                const modifier = direction === 1 ? 1 : -1;
+                const valA = getSortValue(a, column);
+                const valB = getSortValue(b, column);
 
-            const modifier = dir === 'asc' ? 1 : -1;
-            const valA = getSortValue(a, column);
-            const valB = getSortValue(b, column);
+                return (valA > valB ? 1 : -1) * modifier;
+            });
 
-            return (valA > valB ? 1 : -1) * modifier;
+            return sorted;
         }
 
         function getSortValue(item, column) {
@@ -702,136 +567,54 @@
             }
         }
 
-        function sortByDecide(a, b) {
-            if (a.decide === '' && b.decide !== '') return -1;
-            if (a.decide !== '' && b.decide === '') return 1;
-            return 0;
-        }
+        function initializeEchoListener() {
+            Echo.private(`channel-app-home`).listen('AppHomeEvent', (e) => {
+                const valueToDisplay = e.tasks;
+                let Tasks = valueToDisplay.Tasks;
+                let SolvedTaasks = valueToDisplay.SolvedTasks;
 
-        function findDifference(obj1, obj2) {
-            const diff = {};
+                // Filter solved tasks for current user
+                let SolvedTasksOnThisAuthUser = SolvedTaasks.filter(
+                    solved => solved.user_id === teamid
+                );
 
-            // Получаем все ключи из первого объекта
-            const keys = Object.keys(obj1);
+                Tasks = initialFilter(Tasks, SolvedTaasks);
+                localStorage.setItem('data', JSON.stringify(Tasks));
 
-            // Проходим по каждому ключу
-            for (const key of keys) {
-                // Если ключа нет во втором объекте или значения разные
-                if (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {
-                    diff[key] = obj1[key]; // Записываем разницу
+                const SortedTasksColEcho = JSON.parse(localStorage.getItem('SortingTasksColumn'));
+                if (SortedTasksColEcho) {
+                    applySorting(Tasks, SortedTasksColEcho.N, SortedTasksColEcho.isSort);
                 }
-            }
 
-            return diff;
-        }
+                // Update existing forms
+                const existingTasks = Array.from(document.querySelectorAll('.topmost-div[class*="Task-id-"]'));
+                Tasks.forEach(task => {
+                    const existingForm = existingTasks.find(form =>
+                        form.classList.contains(`Task-id-${task.id}`)
+                    );
+                    existingForm
+                        ? updateExistingForm(existingForm, task)
+                        : createTaskForm(task);
+                });
 
-
-        Echo.private(`channel-app-home`).listen('AppHomeEvent', (e) => {
-            const valueToDisplay = e.tasks;
-            let Tasks = valueToDisplay.Tasks;
-            let SolvedTaasks = valueToDisplay.SolvedTasks;
-            let SolvedTasksOnThisAuthUser = [];
-
-            for (let i = 0; i < SolvedTaasks.length; i++) {
-                if (SolvedTaasks[i].user_id === teamid) {
-                    SolvedTasksOnThisAuthUser.push(valueToDisplay.SolvedTasks[i]);
-                }
-            }
-
-            //console.log(SolvedTasksOnThisAuthUser);
-            let Solvedtasks = [];
-            for (let i = 0; i < Tasks.length; i++) {
-                for (let j = 0; j < SolvedTasksOnThisAuthUser.length; j++) {
-                    if (SolvedTasksOnThisAuthUser[j].tasks_id === Tasks[i].id) {
-                        Solvedtasks.push(Tasks[i]);
+                // Remove forms for deleted tasks
+                existingTasks.forEach(form => {
+                    const taskId = Array.from(form.classList)
+                        .find(c => c.startsWith('Task-id-'))
+                        .split('-')[2];
+                    if (!Tasks.some(task => task.id == taskId)) {
+                        form.remove();
                     }
-                }
-            }
+                });
 
-            Tasks = FirsFilter(Tasks, SolvedTaasks);
-
-            localStorage.setItem('data', JSON.stringify(data));
-
-            console.log('Принято!');
-
-            //const sortedData = valueToDisplay.sort((a, b) => b.score - a.score);
-            //console.log(sortedData);
-
-            let taskcomplexity = localStorage.getItem('taskcomplexity');
-            let taskcategory = localStorage.getItem('taskcategory');
-
-            let SortedTasksColEcho = JSON.parse(localStorage.getItem('SortingTasksColumn'));
-            if (SortedTasksColEcho) {
-                const { N: field, isSort: order } = SortedTasksColEcho;
-
-                const createComparator = (field, order) => {
-                    const isReverseBase = field === 'solved';
-                    const baseDirection = isReverseBase ? -1 : 1;
-                    const direction = baseDirection * (order === 1 ? 1 : -1);
-
-                    return (a, b) => {
-                        const aHasDecide = a.decide?.trim() !== '';
-                        const bHasDecide = b.decide?.trim() !== '';
-
-                        if (aHasDecide !== bHasDecide) {
-                            return aHasDecide ? 1 : -1;
-                        }
-
-                        const getValue = (obj) => {
-                            const value = obj[field];
-                            return ['solved', 'price'].includes(field) ? Number(value) : value?.toLowerCase();
-                        };
-
-                        const aValue = getValue(a);
-                        const bValue = getValue(b);
-
-                        return aValue < bValue ? -direction : aValue > bValue ? direction : 0;
-                    };
-                };
-
-                const validFields = ['name', 'category', 'complexity', 'solved', 'price'];
-                if (validFields.includes(field)) {
-                    Tasks.sort(createComparator(field, order));
-                }
-                if(field === 'complexity'){
-                    if(order === 1)
-                        Tasks.sort((a, b) => {
-                            const complexityOrder = {easy: 1, medium: 2, hard: 3};
-                            return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-                        });
-                    if (order === 2)
-                        Tasks.sort((a, b) => {
-                            const complexityOrder = {easy: 3, medium: 2, hard: 1};
-                            return complexityOrder[a.complexity] - complexityOrder[b.complexity];
-                        });
-                }
-            }
-
-
-
-            // Удаляем все существующие формы
-            document.querySelectorAll('.topmost-div[class*="Task-id-"]').forEach(el => el.remove());
-
-            // Создаем формы для всех задач
-            Tasks.forEach(task => {
-                createTaskForm(task);
+                // Re-render tasks list
+                renderFilteredTasks(
+                    Tasks,
+                    localStorage.getItem('taskcomplexity'),
+                    localStorage.getItem('taskcategory')
+                );
             });
-
-            Filtereed(Tasks, taskcomplexity, taskcategory);
-            //console.log(e.test);
-        });
-
-
-        // Обработчик событий для новых задач
-        document.addEventListener('DOMContentLoaded', function() {
-            // Обработчик нажатия клавиш
-            document.addEventListener('keydown', function (event) {
-                // Проверяем, нажата ли клавиша Esc (код 27)
-                if (event.key === 'Escape' || event.keyCode === 27) {
-                    closeAllTasks();
-                }
-            });
-        });
+        }
     </script>
 @endsection
 

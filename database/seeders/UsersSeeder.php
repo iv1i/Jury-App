@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UsersSeeder extends Seeder
 {
@@ -15,6 +16,7 @@ class UsersSeeder extends Seeder
     {
         User::factory()->create([
             'id' => 1,
+            'token' => Str::random(32),
             'name' => 'Team A',
             'password' => Hash::make('1111'),
             'teamlogo' => 'StandartLogo.png',

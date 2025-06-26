@@ -170,7 +170,7 @@
             <div class="settings-card">
                 <h2 class="settings-card-title">{!! __('Tools') !!}</h2>
 
-                <form method="post" id="MyFormReset" action="{{ route('AdminSettingsReset') }}">
+                <form method="post" id="MyFormReset" action="{{ route('Admin-Settings-Reset') }}">
                     @csrf
                     <input type="checkbox" id="delivery_1" value="Yes" name="check" style="display: none;">
                     <input type="hidden" value="RESET" name="ButtonReset">
@@ -183,7 +183,7 @@
                     </button>
                 </form>
 
-                <form method="post" id="MyFormDeleteAll" action="{{ route('AdminSettingsDeleteAll') }}">
+                <form method="post" id="MyFormDeleteAll" action="{{ route('Admin-Settings-DeleteAll') }}">
                     @csrf
                     <input type="checkbox" id="delivery_2" value="Yes" name="check" style="display: none;">
                     <input type="hidden" value="DELETEALL" name="ButtonDeleteAll">
@@ -221,7 +221,7 @@
                 <button class="modal-close">&times;</button>
             </div>
 
-            <form method="post" id="MyFormChngRules" action="{{ route('AdminSettingsChngRules') }}" enctype="multipart/form-data">
+            <form method="post" id="MyFormChngRules" action="{{ route('Admin-Settings-Сhange-Rules') }}" enctype="multipart/form-data">
                 @csrf
                 <input type="checkbox" id="delivery_3" value="Yes" name="check" style="display: none;">
                 <input type="hidden" value="CHNGRULL" name="ButtonChangeRull">
@@ -268,7 +268,7 @@
                 </div>
 
                 <!-- Form Block -->
-                <form method="post" id="MyFormAddCategory" action="{{ route('AdminSettingsChgCategoryes') }}" enctype="multipart/form-data">
+                <form method="post" id="MyFormAddCategory" action="{{ route('Admin-Settings-Сhange-Categories') }}" enctype="multipart/form-data">
                     @csrf
                     <input type="checkbox" id="delivery_4" value="Yes" name="check" style="display: none;">
                     <input type="hidden" value="ADDCATEGORY" name="ButtonAddCategory">
@@ -451,7 +451,7 @@
                     formData.append(name, value);
                     formData.append('_token', token);
 
-                    fetch('{{ route('AdminSettingsSlidebars') }}', {
+                    fetch('{{ route('Admin-Settings-Sidebars') }}', {
                         method: 'POST',
                         body: formData,
                         headers: {
@@ -514,8 +514,9 @@
                             if (form.id === 'MyFormReset') {
                                 buttonName = 'ButtonReset';
                                 buttonValue = 'RESET';
-                            } else if (form.id === 'MyFormDeleteAll') {
-                                buttonName = 'ButtonReset';
+                            }
+                            if (form.id === 'MyFormDeleteAll') {
+                                buttonName = 'ButtonDeleteAll';
                                 buttonValue = 'DELETEALL';
                             }
                             formData.append(buttonName, buttonValue);
