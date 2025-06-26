@@ -11,6 +11,97 @@
     <script>
         {!! Vite::content('resources/js/app.js') !!}
     </script>
+    <style>
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pagination li {
+            margin: 0;
+        }
+
+        .pagination li a,
+        .pagination li span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 8px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+            background-color: white;
+            color: #4b5563;
+        }
+
+        .pagination li a:hover {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .pagination li.active span {
+            background-color: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .pagination li.disabled span {
+            color: #9ca3af;
+            background-color: #f9fafb;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+        }
+
+        /* Dark Mode Styles */
+        .dark .pagination li a,
+        .dark .pagination li span {
+            background-color: #1f2937;
+            border-color: #374151;
+            color: #f3f4f6;
+        }
+
+        .dark .pagination li a:hover {
+            background-color: #374151;
+        }
+
+        .dark .pagination li.active span {
+            background-color: #818cf8;
+            border-color: #818cf8;
+        }
+
+        .dark .pagination li.disabled span {
+            background-color: #111827;
+            border-color: #374151;
+            color: #6b7280;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .pagination {
+                gap: 4px;
+            }
+
+            .pagination li a,
+            .pagination li span {
+                min-width: 32px;
+                height: 32px;
+                font-size: 13px;
+                padding: 0 6px;
+            }
+        }
+    </style>
 @endsection
 
 @section('title', 'AltayCTF-Sch-Home')
@@ -138,7 +229,7 @@
 
 @section('scripts')
     <script src="{{ asset('js/Other/Notifications.js') }}"></script>
-    <script id="TasksBlock-Script-V2">
+    <script id="TasksBlock-Script-V3">
         // Constants and DOM elements
         const divElement = document.querySelector('.Product-body');
         const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
@@ -155,6 +246,7 @@
 
         // State variables
         let data = {!! json_encode($Tasks) !!};
+        console.log(data);
         let sortStates = { name: 0, category: 0, complexity: 0, solved: 0, price: 0 };
         let currentSort = { column: null, direction: 0 };
         let currentlyOpenTaskId = null;

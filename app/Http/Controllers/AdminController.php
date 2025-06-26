@@ -72,6 +72,7 @@ class AdminController extends Controller
 
         return redirect('/Admin/Auth');
     }
+    
     // ----------------------------------------------------------------TEAMS
     public function AddTeams(Request $request)
     {
@@ -314,6 +315,7 @@ class AdminController extends Controller
 
         return response()->json(['success' => true,'message' => 'Команда успешно Обновлена!'], 200);
     }
+
     // ----------------------------------------------------------------TASKS
 
     /**
@@ -928,29 +930,6 @@ class AdminController extends Controller
             'message' => 'Удаление настроек не прошло!'
         ], 500);
     }
-    public function SettingsChngRulesOLD(Request $request)
-    {
-        $Rull = $request->input('Rull');
-        if($request->input('check') === 'Yes' && $request->input('ButtonChangeRull') === 'CHNGRULL'){
-            //dd($request->input('Rull'));
-            $settings = Settings::find(1);
-            if($settings){
-                if ($request->input('Rull')) {
-                    $settings->Rule = $Rull;
-                }
-                $settings->save();
-            }
-            UpdateRulesEvent::dispatch($Rull);
-            return response()->json([
-                'success' => true,
-                'message' => 'Правила успешно обновлены!'
-            ]);
-        }
-        return response()->json([
-            'success' => false,
-            'message' => 'Не удалось обновить правила!'
-        ], 500);
-    }
     public function SettingsChgCategory(Request $request, SettingsService $settings)
     {
         try {
@@ -1041,80 +1020,6 @@ class AdminController extends Controller
             ], 500);
         }
     }
-    public function SettingsSlidebarsOLD(Request $request)
-    {
-        //dd($request);
-        $settings = Settings::find(1);
-        if ($settings){
-            //-------------------------------------------------Rules
-            if ($request->input('Rules') === 'yes'){
-                $settings->Rules = 'yes';
-            }
-            if ($request->input('Rules') === 'no'){
-                $settings->Rules = 'no';
-            }
-            //-------------------------------------------------Projector
-            if ($request->input('Projector') === 'yes'){
-                $settings->Projector = 'yes';
-            }
-            if ($request->input('Projector') === 'no'){
-                $settings->Projector = 'no';
-            }
-            //-------------------------------------------------Admin
-            if ($request->input('Admin') === 'yes'){
-                $settings->Admin = 'yes';
-            }
-            if ($request->input('Admin') === 'no'){
-                $settings->Admin = 'no';
-            }
-            //-------------------------------------------------Home
-            if ($request->input('Home') === 'yes'){
-                $settings->Home = 'yes';
-            }
-            if ($request->input('Home') === 'no'){
-                $settings->Home = 'no';
-            }
-            //-------------------------------------------------Scoreboard
-            if ($request->input('Scoreboard') === 'yes'){
-                $settings->Scoreboard = 'yes';
-            }
-            if ($request->input('Scoreboard') === 'no'){
-                $settings->Scoreboard = 'no';
-            }
-            //-------------------------------------------------Statistics
-            if ($request->input('Statistics') === 'yes'){
-                $settings->Statistics = 'yes';
-            }
-            if ($request->input('Statistics') === 'no'){
-                $settings->Statistics = 'no';
-            }
-            //-------------------------------------------------Logout
-            if ($request->input('Logout') === 'yes'){
-                $settings->Logout = 'yes';
-            }
-            if ($request->input('Logout') === 'no'){
-                $settings->Logout = 'no';
-            }
-
-            $T = $settings->save();
-            if ($T){
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Sidebar успешно обновлен!'
-                ]);
-            }
-            else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Не удалось обновить sidebar!'
-                ], 500);
-            }
-        }
-        return response()->json([
-            'success' => false,
-            'message' => 'Не удалось обновить sidebar!'
-        ], 500);
-    }
     public function SettingsSlidebars(Request $request, SettingsService $settings)
     {
         try {
@@ -1181,6 +1086,7 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
     // ----------------------------------------------------------------EVENTS
     public function AdminEvents()
     {
@@ -1215,6 +1121,7 @@ class AdminController extends Controller
         AppStatisticEvent::dispatch($Team);
         ProjectorEvent::dispatch($data3);
     }
+
     // ----------------------------------------------------------------OTHER
     function formatToLegacyUniversal($universalResult) {
         // Сначала создаем массив только с sumary
@@ -1295,8 +1202,6 @@ class AdminController extends Controller
 
         return $result;
     }
-
-
     private function startDockerContainer($directory)
     {
         $path = storage_path('app/private/'.$directory);
@@ -1632,7 +1537,6 @@ class AdminController extends Controller
         }
         return $id;
     }
-
 
     // ----------------------------------------------------------------VIEW
     public function AdminScoreboardView()
