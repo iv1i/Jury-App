@@ -49,6 +49,11 @@ WEB приложение созданное для проведения соре
 sudo apt update
 sudo apt install php
 ```
+#### Зависимости PHP:
+```
+sudo apt update
+sudo apt install php-ctype php-curl php-dom php-fileinfo php-filter php-hash php-mbstring php-openssl php-pcre php-pdo php-session php-tokenizer php-xml
+```
 #### Composer: 
 ```
 sudo apt-get install php-curl
