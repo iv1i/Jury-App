@@ -85,6 +85,12 @@ nvm install 22
 > [!WARNING]
 > Скрипт launch.sh находится в разработке, здесь представлена Alpha версия, использовать с осторожностью!
 > Рекомендуется установить DNS 8.8.8.8 - чтобы не было проблем со сборкой контейнеров!
+
+Чтобы автоматически создать все необходимые таблицы базы данных, раскоментируйте строчку в docker-compose:
+```
+- './database/schema/init.sql:/docker-entrypoint-initdb.d/dump.sql'
+```
+
 ```
 sudo apt update
 composer update

@@ -236,10 +236,10 @@
             </div>
             <div class="form_item">
                 <div>Лого</div>
-                <div><img id="teamlogoimg" style="height: 7vw; display: none" src=""></div>
-                <label for="images" class="drop-container" id="dropcontainer">
+                <div><img id="teamlogoimg0" class="teamlogoimg" style="height: 7vw; display: none" src=""></div>
+                <label for="images0" class="drop-container team-id0" id="dropcontainer">
                     <span class="drop-title">{{ __('Drop files here') }}</span>
-                    <input type="file" name="file" id="images" accept="image/jpeg, image/png" multiple>
+                    <input type="file" name="file" id="images0" accept="image/jpeg, image/png" multiple>
                 </label>
                 <div class="form_item">Гостевая
                     <input type="checkbox" name="IsGuest" class="is_guest">
@@ -277,7 +277,7 @@
 @section('scripts')
     <script src="{{ asset('js/Other/Notifications.js') }}"></script>
     <script src="{{ asset('js/Admin/AdminOpenBlock.js') }}"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" id="V2">
         //--------------------------------Init-Of-Data
         const data = {!! json_encode($Teams) !!};
         const CloseTeamBanner = document.querySelector('.CloseTeamBanner');
@@ -448,13 +448,6 @@
                     const formValues = Object.fromEntries(formData.entries());
 
                     showToast('success', 'Успех', data.message || 'Операция выполнена успешно', data.actions);
-
-                    // Обновляем данные на странице без перезагрузки
-                    updateTeamDataOnPage(teamId, formValues);
-
-                    // Не закрываем форму автоматически
-                    // window[`Teamid${teamId}close`]();
-
                 } else {
                     showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
                 }
@@ -659,6 +652,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imgElement.src = e.target.result;
+                    imgElement.style = 'display: unset';
                 };
                 reader.readAsDataURL(file);
             }

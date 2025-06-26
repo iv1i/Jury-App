@@ -72,7 +72,7 @@ class AdminController extends Controller
 
         return redirect('/Admin/Auth');
     }
-    
+
     // ----------------------------------------------------------------TEAMS
     public function AddTeams(Request $request)
     {
@@ -1090,8 +1090,8 @@ class AdminController extends Controller
     // ----------------------------------------------------------------EVENTS
     public function AdminEvents()
     {
-        $Teams = User::all();
-        $Tasks = Tasks::all();
+        $Teams = User::all()->makeVisible('token');
+        $Tasks = Tasks::all()->makeVisible('flag');
         $universalResult = $this->processTasksUniversal($Tasks);
         $InfoTasks = $this->formatToLegacyUniversal($universalResult);
         $CheckTasks = CheckTasks::all();

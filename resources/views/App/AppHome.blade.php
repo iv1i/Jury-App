@@ -385,7 +385,7 @@
                 <div class="description">${task.description}</div>
                 <div class="description">
                     ${task.FILES ? task.FILES.split(";").map((file, k) =>
-                file ? `<a href="{{ asset('/Download/File/') }}${md5(file)}/${task.id}">Файл#${k+1}</a>` : ''
+                file ? `<a href="{{ asset('/Download/File/') }}/${md5(file)}/${task.id}">Файл#${k+1}</a>` : ''
             ).join('') : ''}
                 </div>
                 <form id="MyFormChange${task.id}" class="MyFormSellFlag" action="/Home/Tasks/Check" method="post">
