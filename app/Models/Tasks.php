@@ -30,12 +30,20 @@ class Tasks extends Model
         'flag',
     ];
 
-    public function SolvedTasks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function complexityRelashion(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Complexities::class, 'complexity', 'id');
+    }
+    public function categoryRelashion(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Categories::class, 'category', 'id');
+    }
+    public function solvedTasks(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(SolvedTasks::class);
     }
-    public function desidedtasksteams(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function  completed_task_team(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(desided_tasks_teams::class);
+        return $this->hasMany(CompletedTaskTeams::class);
     }
 }

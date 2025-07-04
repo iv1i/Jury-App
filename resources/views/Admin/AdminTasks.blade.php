@@ -316,7 +316,7 @@
 @section('scripts')
     <script src="{{ asset('js/Other/Notifications.js') }}"></script>
     <script src="{{ asset('js/Admin/AdminOpenBlock.js') }}"></script>
-    <script id="Main-Script">
+    <script id="Main-Script-V4">
         //--------------------------------Init-Of-Data
         const data = {!! json_encode($Tasks) !!};
         const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
@@ -615,24 +615,6 @@
                 MakeHTML(DATA, divElement);
             }
         }
-        // Функция получения печенек
-        function getCookie(name) {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const [key, value] = cookies[i].trim().split('=');
-                if (key === name) {
-                    return decodeURIComponent(value);
-                }
-            }
-            return null;
-        }
-        // Функция установки печенек
-        function setCookie(name, value, days, sameSite, path) {
-            const expires = days ? `; expires=${new Date(Date.now() + days * 86400000).toUTCString()}` : '';
-            const sameSiteAttribute = sameSite ? `; SameSite=${sameSite}` : '';
-            const cookiePath = path ? `; path=${path}` : '';
-            document.cookie = `${name}=${encodeURIComponent(value)}${expires}${sameSiteAttribute}${cookiePath}`;
-        }
         // Функция для работы с фильтром
         function setSelection(complx, categ) {
             let select = document.querySelector("select[name='filter-menu-complexity']");
@@ -719,6 +701,7 @@
             <span class="cell-label">{{ __('Price') }}:</span>${item.price}
         </div>
         <div class="product-cell action">
+        <span class="cell-label">{{ __('Action') }}:</span>
             <button class="delete-task-btn" data-task-id="${item.id}" title="{{ __('Delete task') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -767,18 +750,18 @@
                 });
             });
         }
-
-        //--------------------------------Start-Functions
-        // Инициализация существующих форм
-        @foreach ($Tasks as $T)
-        createTaskForm({!! $T !!});
-        @endforeach
-        OpenBlocks('tasks');
-        Filtereed(data, taskcomplexity, taskcategory);
-
-        //--------------------------------Other
-        localStorage.setItem('DataAdmin', JSON.stringify(data));
-        document.getElementById('ApplyBtn').addEventListener('click', function () {
+        // Функция для обработки нажатия ESC
+        function handleKeyDown(event) {
+            if (event.key === 'Escape' || event.keyCode === 27) {
+                closeAllTasks();
+            }
+        }
+        // Функция для сохранения данных в localStorage
+        function saveAdminData(data) {
+            localStorage.setItem('DataAdmin', JSON.stringify(data));
+        }
+        // Функция для применения фильтров
+        function applyFilters(divElement, data) {
             let taskcomplexity = document.getElementById('filter-menu-complexity').value;
             let taskcategory = document.getElementById('filter-menu-category').value;
 
@@ -789,21 +772,20 @@
                 const data = JSON.parse(localStorage.getItem('DataAdmin'));
                 const newArray = data.filter(item => item.complexity === taskcomplexity && item.category === taskcategory);
                 MakeHTML(newArray, divElement);
-            } else {
-                MakeHTML(data, divElement);
-            }
-            if (taskcategory !== 'All Categories' && taskcomplexity === 'All Complexity') {
+            } else if (taskcategory !== 'All Categories' && taskcomplexity === 'All Complexity') {
                 const data = JSON.parse(localStorage.getItem('DataAdmin'));
                 const newArray = data.filter(item => item.category === taskcategory);
                 MakeHTML(newArray, divElement);
-            }
-            if (taskcategory === 'All Categories' && taskcomplexity !== 'All Complexity') {
+            } else if (taskcategory === 'All Categories' && taskcomplexity !== 'All Complexity') {
                 const data = JSON.parse(localStorage.getItem('DataAdmin'));
                 const newArray = data.filter(item => item.complexity === taskcomplexity);
                 MakeHTML(newArray, divElement);
+            } else {
+                MakeHTML(data, divElement);
             }
-        });
-        document.getElementById('ResetBtn').addEventListener('click', function () {
+        }
+        // Функция для сброса фильтров
+        function resetFilters(divElement) {
             const data = JSON.parse(localStorage.getItem('DataAdmin'));
             let taskcomplexity = 'All Complexity';
             let taskcategory = 'All Categories';
@@ -811,55 +793,83 @@
             localStorage.setItem('taskcomplexityAdmin', taskcomplexity);
             localStorage.setItem('taskcategoryAdmin', taskcategory);
             MakeHTML(data, divElement);
-        });
-        document.getElementById('toggleAdditionalFiles').addEventListener('click', function() {
+        }
+        // Функция для переключения видимости дополнительных файлов
+        function toggleAdditionalFiles() {
             const section = document.getElementById('additionalFilesSection');
             const isVisible = section.style.display === 'block';
+            const svg = document.querySelector('#toggleAdditionalFiles svg');
 
             section.style.display = isVisible ? 'none' : 'block';
-            this.querySelector('svg').style.transform = isVisible ? 'rotate(0deg)' : 'rotate(45deg)';
+            svg.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(45deg)';
 
             // Анимация иконки
-            this.querySelector('svg').animate([
+            svg.animate([
                 { transform: isVisible ? 'rotate(45deg)' : 'rotate(0deg)' },
                 { transform: isVisible ? 'rotate(0deg)' : 'rotate(45deg)' }
             ], {
                 duration: 300,
                 easing: 'ease-in-out'
             });
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            // Обработчик нажатия клавиш
-            document.addEventListener('keydown', function (event) {
-                // Проверяем, нажата ли клавиша Esc (код 27)
-                if (event.key === 'Escape' || event.keyCode === 27) {
-                    closeAllTasks();
-                }
+        }
+        // Функция для инициализации всех обработчиков событий
+        function initializeAdminEventHandlers(divElement, initialData) {
+            // Сохраняем начальные данные
+            saveAdminData(initialData);
+
+            // Назначаем обработчики
+            document.getElementById('ApplyBtn').addEventListener('click', function() {
+                applyFilters(divElement, initialData);
             });
-        });
+
+            document.getElementById('ResetBtn').addEventListener('click', function() {
+                resetFilters(divElement);
+            });
+
+            document.getElementById('toggleAdditionalFiles').addEventListener('click', toggleAdditionalFiles);
+
+            // Инициализируем обработчик Esc при загрузке DOM
+            document.addEventListener('keydown', handleKeyDown);
+        }
+        // Функция для инициализации сокетов
+        function initializeEchoListener() {
+            Echo.private(`channel-admin-tasks`).listen('AdminTasksEvent', (e) => {
+                const tasks = e.tasks;
+                localStorage.setItem('DataAdmin', JSON.stringify(tasks));
+
+                // Удаляем все существующие формы
+                document.querySelectorAll('.topmost-div[class*="Task-id-"]').forEach(el => el.remove());
+
+                // Создаем формы для всех задач
+                tasks.forEach(task => {
+                    createTaskForm(task);
+                });
+
+                // Обновляем список задач
+                let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
+                let taskcategory = localStorage.getItem('taskcategoryAdmin');
+
+                Filtereed(tasks, taskcomplexity, taskcategory);
+
+                console.log('Принято!');
+
+                Filtereed(tasks, taskcomplexity, taskcategory);
+            });
+        }
+
+        //--------------------------------Start-Functions
+        // Инициализация существующих форм
+        @foreach ($Tasks as $T)
+        createTaskForm({!! $T !!});
+        @endforeach
+        OpenBlocks('tasks');
+        Filtereed(data, taskcomplexity, taskcategory);
+        initializeAdminEventHandlers(divElement, data);
+
+        //--------------------------------Other
+
 
         //--------------------------------WebSocket
-        Echo.private(`channel-admin-tasks`).listen('AdminTasksEvent', (e) => {
-            const tasks = e.tasks;
-            localStorage.setItem('DataAdmin', JSON.stringify(tasks));
-
-            // Удаляем все существующие формы
-            document.querySelectorAll('.topmost-div[class*="Task-id-"]').forEach(el => el.remove());
-
-            // Создаем формы для всех задач
-            tasks.forEach(task => {
-                createTaskForm(task);
-            });
-
-            // Обновляем список задач
-            let taskcomplexity = localStorage.getItem('taskcomplexityAdmin');
-            let taskcategory = localStorage.getItem('taskcategoryAdmin');
-
-            Filtereed(tasks, taskcomplexity, taskcategory);
-
-            console.log('Принято!');
-
-            Filtereed(tasks, taskcomplexity, taskcategory);
-        });
+        initializeEchoListener();
     </script>
 @endsection

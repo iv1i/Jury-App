@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Tasks;
+use App\Models\Teams;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,15 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('completed_task_teams', function (Blueprint $table) {
             $table->id();
-            $table->string('Rules');
-            $table->string('Projector');
-            $table->string('Home');
-            $table->string('Scoreboard');
-            $table->string('Statistics');
-            $table->string('Logout');
-            $table->longtext('Rule')->nullable();
+            $table->foreignIdFor(Teams::class);
+            $table->foreignIdFor(Tasks::class);
+            $table->longText('StyleTask');
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('settings');
+        Schema::dropIfExists('completed_task_team');
     }
 };

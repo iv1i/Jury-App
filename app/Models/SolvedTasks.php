@@ -9,9 +9,11 @@ class SolvedTasks extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Teams::class);
     }
 
     public function tasks(): \Illuminate\Database\Eloquent\Relations\BelongsTo

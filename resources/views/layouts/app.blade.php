@@ -9,6 +9,96 @@
     <link rel="icon" href="{{ asset('media/img/kolos-white.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('style/scss/Main.css') }}">
     @yield('css')
+    <style>
+        .timer-container {
+            font-family: inherit;
+            text-align: center;
+            max-width: 100%;
+            margin: 10px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background: var(--app-bg-2);
+            border: 1px solid var(--app-border-color);
+            box-shadow: var(--filter-shadow);
+            color: var(--app-content-main-color);
+        }
+
+        .timer-status {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--txt-color);
+            font-weight: 500;
+        }
+
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            font-family: monospace;
+            letter-spacing: 2px;
+            color: var(--app-content-main-color);
+        }
+
+        #event-info {
+            font-size: 0.9rem;
+            color: var(--app-content-main-color);
+            opacity: 0.8;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        /* Состояния таймера */
+        .timer-display.timer-waiting {
+            color: var(--task-category);
+        }
+
+        .timer-display.timer-running {
+            color: var(--action-color);
+            text-shadow: 0 0 8px rgba(40, 105, 255, 0.3);
+        }
+
+        .timer-display.timer-finished {
+            color: #ff4d4d;
+            opacity: 0.8;
+        }
+
+        /* Адаптация для светлой темы */
+        .light .timer-container {
+            background: var(--app-bg-2-inv);
+            border-color: var(--app-border-color);
+        }
+
+        .light .timer-status {
+            color: var(--action-color);
+        }
+
+        .light .timer-display {
+            color: var(--sidebar-main-color);
+        }
+
+        .light #event-info {
+            color: var(--sidebar-main-color);
+        }
+
+        .light .timer-display.timer-waiting {
+            color: var(--task-category);
+        }
+
+        .light .timer-display.timer-running {
+            color: var(--action-color-hover);
+        }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .timer-display {
+                font-size: 2rem;
+            }
+
+            .timer-status {
+                font-size: 1rem;
+            }
+        }
+    </style>
     <title>@yield('title')</title>
 </head>
 <body>
@@ -199,9 +289,12 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
                         </a>
                     </li>
                 @endif
-
-
         </ul>
+        <div class="timer-container">
+            <div class="timer-status" id="status">Загрузка таймера...</div>
+            <div class="timer-display" id="timer">--:--:--</div>
+            <div id="event-info"></div>
+        </div>
         <a href="/Statistics/ID/{{ auth()->user()['id'] }}" class="account-info tasklink">
             <div class="account-info-picture">
                 <img src="{{ asset('storage/teamlogo/' . auth()->user()['teamlogo']) }}" alt="Account">
@@ -225,12 +318,112 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
 <script src="{{ asset('js/App/App.js') }}"></script>
 <script src="{{ asset('js/Other/SwitchTheme.js') }}"></script>
 <script id="ClearLocalStorage">
-    const dropContainer = document.getElementById('Logout');
-    dropContainer.addEventListener( 'click', () => {
-        localStorage.clear();
-    })
     localStorage.removeItem('data');
     localStorage.removeItem('DataAdmin');
+</script>
+
+<script id="V12">
+    class CompetitionTimer {
+        constructor(startTimeStr, endTimeStr) {
+            this.timerElement = document.getElementById('timer');
+            this.statusElement = document.getElementById('status');
+            this.infoElement = document.getElementById('event-info');
+            this.updateInterval = null;
+
+            // Константные значения времени в формате строк
+            this.startTimeStr = startTimeStr || '2025-07-04T14:00:00';
+            this.endTimeStr = endTimeStr || '2025-07-05T14:00:00';
+
+            this.initTimer();
+        }
+
+        initTimer() {
+            try {
+                this.startTime = new Date(this.startTimeStr);
+                this.endTime = new Date(this.endTimeStr);
+
+                // Проверяем, что даты загружены корректно
+                if (isNaN(this.startTime.getTime()) || isNaN(this.endTime.getTime())) {
+                    throw new Error('Некорректный формат даты в настройках');
+                }
+
+                this.updateTimer();
+                this.updateInterval = setInterval(() => this.updateTimer(), 1000);
+
+                // Показываем информацию о событии
+            //     this.infoElement.innerHTML = `
+            //     <p>Начало: ${this.formatDateTime(this.startTime)}</p>
+            //     <p>Окончание: ${this.formatDateTime(this.endTime)}</p>
+            // `;
+            } catch (error) {
+                console.error('Ошибка:', error);
+                this.statusElement.textContent = 'Ошибка загрузки таймера';
+                this.timerElement.textContent = '--:--:--';
+            }
+        }
+
+        updateTimer() {
+            const now = new Date();
+            let diff, status, timerClass;
+
+            if (now < this.startTime) {
+                // До начала соревнования
+                diff = this.startTime - now;
+                status = `До начала: `;
+                timerClass = 'timer-waiting';
+            } else if (now < this.endTime) {
+                // Соревнование идет
+                diff = this.endTime - now;
+                status = 'До окончания:';
+                timerClass = 'timer-running';
+            } else {
+                // Соревнование завершено
+                diff = 0;
+                status = 'Соревнование завершено';
+                timerClass = 'timer-finished';
+                clearInterval(this.updateInterval);
+            }
+
+            this.statusElement.textContent = status;
+            this.timerElement.textContent = this.formatTime(diff);
+
+            // Обновляем классы для стилизации
+            this.timerElement.className = 'timer-display ' + timerClass;
+        }
+
+        formatTime(milliseconds) {
+            if (milliseconds <= 0) return '00:00:00';
+
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            return [
+                hours.toString().padStart(2, '0'),
+                minutes.toString().padStart(2, '0'),
+                seconds.toString().padStart(2, '0')
+            ].join(':');
+        }
+
+        formatDateTime(date) {
+            return date.toLocaleString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            });
+        }
+    }
+
+    // Использование:
+    // Создаем таймер с константными значениями времени
+    const competitionTimer = new CompetitionTimer(
+        '{{ $settings->get('competition.start_time') }}', // Начало (можно менять)
+        '{{ $settings->get('competition.end_time') }}'  // Окончание (можно менять)
+    );
 </script>
     @yield('scripts')
 </body>

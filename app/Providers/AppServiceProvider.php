@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\SettingsService;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
@@ -17,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(SettingsService::class, function ($app) {
+        $this->app->singleton(SettingsService::class, function (Application $app) {
             return new SettingsService();
         });
     }

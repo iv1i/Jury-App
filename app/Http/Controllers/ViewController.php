@@ -2,31 +2,107 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categories;
 use App\Models\CheckTasks;
-use App\Models\desided_tasks_teams;
+use App\Models\CompletedTaskTeams;
+use App\Models\Complexities;
 use App\Models\Tasks;
-use App\Models\User;
+use App\Models\Teams;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+class TakeModels
+{
+    static function getAllTasks()
+    {
+        $tasks = Cache::get('All-Tasks');
+
+        if (!isset($tasks)) {
+            $tasks = Tasks::all();
+//            $tasks = Tasks::with(['categoryRelashion:id,name', 'complexityRelashion:id,name'])->get()->map(function($task) {
+//                return [
+//                    'id' => $task->id,
+//                    'name' => $task->name,
+//                    'description' => $task->description,
+//                    'FILES' => $task->FILES,
+//                    'web_port' => $task->web_port,
+//                    'db_port' => $task->db_port,
+//                    'web_directory' => $task->web_directory,
+//                    'solved' => $task->solved,
+//                    'price' => $task->price,
+//                    'oldprice' => $task->oldprice,
+//                    'decide' => $task->decide,
+//                    'category' => $task->categoryRelashion->name ?? null, // Обработка NULL
+//                    'complexity' => $task->complexityRelashion->name ?? null, // Обработка NULL
+//                    'created_at' => $task->created_at,
+//                    'updated_at' => $task->updated_at
+//                ];
+//            })->toArray();
+            Cache::tags('ModelList')->put('All-Tasks', $tasks, now()->addMinutes(10));
+        }
+        return $tasks;
+    }
+    static function getAllTeams()
+    {
+        $Teams = Cache::get('All-Teams');
+
+        if (!isset($Teams)) {
+            $Teams = Teams::all();
+            Cache::tags('ModelList')->put('All-Teams', $Teams, now()->addMinutes(10));
+        }
+        return $Teams;
+    }
+    static function getAllDesidedTasksAndTeams()
+    {
+        $Desided = Cache::get('All-Desided');
+
+        if (!isset($Desided)) {
+            $Desided = CompletedTaskTeams::all();
+            Cache::tags('ModelList')->put('All-Desided', $Desided, now()->addMinutes(10));
+        }
+        return $Desided;
+    }
+    static function getAllTasksNoHidden()
+    {
+        $Tasks = Cache::get('All-NoHidden-Tasks');
+
+        if (!isset($Tasks)) {
+            $Tasks = Tasks::all()->makeVisible('flag');
+            Cache::tags('ModelList')->put('All-NoHidden-Tasks', $Tasks, now()->addMinutes(10));
+        }
+        return $Tasks;
+    }
+    static function getAllTeamsNoHidden()
+    {
+        $Teams = Cache::get('All-NoHidden-Teams');
+
+        if (!isset($Teams)) {
+            $Teams = Teams::all()->makeVisible(['password', 'token', 'remember_token']);
+            Cache::tags('ModelList')->put('All-NoHidden-Teams', $Teams, now()->addMinutes(10));
+        }
+        return $Teams;
+    }
+}
 
 class ViewController extends Controller
 {
+    public function __construct(private SettingsService $settings) {}
     // ----------------------------------------------------------------VIEW-ADMIN
     public function AdminScoreboardView()
     {
-        $Users = User::all();
-        $DesidedT = desided_tasks_teams::all();
+        $Users = TakeModels::getAllTeams();
+        $DesidedT = TakeModels::getAllDesidedTasksAndTeams();
         return view('Admin.AdminScoreboard', compact('Users', 'DesidedT'));
     }
     public function AdminTeamsView()
     {
-        $Teams = User::all()->makeVisible('token');
+        $Teams = TakeModels::getAllTeamsNoHidden();
         return view('Admin.AdminTeams', compact('Teams'));
     }
-    public function AdminTasksView(SettingsService $settings)
+    public function AdminTasksView()
     {
-        $Tasks = Tasks::all()->makeVisible('flag');
+        $Tasks = TakeModels::getAllTasksNoHidden();
         $universalResult = $this->processTasksUniversal($Tasks);
 
         // Получаем все категории (исключая difficulty и sumary)
@@ -37,8 +113,8 @@ class ViewController extends Controller
         $complexities = $universalResult['difficulty'] ?? [];
         ksort($complexities);
 
-        $AllComplexities = $settings->get('complexity');
-        $AllCategories = $settings->get('categories');
+        $AllComplexities = $this->settings->get('complexity');
+        $AllCategories = $this->settings->get('categories');
 
 
 
@@ -51,17 +127,17 @@ class ViewController extends Controller
             'AllCategories' => $AllCategories,
         ]);
     }
-    public function AdminSettingsView(SettingsService $settings)
+    public function AdminSettingsView()
     {
-        $Rules = $settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
-        $SettSidebar = $settings->get('sidebar');
-        $TypeAuth = $settings->get('auth');
+        $Rules = $this->settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
+        $SettSidebar = $this->settings->get('sidebar');
+        $TypeAuth = $this->settings->get('auth');
         return view('Admin.AdminSettings', compact('Rules', 'SettSidebar', 'TypeAuth'));
     }
     public function AdminHomeView()
     {
-        $Teams = User::all();
-        $Tasks = Tasks::all();
+        $Teams = TakeModels::getAllTeams();
+        $Tasks = TakeModels::getAllTasks();
         $universalResult = $this->processTasksUniversal($Tasks);
         $InfoTasks = $this->formatToLegacyUniversal($universalResult);
         $CheckTasks = CheckTasks::all();
@@ -78,62 +154,51 @@ class ViewController extends Controller
     }
 
     //----------------------------------------------------------------VIEW-APP
-    public function StatisticIDview(int $id, SettingsService $settings)
+    public function StatisticIDview(int $id)
     {
-        $user = User::with('solvedTasks.tasks')->find($id);
-        if(!$settings->get('sidebar.Statistics')){
-            abort(403);
-        }
+        $user = Teams::with([
+            'solvedTasks.tasks',
+            'checkTasks'
+        ])->find($id);
+
         if (!$user) {
             return redirect()->back()->with('error', 'Пользователь не найден');
         }
-        else {
-            $i = 0;
-            $TeamSolvedTAsks = [];
-            foreach ($user->solvedTasks as $solvedTask) {
-                $TeamSolvedTAsks[$i] = $solvedTask->tasks;
-                $i++;
-                //dd($solvedTask->tasks); // Допустим, у вас есть поле name в таблице задач
-            }
-            $M = User::all();
-            for ($i = 0; $i < count($M); $i++) {
-                $M[$i]->teamlogo = asset('storage/teamlogo/' . $M[$i]->teamlogo);
-            }
-            $chkT = User::find($id)->checkTasks;
-            return view('App.AppStatisticID', compact('id', 'M', 'chkT', 'TeamSolvedTAsks'));
-        }
+
+        $TeamSolvedTasks = $user->solvedTasks->pluck('tasks')->filter();
+
+        $M = TakeModels::getAllTeams()->map(function($user) {
+            $user->teamlogo = asset('storage/teamlogo/' . $user->teamlogo);
+            return $user;
+        });
+
+        return view('App.AppStatisticID', [
+            'id' => $id,
+            'M' => $M,
+            'chkT' => $user->checkTasks,
+            'TeamSolvedTAsks' => $TeamSolvedTasks
+        ]);
     }
-    public function StatisticView(SettingsService $settings)
+    public function StatisticView()
     {
-        if(!$settings->get('sidebar.Statistics')){
-            abort(403);
-        }
-        $M = User::all();
+        $M = TakeModels::getAllTeams();
         return view('App.AppStatistic', compact('M'));
     }
-    public function ScoreboardView(SettingsService $settings)
+    public function ScoreboardView()
     {
-        if(!$settings->get('sidebar.Scoreboard')){
-            abort(403);
-        }
-        $M = User::all();
+        $M = TakeModels::getAllTeams();
         return view('App.AppScoreboard', compact('M'));
     }
-    public function ProjectorView(SettingsService $settings)
+    public function ProjectorView()
     {
-        if(!$settings->get('sidebar.Projector')){
-            abort(403);
-        }
-        $M = User::all();
+        $M = TakeModels::getAllTeams();
         return view('Guest.projectorTB', compact('M'));
     }
-    public function HomeView(SettingsService $settings)
+    public function HomeView()
     {
-        if(!$settings->get('sidebar.Home')){
-            abort(403);
-        }
-        $Tasks = Tasks::all();
-        $SolvedTasks = User::find(auth()->id())->solvedTasks;
+        $Tasks = TakeModels::getAllTasks();
+
+        $SolvedTasks = Teams::find(auth()->id())->solvedTasks;
         $universalResult = $this->processTasksUniversal($Tasks);
 
         // Получаем все категории (исключая difficulty и sumary)
@@ -150,12 +215,9 @@ class ViewController extends Controller
             'SolvedTasks' => $SolvedTasks,
         ]);
     }
-    public function RulesView(SettingsService $settings)
+    public function RulesView()
     {
-        if(!$settings->get('sidebar.Rules')){
-            abort(403);
-        }
-        $sett = $settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
+        $sett = $this->settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
         if (Auth::check()) {
             return view('App.AppRules', compact('sett'));
         }

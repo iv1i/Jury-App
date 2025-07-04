@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Teams;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,31 +57,26 @@ class AuthController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'password' => ['required'],
             ]);
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+
+                return response()->json([
+                    'success' => true,
+                    'redirect_url' => url("/Home"), // или ->intended() если нужно
+                ]);
+            }
         }
         if ($auth === 'token') {
-            $user = User::where('token', $request->token)->first();
+            $user = Teams::where('token', $request->token)->first();
 
             if (!$user) {
                 return response()->json(['success' => false, 'message' => __('Incorrect token')], 401);
             }
 
-            Auth::login($user); // Прямой вход без проверки пароля
+            Auth::login($user);
             $request->session()->regenerate();
 
             return response()->json(['success' => true, 'redirect_url' => url("/Home")]);
-        }
-
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            // Возвращаем JSON с URL для редиректа
-            return response()->json([
-                'success' => true,
-                'redirect_url' => url("/Home"), // или ->intended() если нужно
-            ]);
-
-//            $url = url("/Home");
-//            return redirect()->intended($url);
         }
 
         if ($auth === 'base') {

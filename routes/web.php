@@ -1,21 +1,24 @@
 <?php
 
+
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ViewController;
+use App\Models\Tasks;
+use Illuminate\Support\Benchmark;
 use Illuminate\Support\Facades\Route;
 
 ////////////////////////////////////////////////////////////////---APP---
 Route::middleware('auth')->group(function () {
-    Route::get('/Home', [ViewController::class, 'HomeView'])->name('App-Home-View');
-    Route::get('/Scoreboard', [ViewController::class, 'ScoreboardView'])->name('App-Scoreboard-View');
-    Route::get('/Statistics', [ViewController::class, 'StatisticView'])->name('App-Statistics-View');
-    Route::get('/Statistics/ID/{id}', [ViewController::class, 'StatisticIDview'])->name('App-Statistics-ID-View');
-    Route::get('/Logout', [AuthController::class, 'logoutApp'])->name('App-Logout');
+    Route::get('/Home', [ViewController::class, 'HomeView'])->name('App-Home-View')->middleware('check.sidebar.access:Home');
+    Route::get('/Scoreboard', [ViewController::class, 'ScoreboardView'])->name('App-Scoreboard-View')->middleware('check.sidebar.access:Scoreboard');
+    Route::get('/Statistics', [ViewController::class, 'StatisticView'])->name('App-Statistics-View')->middleware('check.sidebar.access:Statistics');
+    Route::get('/Statistics/ID/{id}', [ViewController::class, 'StatisticIDview'])->name('App-Statistics-ID-View')->middleware('check.sidebar.access:Statistics');
+    Route::get('/Logout', [AuthController::class, 'logoutApp'])->name('App-Logout')->middleware('check.sidebar.access:Logout');
 
-    Route::get('/Download/File/{md5file}/{id}', [AppController::class, 'DwnlFile'])->name('App-Download-File');
-    Route::post('/Home/Tasks/Check', [AppController::class, 'CheckFlag'])->name('App-Check-Flag');
+    Route::get('/Download/File/{md5file}/{id}', [AppController::class, 'DwnlFile'])->name('App-Download-File')->middleware('check.sidebar.access:Home');
+    Route::post('/Home/Tasks/Check', [AppController::class, 'checkFlag'])->name('App-Check-Flag')->middleware('check.sidebar.access:Home');
 });
 
 ////////////////////////////////////////////////////////////////---ADMIN---
@@ -31,7 +34,7 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('/Admin/Settings/DeleteAll', [AdminController::class, 'SettingsDeleteAll'])->name('Admin-Settings-DeleteAll');
     Route::post('/Admin/Settings/Sidebars', [AdminController::class, 'SettingsSlidebars'])->name('Admin-Settings-Sidebars');
     Route::post('/Admin/Settings/СhangeRull', [AdminController::class, 'SettingsChngRules'])->name('Admin-Settings-Сhange-Rules');
-    Route::post('/Admin/Settings/СhangeCategory', [AdminController::class, 'SettingsChgCategory'])->name('Admin-Settings-Сhange-Categories');
+    Route::post('/Admin/Settings/СhangeCategory', [AdminController::class, 'SettingsChngCategory'])->name('Admin-Settings-Сhange-Categories');
 
 
     Route::put('/Admin/Tasks/Add', [AdminController::class, 'AddTasks'])->name('Admin-Tasks-Add');
@@ -46,8 +49,8 @@ Route::middleware('auth.admin')->group(function () {
 ////////////////////////////////////////////////////////////////---GUEST---
 Route::get('/', [ViewController::class, 'SlashView'])->name('login');
 Route::get('/Auth', [ViewController::class, 'AuthView'])->name('App-Auth-View');
-Route::get('/Rules', [ViewController::class, 'RulesView'])->name('App-Rules-View');
-Route::get('/Projector', [ViewController::class, 'ProjectorView'])->name('App-Projector-View');
+Route::get('/Rules', [ViewController::class, 'RulesView'])->name('App-Rules-View')->middleware('check.sidebar.access:Rules');
+Route::get('/Projector', [ViewController::class, 'ProjectorView'])->name('App-Projector-View')->middleware('check.sidebar.access:Projector');
 Route::get('/Admin/Auth', [ViewController::class, 'AdminAuthView'])->name('Admin-Auth-View');
 
 Route::middleware('throttle:AuthApp')->group(function () {

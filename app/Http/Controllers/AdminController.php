@@ -13,16 +13,14 @@ use App\Events\AppStatisticIDEvent;
 use App\Events\ProjectorEvent;
 use App\Events\UpdateRulesEvent;
 use App\Models\CheckTasks;
-use App\Models\desided_tasks_teams;
-use App\Models\infoTasks;
-use App\Models\Settings;
+use App\Models\CompletedTaskTeams;
 use App\Models\SolvedTasks;
 use App\Models\Tasks;
-use App\Models\User;
+use App\Models\Teams;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -116,11 +114,11 @@ class AdminController extends Controller
         }
 
         // Создание ID для новой команды
-        $q = User::all();
+        $q = Teams::all();
         $userId = $this->makeId($q);
 
         // Создание новой команды
-        $team = new User();
+        $team = new Teams();
         $team->id = $userId;
         $team->name = $sanitizedName;
         $team->password = Hash::make($request->input('password'));
@@ -138,7 +136,7 @@ class AdminController extends Controller
 
         $chktasks = new CheckTasks();
         $chktasks->id = $chkId;
-        $chktasks->user_id = $userId;
+        $chktasks->teams_id = $userId;
         $chktasks->sumary = 0;
         $chktasks->easy = 0;
         $chktasks->medium = 0;
@@ -160,6 +158,9 @@ class AdminController extends Controller
         $this->AdminEvents();
         $this->AppEvents();
 
+
+
+
         // Возврат ответа
         return response()->json(['success' => true,'message' => 'Команда успешно добавлена!'], 200);
     }
@@ -168,7 +169,7 @@ class AdminController extends Controller
     {
         try {
             if (is_numeric($request->input('ID'))) {
-                $user = User::findOrFail($request->input('ID'));
+                $user = Teams::findOrFail($request->input('ID'));
                 $this->deleteUser($user);
                 $this->UpdateTeamsScores();
             } else {
@@ -189,7 +190,7 @@ class AdminController extends Controller
                 $result = range($start, $end);
 
                 foreach ($result as $id) {
-                    $user = User::find($id);
+                    $user = Teams::find($id);
                     if ($user) {
                         $this->deleteUser($user);
                         $this->UpdateTeamsScores();
@@ -200,13 +201,15 @@ class AdminController extends Controller
             $this->AdminEvents();
             $this->AppEvents();
 
+
+
             return response()->json(['success' => true,'message' => 'Команда успешно удалена/удалены!'], 200);
         } catch (\Exception $e) {
             // Обработка ошибки
             return response()->json(['success' => false,'message' => 'Ошибка при удалении!'], 500);
         }
     }
-    private function deleteUser(User $user)
+    private function deleteUser(Teams $user)
     {
         if ($user->teamlogo !== 'StandartLogo.png') {
             $deleteImage = 'public/teamlogo/' . $user->teamlogo;
@@ -228,7 +231,7 @@ class AdminController extends Controller
             $this->updateTaskPriceDelete($task);
         }
 
-        $user->desidedtasksteams()->delete();
+        $user->completed_task_team()->delete();
         $user->solvedTasks()->delete();
         $user->checkTasks()->delete();
 
@@ -238,7 +241,7 @@ class AdminController extends Controller
     {
         //dd($request->all());
         $TeamID = $request->input('id');
-        $team = User::find($TeamID);
+        $team = Teams::find($TeamID);
 
         //dd([$sanitizedName, $sanitizedPlayers, $sanitizedWhereFrom]);
         $validator = Validator::make($request->all(), [
@@ -312,6 +315,8 @@ class AdminController extends Controller
 
         $this->AdminEvents();
         $this->AppEvents();
+
+
 
         return response()->json(['success' => true,'message' => 'Команда успешно Обновлена!'], 200);
     }
@@ -476,6 +481,8 @@ class AdminController extends Controller
         $this->AdminEvents();
         $this->AppEvents();
 
+
+
         return response()->json(['success' => true,'message' => 'Таск успешно добавлен!'], 200);
 
 
@@ -611,7 +618,7 @@ class AdminController extends Controller
                 $actions[] = 'Сложность изменена с ' . $task->complexity . ' на ' . $request->input('complexity') . '! ';
             }
 
-            $desid = $task->desidedtasksteams;
+            $desid = $task->completed_task_team;
             if ($desid) {
                 foreach ($desid as $desidtask) {
                     if ($desidtask) {
@@ -637,10 +644,10 @@ class AdminController extends Controller
             if ($complexityChanged) {
                 $ST = $task->SolvedTasks;
                 if (!$ST->isEmpty()) {
-                    $Uid = $ST->pluck('user_id')->unique()->toArray();
+                    $Uid = $ST->pluck('teams_id')->unique()->toArray();
 
                     foreach ($Uid as $uid) {
-                        $user = User::find($uid);
+                        $user = Teams::find($uid);
                         if ($user && $user->checkTasks) {
                             $CHKT = $user->checkTasks;
 
@@ -742,6 +749,7 @@ class AdminController extends Controller
             $task->category = $sanitizedCategory;
             $task->complexity = $sanitizedComplexity;
             $task->description = $sanitizedDescription;
+            $task->price = $request->input('points');
             $task->oldprice = $request->input('points');
             $task->decide = null;
             $task->FILES = $filenames;
@@ -759,8 +767,43 @@ class AdminController extends Controller
             $task->web_directory = $webDirectory;
             $task->save();
 
+            $userAll = Teams::with(['solvedTasks.tasks'])->get();
+            $countteams = DB::table('users')->count(); // Выносим подсчет количества пользователей за пределы цикла
+
+            foreach ($userAll as $user) {
+                // Сначала обрабатываем solvedTasks пользователя
+                foreach ($user->solvedTasks as $solvedTask) {
+                    if ($solvedTask->tasks) {
+                        $solved = $solvedTask->tasks->solved ?? 0;
+                        $rate = $countteams > 0 ? $solved / $countteams : 0;
+
+                        if ($rate >= 0.8) {
+                            $solvedTask->tasks->price = $solvedTask->tasks->oldprice * 0.2;
+                        } elseif ($rate >= 0.6) {
+                            $solvedTask->tasks->price = $solvedTask->tasks->oldprice * 0.4;
+                        } elseif ($rate >= 0.4) {
+                            $solvedTask->tasks->price = $solvedTask->tasks->oldprice * 0.6;
+                        } elseif ($rate >= 0.2) {
+                            $solvedTask->tasks->price = $solvedTask->tasks->oldprice * 0.8;
+                        }
+
+                        $solvedTask->tasks->save(); // Сохраняем измененную цену задачи
+                    }
+                }
+
+                // Затем считаем общий балл пользователя
+                $scores = $user->solvedTasks->sum(function($solvedTask) {
+                    return $solvedTask->tasks->price ?? 0;
+                });
+
+                $user->scores = $scores;
+                $user->save();
+            }
+
             $this->AdminEvents();
             $this->AppEvents();
+
+
 
             // Если не было конкретных действий, но задача обновлена
             if (empty($actions)) {
@@ -825,6 +868,9 @@ class AdminController extends Controller
             $this->UpdateTeamsScores();
             $this->AdminEvents();
             $this->AppEvents();
+
+
+
             return response()->json(['success' => true,'message' => 'Таск/Таски удалены!'], 200);
 
         } catch (\Exception $e) {
@@ -845,7 +891,7 @@ class AdminController extends Controller
             Storage::disk('private')->deleteDirectory($task->web_directory);
         }
 
-        $task->desidedtasksteams()->delete();
+        $task->completed_task_team()->delete();
 
         $users = $task->solvedTasks()->with('user')->get();
         $UsersID = [];
@@ -854,7 +900,7 @@ class AdminController extends Controller
                 $UsersID[] = $user->user->id;
             }
             foreach ($UsersID as $ID) {
-                $user = User::find($ID);
+                $user = Teams::find($ID);
                 $CHKTforUser = $user->checkTasks;
                 if ($CHKTforUser) {
                     $CHKTforUser->sumary--;
@@ -879,11 +925,11 @@ class AdminController extends Controller
     public function SettingsReset(Request $request)
     {
         if($request->input('check') === 'Yes' && $request->input('ButtonReset') === 'RESET'){
-            desided_tasks_teams::truncate();
+            CompletedTaskTeams::truncate();
             SolvedTasks::truncate();
 
             CheckTasks::query()->update(['sumary' => 0, 'easy' => 0, 'medium' => 0, 'hard' => 0]);
-            User::query()->update(['scores' => 0]);
+            Teams::query()->update(['scores' => 0]);
 
             $tasks = Tasks::all();
             if ($tasks){
@@ -896,6 +942,8 @@ class AdminController extends Controller
 
             $this->AdminEvents();
             $this->AppEvents();
+
+
 
             return response()->json([
                 'success' => true,
@@ -911,10 +959,10 @@ class AdminController extends Controller
     {
         if($request->input('check') === 'Yes' && $request->input('ButtonDeleteAll') === 'DELETEALL'){
 
-            desided_tasks_teams::truncate();
+            CompletedTaskTeams::truncate();
             SolvedTasks::truncate();
             CheckTasks::truncate();
-            User::truncate();
+            Teams::truncate();
             Tasks::truncate();
 
             $this->AdminEvents();
@@ -925,12 +973,15 @@ class AdminController extends Controller
                 'message' => 'Удаление настроек прошло успешно!'
             ]);
         }
+
+
+
         return response()->json([
             'success' => false,
             'message' => 'Удаление настроек не прошло!'
         ], 500);
     }
-    public function SettingsChgCategory(Request $request, SettingsService $settings)
+    public function SettingsChngCategory(Request $request, SettingsService $settings)
     {
         try {
             $action = $request->input('command');
@@ -942,7 +993,7 @@ class AdminController extends Controller
                     if (!in_array($categoryName, $AllCategories)) {
                         $AllCategories[] = $categoryName;
                         $settings->set('categories', $AllCategories);
-                        return response()->json(['success' => true,'message' => 'Категория успешно добавлена!','categories' => $AllCategories], 200);
+                        return response()->json(['success' => true,'message' => 'Категория успешно добавлена!','categories' => $settings->get('categories')], 200);
                     }
                 }
                 if ($action === 'delete') {
@@ -968,15 +1019,19 @@ class AdminController extends Controller
                         $this->UpdateTeamsScores();
                         $this->AdminEvents();
                         $this->AppEvents();
-                        return response()->json(['success' => true,'message' => 'Категория успешно удалена!','categories' => $filteredCategories], 200);
+                        return response()->json(['success' => true,'message' => 'Категория успешно удалена!','categories' => $settings->get('categories')], 200);
+                    }
+                    else {
+                        return response()->json(['success' => false,'message' => 'Категория для удаления не найдена!','categories' => $settings->get('categories')], 200);
+
                     }
                 }
-                return response()->json(['success' => false,'message' => 'Ошибка при добавлении категории! Команда не распознана!'], 500);
+                return response()->json(['success' => false,'message' => 'Ошибка при добавлении категории! Команда не распознана!','categories' => $settings->get('categories')], 200);
             }
-            return response()->json(['success' => false,'message' => 'Ошибка при добавлении категории!'], 500);
+            return response()->json(['success' => false,'message' => 'Ошибка при добавлении категории!','categories' => $settings->get('categories')], 200);
         }
         catch (\Exception $e) {
-            return response()->json(['success' => false,'message' => 'Неизвестная ошибка при добавлении категории!'], 500);
+            return response()->json(['success' => false,'message' => 'Неизвестная ошибка при добавлении категории!' . $e,'categories' => $settings->get('categories')], 200);
         }
 
     }
@@ -1090,14 +1145,16 @@ class AdminController extends Controller
     // ----------------------------------------------------------------EVENTS
     public function AdminEvents()
     {
-        $Teams = User::all()->makeVisible('token');
+        $Teams = Teams::all()->makeVisible('token');
         $Tasks = Tasks::all()->makeVisible('flag');
         $universalResult = $this->processTasksUniversal($Tasks);
         $InfoTasks = $this->formatToLegacyUniversal($universalResult);
         $CheckTasks = CheckTasks::all();
-        $DesidedT = desided_tasks_teams::all();
+        $DesidedT = CompletedTaskTeams::all();
         $dataHome = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
         $dataScoreboard = [$Teams, $DesidedT];
+
+        $this->cacheClear();
 
         AdminTasksEvent::dispatch($Tasks);
         AdminTeamsEvent::dispatch($Teams);
@@ -1107,14 +1164,17 @@ class AdminController extends Controller
     public function AppEvents()
     {
         $CHKT = CheckTasks::all();
-        $Team = User::all();
+        $Team = Teams::all();
         $Tasks = Tasks::all();
-        $DesidedT = desided_tasks_teams::all();
+        $DesidedT = CompletedTaskTeams::all();
         $SolvedTasks = SolvedTasks::all();
         $Teams = $Team;
         $data = compact('Team', 'Tasks', 'SolvedTasks', 'CHKT');
         $data2 = compact('Tasks', 'SolvedTasks');
         $data3 = compact('Teams', 'DesidedT');
+
+        $this->cacheClear();
+
         AppStatisticIDEvent::dispatch($data);
         AppHomeEvent::dispatch($data2);
         AppScoreboardEvent::dispatch($data3);
@@ -1123,6 +1183,10 @@ class AdminController extends Controller
     }
 
     // ----------------------------------------------------------------OTHER
+    function cacheClear()
+    {
+        Cache::tags('ModelList')->flush();
+    }
     function formatToLegacyUniversal($universalResult) {
         // Сначала создаем массив только с sumary
         $legacy = [
@@ -1462,7 +1526,7 @@ class AdminController extends Controller
     }
     public function UpdateTeamsScores()
     {
-        $userAll = User::all();
+        $userAll = Teams::all();
         foreach ($userAll as $user) {
             $allusersolvedtasks = $user->solvedTasks;
             $scores = 0;
@@ -1537,69 +1601,5 @@ class AdminController extends Controller
         }
         return $id;
     }
-
-    // ----------------------------------------------------------------VIEW
-    public function AdminScoreboardView()
-    {
-        $Users = User::all();
-        $DesidedT = desided_tasks_teams::all();
-        return view('Admin.AdminScoreboard', compact('Users', 'DesidedT'));
-    }
-    public function AdminTeamsView()
-    {
-        $Teams = User::all()->makeVisible('token');
-        return view('Admin.AdminTeams', compact('Teams'));
-    }
-    public function AdminTasksView(SettingsService $settings)
-    {
-        $Tasks = Tasks::all()->makeVisible('flag');
-        $universalResult = $this->processTasksUniversal($Tasks);
-
-        // Получаем все категории (исключая difficulty и sumary)
-        $categories = $universalResult['categories'] ?? [];
-        ksort($categories);
-
-        // Получаем все возможные сложности
-        $complexities = $universalResult['difficulty'] ?? [];
-        ksort($complexities);
-
-        $AllComplexities = $settings->get('complexity');
-        $AllCategories = $settings->get('categories');
-
-
-
-        return view('Admin.AdminTasks', [
-            'Tasks' => $Tasks,
-            'categories' => $categories,
-            'complexities' => $complexities,
-            'infoTasks' => $this->formatToLegacyUniversal($universalResult),
-            'AllComplexities' => $AllComplexities,
-            'AllCategories' => $AllCategories,
-        ]);
-    }
-    public function AdminSettingsView(SettingsService $settings)
-    {
-        $Rules = $settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
-        $SettSidebar = $settings->get('sidebar');
-        $TypeAuth = $settings->get('auth');
-        return view('Admin.AdminSettings', compact('Rules', 'SettSidebar', 'TypeAuth'));
-    }
-    public function AdminHomeView()
-    {
-        $Teams = User::all();
-        $Tasks = Tasks::all();
-        $universalResult = $this->processTasksUniversal($Tasks);
-        $InfoTasks = $this->formatToLegacyUniversal($universalResult);
-        $CheckTasks = CheckTasks::all();
-        $data = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
-        return view('Admin.AdminHome', compact('data'));
-    }
-    public function AdminAuthView()
-    {
-        if (Auth::guard('admin')->check()) {
-            // Пользователь вошел в систему...
-            return redirect('/Admin');
-        }
-        return view('Admin.AdminAuth');
-    }
 }
+

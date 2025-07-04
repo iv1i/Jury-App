@@ -17,36 +17,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `admins`
---
-
-DROP TABLE IF EXISTS `admins`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `admins` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `admins_name_unique` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `admins`
---
-
-LOCK TABLES `admins` WRITE;
-/*!40000 ALTER TABLE `admins` DISABLE KEYS */;
-INSERT INTO `admins` VALUES
-(1,'admin','$2y$12$6mO5GgbND9r23TvWrIvWCuiWEBA8w6jZnBMOMzAwLfmSCAbdk/MdK','zpcPB4f2zm6V3FurnRoNHidDyFCFBovi08jwx4WgjBs4Bhzpyzp5Yic1wIOO','2024-08-20 05:03:32','2025-06-26 07:09:21');
-/*!40000 ALTER TABLE `admins` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `check_tasks`
 --
 
@@ -55,7 +25,7 @@ DROP TABLE IF EXISTS `check_tasks`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `check_tasks` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned NOT NULL,
+  `teams_id` bigint unsigned NOT NULL,
   `sumary` bigint NOT NULL,
   `easy` int NOT NULL,
   `medium` int NOT NULL,
@@ -73,27 +43,26 @@ CREATE TABLE `check_tasks` (
 LOCK TABLES `check_tasks` WRITE;
 /*!40000 ALTER TABLE `check_tasks` DISABLE KEYS */;
 INSERT INTO `check_tasks` VALUES
-(1,1,0,0,0,0,'2025-02-06 17:28:48','2025-06-26 07:04:58'),
-(2,2,0,0,0,0,'2024-08-25 15:31:53','2025-06-26 07:04:58'),
-(3,3,0,0,0,0,'2024-08-23 06:23:43','2025-06-26 07:04:58'),
-(4,4,0,0,0,0,'2024-08-23 06:23:45','2025-06-26 07:04:58'),
-(5,5,0,0,0,0,'2024-08-23 06:23:48','2025-06-26 07:04:58'),
-(6,6,0,0,0,0,'2024-10-31 16:49:23','2025-06-26 07:04:58'),
-(7,7,0,0,0,0,'2024-08-26 08:04:47','2025-06-26 07:04:58'),
-(8,8,0,0,0,0,'2025-06-21 13:03:18','2025-06-26 07:04:58');
+(1,1,0,0,0,0,'2025-02-06 17:28:48','2025-07-03 15:46:19'),
+(2,2,0,0,0,0,'2024-08-25 15:31:53','2025-07-03 15:46:19'),
+(3,3,0,0,0,0,'2024-08-23 06:23:43','2025-07-03 15:46:19'),
+(4,4,0,0,0,0,'2024-08-23 06:23:45','2025-07-03 15:46:19'),
+(5,5,0,0,0,0,'2024-08-23 06:23:48','2025-07-03 15:46:19'),
+(6,6,0,0,0,0,'2024-10-31 16:49:23','2025-07-03 15:46:19'),
+(7,7,0,0,0,0,'2024-08-26 08:04:47','2025-07-03 15:46:19');
 /*!40000 ALTER TABLE `check_tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `desided_tasks_teams`
+-- Table structure for table `completed_task_teams`
 --
 
-DROP TABLE IF EXISTS `desided_tasks_teams`;
+DROP TABLE IF EXISTS `completed_task_teams`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `desided_tasks_teams` (
+CREATE TABLE `completed_task_teams` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned NOT NULL,
+  `teams_id` bigint unsigned NOT NULL,
   `tasks_id` bigint unsigned NOT NULL,
   `StyleTask` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -103,41 +72,12 @@ CREATE TABLE `desided_tasks_teams` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `desided_tasks_teams`
+-- Dumping data for table `completed_task_teams`
 --
 
-LOCK TABLES `desided_tasks_teams` WRITE;
-/*!40000 ALTER TABLE `desided_tasks_teams` DISABLE KEYS */;
-/*!40000 ALTER TABLE `desided_tasks_teams` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `jobs`
---
-
-DROP TABLE IF EXISTS `jobs`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `jobs` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `queue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `attempts` tinyint unsigned NOT NULL,
-  `reserved_at` int unsigned DEFAULT NULL,
-  `available_at` int unsigned NOT NULL,
-  `created_at` int unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `jobs_queue_index` (`queue`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `jobs`
---
-
-LOCK TABLES `jobs` WRITE;
-/*!40000 ALTER TABLE `jobs` DISABLE KEYS */;
-/*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
+LOCK TABLES `completed_task_teams` WRITE;
+/*!40000 ALTER TABLE `completed_task_teams` DISABLE KEYS */;
+/*!40000 ALTER TABLE `completed_task_teams` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -152,7 +92,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -162,49 +102,17 @@ CREATE TABLE `migrations` (
 LOCK TABLES `migrations` WRITE;
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
 INSERT INTO `migrations` VALUES
-(1,'2014_10_12_000000_create_users_table',1),
+(1,'2014_10_12_000000_create_teams_table',1),
 (2,'2019_12_14_000001_create_personal_access_tokens_table',1),
 (3,'2024_08_11_040726_create_tasks_table',1),
-(4,'2024_08_11_040739_create_admins_table',1),
+(4,'2024_08_11_040739_create_users_table',1),
 (5,'2024_08_11_040855_create_info_tasks_table',1),
 (6,'2024_08_11_040915_create_check_tasks_table',1),
 (7,'2024_08_11_040926_create_solved_tasks_table',1),
-(8,'2024_08_22_043055_create_desided_tasks_teams_table',2),
-(9,'2024_09_08_095122_create_settings_table',3);
+(8,'2024_08_22_043055_create_desided_tasks_teams_table',1),
+(9,'2024_09_08_095122_create_settings_table',1),
+(10,'2025_05_30_111619_create_sessions_table',1);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `personal_access_tokens`
---
-
-DROP TABLE IF EXISTS `personal_access_tokens`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `personal_access_tokens` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `tokenable_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tokenable_id` bigint unsigned NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abilities` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `last_used_at` timestamp NULL DEFAULT NULL,
-  `expires_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
-  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `personal_access_tokens`
---
-
-LOCK TABLES `personal_access_tokens` WRITE;
-/*!40000 ALTER TABLE `personal_access_tokens` DISABLE KEYS */;
-/*!40000 ALTER TABLE `personal_access_tokens` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -222,8 +130,8 @@ CREATE TABLE `sessions` (
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `last_activity` int NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `sessions_user_id_index` (`user_id`),
-  KEY `sessions_last_activity_index` (`last_activity`)
+  KEY `sessions_last_activity_index` (`last_activity`),
+  KEY `sessions_teams_id_index` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -234,7 +142,7 @@ CREATE TABLE `sessions` (
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
 INSERT INTO `sessions` VALUES
-('37Rofpmk3DPV3sNOLUkoqSTQ19zDZNKKN4lnQcKg',NULL,'192.168.1.17','Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0','YTo0OntzOjY6Il90b2tlbiI7czo0MDoibnFlRzJWSVI3N3k5Z3l3TEtkSjZQYjNRWHljeURkY2hvUjk5QU5CQyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzQ6Imh0dHA6Ly8xOTIuMTY4LjEuMTcvQWRtaW4vU2V0dGluZ3MiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUyOiJsb2dpbl9hZG1pbl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7fQ==',1750921631);
+('7DDRt8aczgIqScQRpQX10hx29D26yqyypDYtcjOn',7,'192.168.1.17','Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0','YTo2OntzOjY6Il90b2tlbiI7czo0MDoiSjZSVkxRb2lyY29CRkhNM2F2UjZVemlSZThjTXBXNVk2d3czVmZWRyI7czo1MjoibG9naW5fYWRtaW5fNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO3M6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjM0OiJodHRwOi8vMTkyLjE2OC4xLjE3L0FkbWluL1NldHRpbmdzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czoyNDoiaHR0cDovLzE5Mi4xNjguMS4xNy9Ib21lIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6Nzt9',1751558652);
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -247,7 +155,7 @@ DROP TABLE IF EXISTS `solved_tasks`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `solved_tasks` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint unsigned NOT NULL,
+  `teams_id` bigint unsigned NOT NULL,
   `tasks_id` bigint unsigned NOT NULL,
   `price` double(8,2) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -331,20 +239,20 @@ INSERT INTO `tasks` VALUES
 (29,'Adrastei&#039;s…','reverse','hard','Вас пригласили на VIP вечеринку любителей обратной перемотки. Кодовое слово, что у вас спрашивают и будет флагом  <br>\r\nФормат флага: school{A-Z, a-z, 0-1}','336b7abf20c29950c9a3d513b92d0ebe.exe;',NULL,NULL,NULL,0.00,1000.00,1000.00,'school{YlAFRTLM44GC34oPDix7}',NULL,'2024-10-31 17:48:20','2025-02-07 15:07:53'),
 (30,'…sister','reverse','easy','ООО «Гексагон» приглашает вас к себе на работу, но охранник без кодового слова не пускает<br>\r\nФормат флага:school{codeword}','5e635409c4f88692bc544d297b7ee6aa.zip;',NULL,NULL,NULL,0.00,1000.00,1000.00,'school{UPUPDDLRLRBA}',NULL,'2024-10-31 17:51:38','2025-02-07 15:07:53'),
 (31,'&','reverse','hard','Мы отдали разработку кода на аутсорс программистам из индии. В результате буквы разбрелись по консоли. Поставьте их снова в красивый рядочек, что будет флажком<br>\r\nФормат флага: school{A-Z}','75bdd7638cf3a2ced902b6c9dd27dee2.zip;',NULL,NULL,NULL,0.00,1000.00,1000.00,'school{ACDJKBEILSFHMRTGNQUXOPVWY}',NULL,'2024-10-31 17:52:53','2025-02-07 15:07:53'),
-(32,'AAAAaaaa','web','easy','test',NULL,NULL,NULL,NULL,0.00,1000.00,1000.00,'test',NULL,'2025-06-22 07:52:10','2025-06-25 02:28:41');
+(33,'test','crypto','medium','edfvsdvds',NULL,NULL,NULL,NULL,0.00,1000.00,1000.00,'test',NULL,'2025-06-27 14:40:23','2025-07-03 15:56:59');
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `users`
+-- Table structure for table `teams`
 --
 
-DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `teams`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `users` (
+CREATE TABLE `teams` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `token` text COLLATE utf8mb4_unicode_ci,
+  `token` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `teamlogo` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -361,20 +269,49 @@ CREATE TABLE `users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `teams`
+--
+
+LOCK TABLES `teams` WRITE;
+/*!40000 ALTER TABLE `teams` DISABLE KEYS */;
+INSERT INTO `teams` VALUES
+(1,'c49b5d9263ed3a564bd2e14d80b97404','Team A','$2y$12$JcaGMYj6kLTKjH9ZTTCH5uVEMf.zJcExVk5cXZo2N2bApMEolfTBq','StandartLogo.png',8,'МАОУ &quot;СОШ №132&quot;  им. Н.М. Малахова г. Барнаул','Yes',0.00,NULL,'2025-02-06 17:28:48','2025-07-03 15:46:19'),
+(2,'4d627164ff7450d40ebe500eb968ba67','Team B','$2y$12$bH7ppx6a8IO4f1HK4fkhBu5.9pAKM3iDJi99OtIbCFhrk3b4cOwJ2','StandartLogo.png',5,'МАОУ &quot;СОШ №136&quot;','Yes',0.00,NULL,'2024-08-25 15:31:53','2025-07-03 15:46:19'),
+(3,'c2f6eb504881924eee34a90c1fb6e310','Team C','$2y$12$PYGEPsxZcHCeMYUQ/dMVQ.IhLyZnbwYgcxuT4HN.mf3aIUzDRXbSu','StandartLogo.png',5,'БОУ г. Омска &quot;Лицей № 149&quot;','Yes',0.00,NULL,'2024-08-23 06:23:43','2025-07-03 15:46:19'),
+(4,'9b2dcb81d35eb3040ddd6bee9a03680f','Team D','$2y$12$FKq38OSmdxo9mPRdxtK36eri2WdHSTvsXiIndM9KgPiQ3ikbh2G9u','StandartLogo.png',5,'МБОУ &quot;СОШ №49&quot;; г.Барнаул','Yes',0.00,NULL,'2024-08-23 06:23:45','2025-07-03 15:46:19'),
+(5,'88d6e6bb34b5f0bca0d953a2cb14f69d','Team E','$2y$12$uj9hHrsTXxnLnoUDPpohc.KdMnWrsVdVFRgzW0E1ynQUXqoyLOIX.','StandartLogo.png',5,'МАОУ «СОШ №134» г. Барнаул','Yes',0.00,NULL,'2024-08-23 06:23:48','2025-07-03 15:46:19'),
+(6,'6cc70190b0720666ae9565d8790814e9','SharLike','$2y$12$6oVOGIbxhjVGeLSQ.MWHtuh91/z9Wm.Fh.GkNyzldBR59nMqbDD2y','1730425369_like-button.png',7,'Алтайский государственный технический университет им. И. И. Ползунова','No',0.00,NULL,'2024-10-31 16:49:23','2025-07-03 15:46:19'),
+(7,'ea5f2bf8f22cfd9442db7c2b42e3aaba','Жуколовы','$2y$12$bUPE6JfRNqrs9FPLxQfPFuDZXGwqIcU0vlZyoxMJXZE5LcJKxnHXS','1727521723_New_Logo_Жуколовы-5-full.png',6,'Алтайский государственный технический университет им. И. И. Ползунова','No',0.00,NULL,'2024-08-26 08:04:47','2025-07-03 15:46:19');
+/*!40000 ALTER TABLE `teams` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `users` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `admins_name_unique` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Dumping data for table `users`
 --
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(1,'c49b5d9263ed3a564bd2e14d80b97404','Team A','$2y$12$JcaGMYj6kLTKjH9ZTTCH5uVEMf.zJcExVk5cXZo2N2bApMEolfTBq','StandartLogo.png',8,'МАОУ &quot;СОШ №132&quot;  им. Н.М. Малахова г. Барнаул','Yes',0.00,NULL,'2025-02-06 17:28:48','2025-06-26 07:04:58'),
-(2,'4d627164ff7450d40ebe500eb968ba67','Team B','$2y$12$bH7ppx6a8IO4f1HK4fkhBu5.9pAKM3iDJi99OtIbCFhrk3b4cOwJ2','StandartLogo.png',5,'МАОУ &quot;СОШ №136&quot;','Yes',0.00,NULL,'2024-08-25 15:31:53','2025-06-26 07:04:58'),
-(3,'c2f6eb504881924eee34a90c1fb6e310','Team C','$2y$12$PYGEPsxZcHCeMYUQ/dMVQ.IhLyZnbwYgcxuT4HN.mf3aIUzDRXbSu','StandartLogo.png',5,'БОУ г. Омска &quot;Лицей № 149&quot;','Yes',0.00,NULL,'2024-08-23 06:23:43','2025-06-26 07:04:58'),
-(4,'9b2dcb81d35eb3040ddd6bee9a03680f','Team D','$2y$12$FKq38OSmdxo9mPRdxtK36eri2WdHSTvsXiIndM9KgPiQ3ikbh2G9u','StandartLogo.png',5,'МБОУ &quot;СОШ №49&quot;; г.Барнаул','Yes',0.00,NULL,'2024-08-23 06:23:45','2025-06-26 07:04:58'),
-(5,'88d6e6bb34b5f0bca0d953a2cb14f69d','Team E','$2y$12$uj9hHrsTXxnLnoUDPpohc.KdMnWrsVdVFRgzW0E1ynQUXqoyLOIX.','StandartLogo.png',5,'МАОУ «СОШ №134» г. Барнаул','Yes',0.00,NULL,'2024-08-23 06:23:48','2025-06-26 07:04:58'),
-(6,'6cc70190b0720666ae9565d8790814e9','SharLike','$2y$12$6oVOGIbxhjVGeLSQ.MWHtuh91/z9Wm.Fh.GkNyzldBR59nMqbDD2y','1730425369_like-button.png',7,'Алтайский государственный технический университет им. И. И. Ползунова','No',0.00,NULL,'2024-10-31 16:49:23','2025-06-26 07:04:58'),
-(7,'ea5f2bf8f22cfd9442db7c2b42e3aaba','Жуколовы','$2y$12$bUPE6JfRNqrs9FPLxQfPFuDZXGwqIcU0vlZyoxMJXZE5LcJKxnHXS','1727521723_New_Logo_Жуколовы-5-full.png',6,'Алтайский государственный технический университет им. И. И. Ползунова','No',0.00,NULL,'2024-08-26 08:04:47','2025-06-26 07:04:58'),
-(8,'1ab4a4f51e4934fb976b8100c3b01dc3','test','$2y$12$ICwpys4xenNs72XTkPpVgO7EthEMmIBw8GeKS7H.tUHK300VVF02u','StandartLogo.png',5,'test','Yes',0.00,NULL,'2025-06-21 13:03:18','2025-06-26 07:04:58');
+(1,'admin','$2y$12$5m.2BYBrTSBa/1LmKrAoSuRX3ZaQow5g.Z9Px3XEq2ZxNAcdMzNtu','zpcPB4f2zm6V3FurnRoNHidDyFCFBovi08jwx4WgjBs4Bhzpyzp5Yic1wIOO','2024-08-20 05:03:32','2025-07-03 16:05:22');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -387,4 +324,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-26  7:09:21
+-- Dump completed on 2025-07-03 16:05:22

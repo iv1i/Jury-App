@@ -85,15 +85,28 @@
                 <div class="product-cell image">
                     {{ __('Teams') }}
                     <button class="sort-button sort-button-teams">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
+                            <path fill="currentColor"
+                                  d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/>
+                        </svg>
                     </button>
                 </div>
-                <div class="product-cell sales">{{ __('Scores') }}<button class="sort-button sort-button-scores">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
-                <div class="product-cell price">{{ __('Tasks') }}<button class="sort-button sort-button-tasks">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button></div>
+                <div class="product-cell sales">{{ __('Scores') }}
+                    <button class="sort-button sort-button-scores">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
+                            <path fill="currentColor"
+                                  d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="product-cell price">{{ __('Tasks') }}
+                    <button class="sort-button sort-button-tasks">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
+                            <path fill="currentColor"
+                                  d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="Product-body">
 
@@ -105,7 +118,7 @@
 @section('scripts')
     <script type="text/javascript">
         const data = {!! json_encode($M) !!};
-        const desidedteams = {!! json_encode(\App\Models\desided_tasks_teams::all()) !!};
+        const desidedteams = {!! json_encode(\App\Models\CompletedTaskTeams::all()) !!};
         const divElement = document.querySelector('.Product-body');
 
         MakeHTML(MakeMassive(data, desidedteams), divElement);
@@ -119,7 +132,7 @@
             MakeHTML(MakeMassive(data2, desidedteams), divElement);
         });
 
-        function MakeMassive(data2, DesidedTeams){
+        function MakeMassive(data2, DesidedTeams) {
             const svg = `{!! view('SVG.GuestSVG') !!}`;
             const desidedteams = DesidedTeams;
             const divimgElement = document.querySelector('.account-info-picture');
@@ -170,11 +183,11 @@
             const html0 = `<div class="products-header">
                 <div class="product-cell image">
                     {{ __('Teams') }}
-                    <button class="sort-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
-                    </button>
-                </div>
-                <div class="product-cell sales">{{ __('Scores') }}<button class="sort-button">
+            <button class="sort-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
+            </button>
+        </div>
+        <div class="product-cell sales">{{ __('Scores') }}<button class="sort-button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><path fill="currentColor" d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/></svg>
                     </button></div>
                 <div class="product-cell price">{{ __('Tasks') }}<button class="sort-button">
@@ -185,7 +198,7 @@
             <div class="products-row ${item.BorderStyle}">
                 <div class="product-cell image">
                     <img class="logo_sc" src="${url + item.teamlogo}" alt="teamlogo">
-                    <span class="span-name">${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
+                    <span class="span-name">${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>' : ''}</span>
                 </div>
                 <div class="product-cell sales"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
                 <div class="product-cell price" style="display: flex; flex-wrap: wrap;"><span class="cell-label">{{ __('Tasks') }}:</span>
@@ -221,7 +234,7 @@
             isSorted3 = 0;
             isSorted4 = 0;
             Sorting(Teams, originalTeams, divElementSort, isSorted0, 'name')
-            if (isSorted0 === 2){
+            if (isSorted0 === 2) {
                 isSorted0 = 0;
             }
         });
@@ -232,7 +245,7 @@
             isSorted3 = 0;
             isSorted4 = 0;
             Sorting(Teams, originalTeams, divElementSort, isSorted1, 'scores')
-            if (isSorted1 >= 2){
+            if (isSorted1 >= 2) {
                 isSorted1 = 0;
             }
         });
@@ -243,12 +256,12 @@
             isSorted3 = 0;
             isSorted4 = 0;
             Sorting(Teams, originalTeams, divElementSort, isSorted2, 'complexity')
-            if (isSorted2 >= 2){
+            if (isSorted2 >= 2) {
                 isSorted2 = 0;
             }
         });
 
-        function Sorting(M, originalM, divElemSort, isSorted, column){
+        function Sorting(M, originalM, divElemSort, isSorted, column) {
             console.log(M)
             if (isSorted === 1) {
                 // Сортируем команды по имени
@@ -265,8 +278,8 @@
             }
         }
 
-        function SortDirect(M, column){
-            if (column === "name"){
+        function SortDirect(M, column) {
+            if (column === "name") {
                 M.sort(function (a, b) {
                     // Проверяем, есть ли значение в поле decide
                     const aHasDeside = a.decide && a.decide.trim() !== '';
@@ -294,7 +307,7 @@
                     return 0;
                 });
             }
-            if (column === "scores"){
+            if (column === "scores") {
                 M.sort(function (a, b) {
                     // Проверяем, есть ли значение в поле decide
                     const aHasDeside = a.decide && a.decide.trim() !== '';
@@ -322,7 +335,7 @@
                     return 0;
                 });
             }
-            if (column === "complexity"){
+            if (column === "complexity") {
                 M.sort(function (a, b) {
                     // Проверяем, есть ли значение в поле decide
                     const aHasDeside = a.decide && a.decide.trim() !== '';
@@ -353,8 +366,9 @@
 
             return M;
         }
-        function SortReverse(M, column){
-            if (column === "name"){
+
+        function SortReverse(M, column) {
+            if (column === "name") {
                 M.sort(function (a, b) {
                     // Проверяем, есть ли значение в поле decide
                     const aHasDeside = a.decide && a.decide.trim() !== '';
@@ -382,7 +396,7 @@
                     return 0;
                 });
             }
-            if (column === "scores"){
+            if (column === "scores") {
                 M.sort(function (a, b) {
                     // Проверяем, есть ли значение в поле decide
                     const aHasDeside = a.decide && a.decide.trim() !== '';
@@ -410,7 +424,7 @@
                     return 0;
                 });
             }
-            if (column === "complexity"){
+            if (column === "complexity") {
                 M.sort(function (a, b) {
                     // Проверяем, есть ли значение в поле decide
                     const aHasDeside = a.decide && a.decide.trim() !== '';

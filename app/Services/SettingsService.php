@@ -235,19 +235,12 @@ class SettingsService
 
     ];
 
-    /**
-     * @throws \JsonException
-     */
     public function __construct()
     {
         $this->path = storage_path('app/private/settings.json');
         $this->initializeSettings();
         $this->loadSettings();
     }
-
-    /**
-     * @throws \JsonException
-     */
     protected function initializeSettings(): void
     {
         if (!file_exists($this->path)) {
@@ -258,10 +251,6 @@ class SettingsService
             $this->save();
         }
     }
-
-    /**
-     * @throws \JsonException
-     */
     protected function loadSettings()
     {
         $fileContents = file_get_contents($this->path);
@@ -275,24 +264,15 @@ class SettingsService
 
         $this->settings = array_replace_recursive($this->defaultSettings, $decoded);
     }
-
     public function get(string $key, $default = null)
     {
         return data_get($this->settings, $key, $default);
     }
-
-    /**
-     * @throws \JsonException
-     */
     public function set(string $key, $value): void
     {
         data_set($this->settings, $key, $value);
         $this->save();
     }
-
-    /**
-     * @throws \JsonException
-     */
     public function setMany(array $values): void
     {
         foreach ($values as $key => $value) {
@@ -300,19 +280,11 @@ class SettingsService
         }
         $this->save();
     }
-
-    /**
-     * @throws \JsonException
-     */
     public function remove(string $key): void
     {
         data_forget($this->settings, $key);
         $this->save();
     }
-
-    /**
-     * @throws \JsonException
-     */
     public function removeMany(array $keys): void
     {
         foreach ($keys as $key) {
@@ -320,17 +292,14 @@ class SettingsService
         }
         $this->save();
     }
-
     public function all(): array
     {
         return $this->settings;
     }
-
     public function exists(string $key): bool
     {
         return data_get($this->settings, $key) !== null;
     }
-
     protected function save(): void
     {
         $result = file_put_contents(

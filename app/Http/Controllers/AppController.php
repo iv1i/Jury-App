@@ -2,32 +2,150 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\AdminHomeEvent;
-use App\Events\AdminScoreboardEvent;
-use App\Events\AppCheckTaskEvent;
-use App\Events\AppHomeEvent;
-use App\Events\AppScoreboardEvent;
-use App\Events\AppStatisticEvent;
-use App\Events\AppStatisticIDEvent;
-use App\Events\ProjectorEvent;
-use App\Models\CheckTasks;
-use App\Models\desided_tasks_teams;
-use App\Models\Settings;
-use App\Models\SolvedTasks;
-use App\Models\Tasks;
-use App\Models\User;
-use App\Services\SettingsService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use App\Events\{AdminHomeEvent, AdminScoreboardEvent, AppCheckTaskEvent, AppHomeEvent, AppScoreboardEvent, AppStatisticEvent, AppStatisticIDEvent, ProjectorEvent};
+use App\Models\{Tasks, SolvedTasks, Teams, CompletedTaskTeams, CheckTasks};
+use Illuminate\Http\{Request, JsonResponse};
+use Illuminate\Support\Facades\{Auth, Storage, Cache, DB, Validator};
+
 
 class AppController extends Controller
 {
     //----------------------------------------------------------------APP
-    public function CheckFlag(Request $request)
+    public function checkFlag(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'flag' => ['required', 'string', 'max:255'],
+            'ID' => ['required', 'numeric', 'integer'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(
+                ['message' => $validator->errors()->first()],
+                422
+            );
+        }
+
+        $taskId = $request->input('ID');
+        $task = Tasks::findOrFail($taskId);
+        $authUserId = Auth::id();
+
+        if ($this->isTaskAlreadySolved($authUserId, $taskId)) {
+            return response()->json([
+                'type' => 'warning',
+                'success' => true,
+                'message' => 'Вы уже решили эту задачу'
+            ], 200);
+        }
+
+        if ($request->input('flag') !== $task->flag) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Флаг неверный!'
+            ], 200);
+        }
+
+        $this->handleCorrectFlag($task, $authUserId, $request->input('complexity'));
+
+        return response()->json([
+            'success' => true,
+            'message' => __('The flag is correct!')
+        ], 200);
+    }
+
+    private function isTaskAlreadySolved(int $userId, int $taskId): bool
+    {
+        return SolvedTasks::where('teams_id', $userId)
+            ->where('tasks_id', $taskId)
+            ->exists();
+    }
+
+    private function handleCorrectFlag(Tasks $task, int $userId, ?string $complexity): void
+    {
+        $this->createSolvedTask($task, $userId);
+        $this->updateTaskPrice($task);
+        $this->updateUserStats($userId, $task->id, $complexity);
+        $this->updateAllUsersScores();
+
+        $this->AppEvents();
+        $this->AdminEvents();
+        $this->cacheClear();
+    }
+
+    private function createSolvedTask(Tasks $task, int $userId): void
+    {
+        $solvedTask = new SolvedTasks();
+        $solvedTask->id = $this->makeId(SolvedTasks::all());
+        $solvedTask->teams_id = $userId;
+        $solvedTask->tasks_id = $task->id;
+        $solvedTask->price = $task->id;
+        $solvedTask->save();
+    }
+
+    private function updateTaskPrice(Tasks $task): void
+    {
+        $solvedCount = $task->solved + 1;
+        $teamsCount = DB::table('users')->count();
+        $successRate = $solvedCount / $teamsCount;
+
+        $discountRates = [
+            0.2 => 0.2,
+            0.4 => 0.4,
+            0.6 => 0.6,
+            0.8 => 0.8
+        ];
+
+        foreach ($discountRates as $threshold => $discount) {
+            if ($successRate >= $threshold) {
+                $task->price = $task->oldprice - ($task->oldprice * $discount);
+            }
+        }
+
+        $task->solved = $solvedCount;
+        $task->save();
+    }
+
+    private function updateUserStats(int $userId, int $taskId, ?string $complexity): void
+    {
+        $checkTasks = Teams::findOrFail($userId)->checkTasks;
+
+        if (!$checkTasks) {
+            return;
+        }
+
+        $checkTasks->sumary += 1;
+
+        $styleMap = [
+            'easy' => '<div id="easy" style="background-color: #2ba972; border-radius: 5px; text-align: center; width: 10px; height: 20px; margin-right: 4px"><b></b></div>',
+            'medium' => '<div id="medium" style="background-color: #0086d3; border-radius: 5px; text-align: center; width: 10px; height: 20px; margin-right: 4px"><b></b></div>',
+            'hard' => '<div id="hard" style="background-color: #ba074f; border-radius: 5px; text-align: center; width: 10px; height: 20px; margin-right: 4px"><b></b></div>'
+        ];
+
+        if (array_key_exists($complexity, $styleMap)) {
+            $checkTasks->{$complexity} += 1;
+
+            $decidedTask = new DesidedTasksTeams();
+            $decidedTask->id = $this->makeId(DesidedTasksTeams::all());
+            $decidedTask->tasks_id = $taskId;
+            $decidedTask->teams_id = $userId;
+            $decidedTask->StyleTask = $styleMap[$complexity];
+            $decidedTask->save();
+        }
+
+        $checkTasks->save();
+    }
+
+    private function updateAllUsersScores(): void
+    {
+        $users = Teams::with(['solvedTasks.tasks'])->get();
+
+        foreach ($users as $user) {
+            $user->scores = $user->solvedTasks->sum(function ($solvedTask) {
+                return $solvedTask->tasks->price ?? 0;
+            });
+            $user->save();
+        }
+    }
+    public function СheckFlag(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'flag' => ['required', 'string', 'max:255'],
@@ -43,24 +161,11 @@ class AppController extends Controller
         $taskid = $request->input('ID');
         $task = Tasks::findOrFail($taskid);
         $AuthUserId =Auth::user()['id'];
-        //dd($task->flag);
-        //$checkSolvedTasks = User::find($AuthUserId)->solvedTasks;
 
-        $solved = SolvedTasks::where('user_id', $AuthUserId)->where('tasks_id', $taskid)->exists();
+        $solved = SolvedTasks::where('teams_id', $AuthUserId)->where('tasks_id', $taskid)->exists();
         if ($solved) {
-            //$this->NotifEventsOups($userAgent);
             return response()->json(['type' => 'warning', 'success' => 'true','message' => 'Вы уже решили эту задачу'], 200);
-            //return redirect()->route('TasksID', ['id' => $taskid])->with('error', 'Вы уже решили эту задачу');
         }
-
-        //dd($checkSolvedTasks);
-//        foreach ($checkSolvedTasks as $Task){
-//            if($Task->tasks_id == $taskid){
-//                //dd([$Task->tasks_id, $taskid]);
-//                $this->NotifEventsOups();
-//                return redirect()->route('TasksID', ['id' => $taskid])->with('error', 'Вы уже решили эту задачу');
-//            }
-//        }
 
         if($request->input('flag') === $task->flag){
             // Выполняем действия, если флаг верный
@@ -69,7 +174,7 @@ class AppController extends Controller
 
             $solvedtask = New SolvedTasks();
             $solvedtask->id = $SolvedId;
-            $solvedtask->user_id = $AuthUserId;
+            $solvedtask->teams_id = $AuthUserId;
             $solvedtask->tasks_id = $taskid;
             $solvedtask->price = $taskid;
             $solvedtask->save();
@@ -91,21 +196,20 @@ class AppController extends Controller
             }
             $task->solved = $solved;
             $task->save();
-
-            $checktasks = User::findOrFail($AuthUserId)->checkTasks;
+            $checktasks = Teams::findOrFail($AuthUserId)->checkTasks;
 
             $easyTask = '<div id="easy" style="background-color: #2ba972; border-radius: 5px; Text-align: center; width: 10px; height: 20px; margin-right: 4px"> <b></b> </div>';
             $mediumTask = '<div id="medium" style="background-color: #0086d3; border-radius: 5px; Text-align: center; width: 10px; height: 20px; margin-right: 4px"> <b></b> </div>';
             $hardTask = '<div id="hard" style="background-color: #ba074f; border-radius: 5px; Text-align: center; width: 10px; height: 20px; margin-right: 4px"> <b></b> </div>';
 
-            $desidedTask = New desided_tasks_teams();
+            $desidedTask = New CompletedTaskTeams();
 
-            $q = desided_tasks_teams::all();
+            $q = CompletedTaskTeams::all();
             $DesideId = $this->makeId($q);
 
             $desidedTask->id = $DesideId;
             $desidedTask->tasks_id = $taskid;
-            $desidedTask->user_id = $AuthUserId;
+            $desidedTask->teams_id = $AuthUserId;
             //dd($checktasks);
             if ($checktasks) {
                 $checktasks->sumary += 1;
@@ -126,25 +230,21 @@ class AppController extends Controller
                 $checktasks->save();
                 $desidedTask->save();
 
-                $user = User::find($AuthUserId);
-                $solvedTasks = $user->solvedTasks;
-                //dd($solvedTasks);
-                $scores = 0;
-                foreach ($solvedTasks as $task) {
-                    $task = Tasks::find($task->tasks_id);
-                    $scores += $task->price;
-                }
-                //dd($scores);
+                $user = Teams::with(['solvedTasks.tasks'])->find($AuthUserId);
+
+                $scores = $user->solvedTasks->sum(function($solvedTask) {
+                    return $solvedTask->tasks->price ?? 0;
+                });
+
                 $user->scores = $scores;
                 $user->save();
-                $userAll = User::all();
+                $userAll = Teams::with(['solvedTasks.tasks'])->get();
+
                 foreach ($userAll as $user) {
-                    $allusersolvedtasks = $user->solvedTasks;
-                    $scores = 0;
-                    foreach ($allusersolvedtasks as $task) {
-                        $task = Tasks::find($task->tasks_id);
-                        $scores += $task->price;
-                    }
+                    $scores = $user->solvedTasks->sum(function($solvedTask) {
+                        return $solvedTask->tasks->price ?? 0;
+                    });
+
                     $user->scores = $scores;
                     $user->save();
                 }
@@ -154,15 +254,12 @@ class AppController extends Controller
             $this->AppEvents();
             $this->AdminEvents();
 
+            $this->cacheClear();
+
             return response()->json(['success' => true,'message' =>  __('The flag is correct!')], 200);
-            //$this->NotifEventsSucces($userAgent);
 
         }
-
-        //$this->NotifEventsError($userAgent);
-
         return response()->json(['success' => false,'message' => 'Флаг неверный!'], 200);
-        //return redirect()->route('TasksID', ['id' => $taskid])->with('error', 'Флаг неверный!');
     }
     public function DwnlFile($md5file, $id, Request $request)
     {
@@ -223,9 +320,9 @@ class AppController extends Controller
     public function AppEvents()
     {
         $CHKT = CheckTasks::all();
-        $Team = User::all();
+        $Team = Teams::all();
         $Tasks = Tasks::all();
-        $DesidedT = desided_tasks_teams::all();
+        $DesidedT = CompletedTaskTeams::all();
         $SolvedTasks = SolvedTasks::all();
         $Teams = $Team;
         $data = compact('Team', 'Tasks', 'SolvedTasks', 'CHKT');
@@ -241,19 +338,23 @@ class AppController extends Controller
     }
     public function AdminEvents()
     {
-        $Teams = User::all()->makeVisible('token');
+        $Teams = Teams::all()->makeVisible('token');
         $Tasks = Tasks::all()->makeVisible('flag');
         $universalResult = $this->processTasksUniversal($Tasks);
         $InfoTasks = $this->formatToLegacyUniversal($universalResult);
         $CheckTasks = CheckTasks::all();
-        $DesidedT = desided_tasks_teams::all();
+        $DesidedT = CompletedTaskTeams::all();
         $data = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
         $data3 = compact('Teams', 'DesidedT');
         AdminHomeEvent::dispatch($data);
         AdminScoreboardEvent::dispatch($data3);
     }
     //----------------------------------------------------------------OTHER
-    public function makeId($q)
+    private function cacheClear()
+    {
+        Cache::tags('ModelList')->flush();
+    }
+    private function makeId($q)
     {
         $table = [];
         foreach ($q as $item) {
@@ -269,7 +370,7 @@ class AppController extends Controller
         }
         return $id;
     }
-    function formatToLegacyUniversal($universalResult) {
+    private function formatToLegacyUniversal($universalResult) {
         // Сначала создаем массив только с sumary
         $legacy = [
             'sumary' => $universalResult['sumary'] ?? 0
@@ -305,7 +406,7 @@ class AppController extends Controller
 
         return $legacy;
     }
-    function processTasksUniversal($tasks) {
+    private function processTasksUniversal($tasks) {
         $result = [
             'sumary' => 0,
             'difficulty' => [],

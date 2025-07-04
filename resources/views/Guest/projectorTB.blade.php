@@ -9,7 +9,8 @@
 @section('title', 'AltayCTF-School')
 
 @section('appcontent')
-    <div style="display: none; text-align: center; width: 100%; height: 2.2vh; color: var(--app-bg-inv);background-color: var(--app-bg-2); position: fixed; top: 0%; opacity: 0.5;font-family: cursive; font-size: 12px">
+    <div
+        style="display: none; text-align: center; width: 100%; height: 2.2vh; color: var(--app-bg-inv);background-color: var(--app-bg-2); position: fixed; top: 0%; opacity: 0.5;font-family: cursive; font-size: 12px">
         <b>By SharLike</b>
     </div>
     <div class="app-content">
@@ -186,7 +187,8 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
             width: 64px;
             height: 64px;
             border-radius: 6px;
-            margin-right: 6px; }
+            margin-right: 6px;
+        }
     </style>
 @endsection
 
@@ -195,7 +197,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
     <script type="text/javascript">
         const data = {!! json_encode($M) !!};
         const checktasks = {!! json_encode(\App\Models\CheckTasks::all()) !!};
-        const desidedteams = {!! json_encode(\App\Models\desided_tasks_teams::all()) !!};
+        const desidedteams = {!! json_encode(\App\Models\CompletedTaskTeams::all()) !!};
         const svg = `{!! view('SVG.GuestSVG') !!}`;
         // console.log(desidedteams);
         // console.log(data);
@@ -294,7 +296,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
             <div class="products-row" ${item.BorderStyle}>
                 <div class="product-cell image projector">
                     <img class="logo_sc" src="${url + item.teamlogo}" alt="product">
-                    <span>${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
+                    <span>${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>' : ''}</span>
                 </div>
                 <div class="product-cell sales projector" style="font-size: 25px;font-weight: 999;"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
                 <div class="product-cell price projector" style="display: flex; flex-wrap: wrap;"><span class="cell-label">{{ __('Tasks') }}:</span>
@@ -347,10 +349,10 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
         switchgrid.addEventListener('click', () => {
             const images = document.querySelectorAll('.gridView .product-cell img');
 
-                images.forEach(img => {
-                    img.style.width = ''; // Новая ширина
-                    img.style.height = ''; // Новая высота
-                });
+            images.forEach(img => {
+                img.style.width = ''; // Новая ширина
+                img.style.height = ''; // Новая высота
+            });
         });
 
         switchlist.addEventListener('click', () => {
@@ -358,7 +360,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
 
             // Изменяем стили для каждого изображения
             const TableS = localStorage.getItem('TableStyle');
-            if(TableS !== 'gridView'){
+            if (TableS !== 'gridView') {
                 images.forEach(img => {
                     img.style.width = '60px'; // Новая ширина
                     img.style.height = '60px'; // Новая высота
@@ -369,7 +371,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
 
         // Изменяем стили для каждого изображения
         const TableS = localStorage.getItem('TableStyle');
-        if(TableS !== 'gridView'){
+        if (TableS !== 'gridView') {
             images.forEach(img => {
                 img.style.width = '60px'; // Новая ширина
                 img.style.height = '60px'; // Новая высота

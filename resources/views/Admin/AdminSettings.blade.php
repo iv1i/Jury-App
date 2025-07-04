@@ -312,7 +312,7 @@
 
 @section('scripts')
     <script src="{{ asset('js/Other/Notifications.js') }}"></script>
-    <script>
+    <script id="V3">
         //--------------------------------Init-Of-Data
         const token = '{!! csrf_token() !!}';
 
@@ -341,11 +341,11 @@
                     return data;
                 } else {
                     showToast('error', 'Ошибка', data.message || 'Произошла ошибка');
-                    return Promise.reject(data);
+                    return data;
                 }
             } catch (error) {
+                console.log(error);
                 showToast('error', 'Ошибка', data.message || 'Произошла ошибка при отправке запроса');
-                return Promise.reject(error);
             }
         }
         function listCategoriesEdit(){
@@ -550,6 +550,7 @@
                         }
                     } catch (error) {
                         showToast('error', 'Ошибка', 'Произошла ошибка при отправке запроса');
+                        console.log(error);
                     } finally {
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;

@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -34,7 +34,7 @@ class AdminServiceProvider extends ServiceProvider
             }
 
             // Проверка существования таблицы admins только если соединение установлено
-            if (Schema::hasTable('admins')) {
+            if (Schema::hasTable('users')) {
                 $admin = config('admin');
 
                 // Проверяем, есть ли конфигурация администратора
@@ -43,7 +43,7 @@ class AdminServiceProvider extends ServiceProvider
                     return;
                 }
 
-                Admin::updateOrCreate(
+                User::updateOrCreate(
                     ['name' => 'admin'],
                     ['password' => Hash::make($admin['password'])]
                 );

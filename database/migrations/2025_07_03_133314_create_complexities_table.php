@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Tasks;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,11 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('desided_tasks_teams', function (Blueprint $table) {
+        Schema::create('complexities', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class);
-            $table->foreignIdFor(Tasks::class);
-            $table->longText('StyleTask');
+            $table->string('name')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('desided_tasks_teams');
+        Schema::dropIfExists('complexities');
     }
 };

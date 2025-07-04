@@ -175,7 +175,7 @@
     transition: all 0.2s;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 272px;
+    max-width: 185px;
 }
 
 .token-value:hover {
