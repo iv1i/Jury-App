@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Crypt;
 class AuthController extends Controller
 {
     // ----------------------------------------------------------------AUTH-ADMIN
-    public function AuthAdmin(Request $request)
+    public function authAdmin(Request $request)
     {
         $credentials = $request->validate([
             'name' => ['max:255'],
@@ -48,7 +48,7 @@ class AuthController extends Controller
     }
 
     //----------------------------------------------------------------Auth
-    public function AuthApp(Request $request, SettingsService $settings)
+    public function authApp(Request $request, SettingsService $settings)
     {
         $auth = $settings->get('auth');
         $credentials = [];

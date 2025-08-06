@@ -117,17 +117,17 @@
             count = 0;
             const userStyles = {};
             desidedteams.forEach(team => {
-                if (!userStyles[team.user_id]) {
-                    userStyles[team.user_id] = [];
+                if (!userStyles[team.teams_id]) {
+                    userStyles[team.teams_id] = [];
                 }
-                userStyles[team.user_id].push(team.StyleTask);
+                userStyles[team.teams_id].push(team.StyleTask);
             });
 
             // Обрабатываем массив Teams
             data2.forEach(team => {
-                const user_id = team.id; // Предполагается, что id команды совпадает с id пользователя
-                if (userStyles[user_id]) {
-                    team.style = userStyles[user_id].join(''); // Присваиваем стили команде
+                const teams_id = team.id; // Предполагается, что id команды совпадает с id пользователя
+                if (userStyles[teams_id]) {
+                    team.style = userStyles[teams_id].join(''); // Присваиваем стили команде
                 }
             });
             const sortedData = data2.sort((a, b) => b.scores - a.scores);

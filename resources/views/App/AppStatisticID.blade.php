@@ -189,7 +189,7 @@
                 }
             }
             for (let i = 0; i < valueToDisplay.CHKT.length; i++) {
-                if (teamid === valueToDisplay.CHKT[i].user_id) {
+                if (teamid === valueToDisplay.CHKT[i].teams_id) {
                     CHkT = valueToDisplay.CHKT[i];
                     //console.log(valueToDisplay.CHKT[i]);
                     break;
@@ -273,7 +273,7 @@
             </div>
         `).join("");
 
-            divElement.innerHTML = html22 + html2;
+            divElement.innerHTML = html2;
             //console.log(e.test);
         });
     </script>

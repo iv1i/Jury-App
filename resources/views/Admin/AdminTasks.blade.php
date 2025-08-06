@@ -43,44 +43,30 @@
         <div id="FormSwitchTheme" class="app-content-header">
             <h1 class="app-content-headerText">{{ __('Tasks') }}</h1>
             <button id="button-plus" class="button-plus">
-                <svg width="30px" height="30px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"
-                     xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
-                     fill="#000000">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-                    <g id="SVGRepo_iconCarrier"><title>plus-square</title>
-                        <desc>Created with Sketch Beta.</desc>
-                        <defs></defs>
-                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"
-                           sketch:type="MSPage">
-                            <g id="Icon-Set-Filled" sketch:type="MSLayerGroup"
-                               transform="translate(-102.000000, -1037.000000)" fill="var(--app-bg-inv)">
-                                <path
-                                    d="M124,1054 L119,1054 L119,1059 C119,1059.55 118.552,1060 118,1060 C117.448,1060 117,1059.55 117,1059 L117,1054 L112,1054 C111.448,1054 111,1053.55 111,1053 C111,1052.45 111.448,1052 112,1052 L117,1052 L117,1047 C117,1046.45 117.448,1046 118,1046 C118.552,1046 119,1046.45 119,1047 L119,1052 L124,1052 C124.552,1052 125,1052.45 125,1053 C125,1053.55 124.552,1054 124,1054 L124,1054 Z M130,1037 L106,1037 C103.791,1037 102,1038.79 102,1041 L102,1065 C102,1067.21 103.791,1069 106,1069 L130,1069 C132.209,1069 134,1067.21 134,1065 L134,1041 C134,1038.79 132.209,1037 130,1037 L130,1037 Z"
-                                    id="plus-square" sketch:type="MSShapeGroup"></path>
-                            </g>
-                        </g>
-                    </g>
-                </svg>
+                <svg id="button-plus-svg" height="30px" viewBox="0 0 24 24" width="30px" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1"><path d="m16 16a1 1 0 0 1 -1 1h-2v2a1 1 0 0 1 -2 0v-2h-2a1 1 0 0 1 0-2h2v-2a1 1 0 0 1 2 0v2h2a1 1 0 0 1 1 1zm6-5.515v8.515a5.006 5.006 0 0 1 -5 5h-10a5.006 5.006 0 0 1 -5-5v-14a5.006 5.006 0 0 1 5-5h4.515a6.958 6.958 0 0 1 4.95 2.05l3.484 3.486a6.951 6.951 0 0 1 2.051 4.949zm-6.949-7.021a5.01 5.01 0 0 0 -1.051-.78v4.316a1 1 0 0 0 1 1h4.316a4.983 4.983 0 0 0 -.781-1.05zm4.949 7.021c0-.165-.032-.323-.047-.485h-4.953a3 3 0 0 1 -3-3v-4.953c-.162-.015-.321-.047-.485-.047h-4.515a3 3 0 0 0 -3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3z" fill="var(--app-bg-inv)"/></svg>
             </button>
             <button id="button-minus" class="button-minus">
-                <svg width="30px" height="30px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                     xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
-                     fill="#000000">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-                    <g id="SVGRepo_iconCarrier"><title>minus-square</title>
-                        <desc>Created with Sketch Beta.</desc>
-                        <defs></defs>
-                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"
-                           sketch:type="MSPage">
-                            <g id="Icon-Set-Filled" sketch:type="MSLayerGroup"
-                               transform="translate(-154.000000, -1037.000000)" fill="var(--app-bg-inv)">
-                                <path
-                                    d="M176,1054 L164,1054 C163.448,1054 163,1053.55 163,1053 C163,1052.45 163.448,1052 164,1052 L176,1052 C176.552,1052 177,1052.45 177,1053 C177,1053.55 176.552,1054 176,1054 L176,1054 Z M182,1037 L158,1037 C155.791,1037 154,1038.79 154,1041 L154,1065 C154,1067.21 155.791,1069 158,1069 L182,1069 C184.209,1069 186,1067.21 186,1065 L186,1041 C186,1038.79 184.209,1037 182,1037 L182,1037 Z"
-                                    id="minus-square" sketch:type="MSShapeGroup"></path>
-                            </g>
-                        </g>
+                <svg id="button-minus-svg" version="1.0" xmlns="http://www.w3.org/2000/svg"
+                     width="30px" height="30px" viewBox="0 0 512.000000 512.000000"
+                     preserveAspectRatio="xMidYMid meet">
+
+                    <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+                       fill="var(--app-bg-inv)" stroke="none">
+                        <path d="M1275 5100 c-419 -89 -739 -413 -832 -842 -17 -78 -18 -182 -18
+-1698 0 -1516 1 -1620 18 -1698 78 -363 319 -654 653 -787 37 -15 103 -36 148
+-48 l81 -22 1235 0 1235 0 89 23 c409 109 703 418 793 834 17 77 18 160 18
+1123 0 967 -1 1047 -18 1145 -40 222 -132 443 -261 623 -95 133 -958 999
+-1086 1089 -185 131 -401 221 -618 259 -105 17 -164 19 -730 18 -565 0 -625
+-2 -707 -19z m1254 -416 l31 -6 0 -572 c0 -639 -1 -627 71 -774 54 -111 152
+-211 266 -270 150 -78 128 -75 778 -82 l580 -5 0 -1015 0 -1015 -22 -70 c-59
+-188 -217 -348 -408 -413 l-80 -27 -1180 0 c-1119 0 -1183 1 -1240 18 -180 56
+-321 172 -400 329 -69 139 -66 37 -63 1808 l3 1595 22 65 c59 174 214 338 374
+396 112 40 147 42 700 43 295 1 551 -2 568 -5z m581 -223 c89 -65 910 -896
+959 -971 l43 -65 -469 -3 c-257 -1 -482 0 -499 3 -42 7 -113 70 -135 119 -17
+38 -19 76 -19 519 l0 479 33 -21 c17 -11 57 -38 87 -60z"/>
+                        <path d="M1835 1886 c-59 -27 -77 -46 -104 -106 -35 -77 -24 -157 31 -224 65
+-79 26 -76 806 -76 662 0 694 1 730 19 43 22 83 63 106 108 21 43 20 128 -3
+179 -22 48 -82 101 -131 114 -21 6 -303 10 -710 10 l-675 0 -50 -24z"/>
                     </g>
                 </svg>
             </button>
@@ -698,7 +684,7 @@
             <span class="status ${item.complexity}">${item.complexity.toUpperCase()}</span>
         </div>
         <div class="product-cell price">
-            <span class="cell-label">{{ __('Price') }}:</span>${item.price}
+            <span class="cell-label">{{ __('Price') }}:</span>${item.oldprice}
         </div>
         <div class="product-cell action">
         <span class="cell-label">{{ __('Action') }}:</span>

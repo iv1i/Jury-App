@@ -35,32 +35,6 @@ use ZipArchive;
 class AdminController extends Controller
 {
     // ----------------------------------------------------------------AUTH
-    public function AdminAuth(Request $request)
-    {
-        $credentials = $request->validate([
-            'name' => ['max:255'],
-            'password' => ['required'],
-        ]);
-        $remember = $request->has('remember');
-
-        if (Auth::guard('admin')->attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
-            // Возвращаем JSON с URL для редиректа
-            return response()->json([
-                'success' => true,
-                'redirect_url' => url("/Admin"), // или ->intended() если нужно
-            ]);
-
-//            $url = url("/Admin");
-//            return redirect()->intended($url);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => __('Incorrect credentials'), // Исправлено на "credentials"
-        ], 401); // 401 — Unauthorized
-    }
     public function logout(Request $request)
     {
         Auth::guard('admin')->logout();
@@ -72,7 +46,7 @@ class AdminController extends Controller
     }
 
     // ----------------------------------------------------------------TEAMS
-    public function AddTeams(Request $request)
+    public function addTeams(Request $request)
     {
         // Валидация входных данных
         $validator = Validator::make($request->all(), [
@@ -152,11 +126,11 @@ class AdminController extends Controller
         foreach ($tasks as $task) {
             $this->updateTaskPrice($task);
         }
-        $this->UpdateTeamsScores();
+        $this->updateTeamsScores();
 
         // Обновление событий
-        $this->AdminEvents();
-        $this->AppEvents();
+        $this->adminEvents();
+        $this->appEvents();
 
 
 
@@ -165,13 +139,13 @@ class AdminController extends Controller
         return response()->json(['success' => true,'message' => 'Команда успешно добавлена!'], 200);
     }
     // -------------------------------DeleteTeams
-    public function DeleteTeams(Request $request)
+    public function deleteTeams(Request $request)
     {
         try {
             if (is_numeric($request->input('ID'))) {
                 $user = Teams::findOrFail($request->input('ID'));
-                $this->deleteUser($user);
-                $this->UpdateTeamsScores();
+                $this->deleteTeam($user);
+                $this->updateTeamsScores();
             } else {
                 $str = $request->input('ID');
                 $arr = explode('-', $str);
@@ -192,14 +166,14 @@ class AdminController extends Controller
                 foreach ($result as $id) {
                     $user = Teams::find($id);
                     if ($user) {
-                        $this->deleteUser($user);
-                        $this->UpdateTeamsScores();
+                        $this->deleteTeam($user);
+                        $this->updateTeamsScores();
                     }
                 }
             }
 
-            $this->AdminEvents();
-            $this->AppEvents();
+            $this->adminEvents();
+            $this->appEvents();
 
 
 
@@ -209,7 +183,7 @@ class AdminController extends Controller
             return response()->json(['success' => false,'message' => 'Ошибка при удалении!'], 500);
         }
     }
-    private function deleteUser(Teams $user)
+    private function deleteTeam(Teams $user)
     {
         if ($user->teamlogo !== 'StandartLogo.png') {
             $deleteImage = 'public/teamlogo/' . $user->teamlogo;
@@ -237,7 +211,7 @@ class AdminController extends Controller
 
         $user->delete();
     }
-    public function ChangeTeams(Request $request)
+    public function changeTeams(Request $request)
     {
         //dd($request->all());
         $TeamID = $request->input('id');
@@ -313,8 +287,8 @@ class AdminController extends Controller
 
         }
 
-        $this->AdminEvents();
-        $this->AppEvents();
+        $this->adminEvents();
+        $this->appEvents();
 
 
 
@@ -326,7 +300,7 @@ class AdminController extends Controller
     /**
      * @throws \Exception
      */
-    public function AddTasks(Request $request)
+    public function addTasks(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string','max:255'],
@@ -478,8 +452,8 @@ class AdminController extends Controller
         $task->solved = 0;
         $task->save();
 
-        $this->AdminEvents();
-        $this->AppEvents();
+        $this->adminEvents();
+        $this->appEvents();
 
 
 
@@ -490,7 +464,7 @@ class AdminController extends Controller
 //            $this->startDockerContainer($webDirectory);
 //        }
     }
-    public function ChangeTasks(Request $request) {
+    public function changeTasks(Request $request) {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:255'],
@@ -800,8 +774,8 @@ class AdminController extends Controller
                 $user->save();
             }
 
-            $this->AdminEvents();
-            $this->AppEvents();
+            $this->adminEvents();
+            $this->appEvents();
 
 
 
@@ -824,7 +798,7 @@ class AdminController extends Controller
             ], 500);
         }
     }
-    public function DeleteTasks(Request $request)
+    public function deleteTasks(Request $request)
     {
         try {
             if(is_numeric($request->input('ID'))){
@@ -865,9 +839,9 @@ class AdminController extends Controller
                     }
                 }
             }
-            $this->UpdateTeamsScores();
-            $this->AdminEvents();
-            $this->AppEvents();
+            $this->updateTeamsScores();
+            $this->adminEvents();
+            $this->appEvents();
 
 
 
@@ -878,7 +852,7 @@ class AdminController extends Controller
             return response()->json(['success' => false,'message' => 'Ошибка при удалении'], 500);
         }
     }
-    private function DeleteTask(Tasks $task)
+    private function deleteTask(Tasks $task)
     {
         // Остановка веб-контейнера, если он есть
         if ($task->web_directory) {
@@ -922,7 +896,7 @@ class AdminController extends Controller
     }
 
     // ----------------------------------------------------------------SETTINGS
-    public function SettingsReset(Request $request)
+    public function settingsReset(Request $request)
     {
         if($request->input('check') === 'Yes' && $request->input('ButtonReset') === 'RESET'){
             CompletedTaskTeams::truncate();
@@ -940,8 +914,8 @@ class AdminController extends Controller
                 }
             }
 
-            $this->AdminEvents();
-            $this->AppEvents();
+            $this->adminEvents();
+            $this->appEvents();
 
 
 
@@ -955,7 +929,7 @@ class AdminController extends Controller
             'message' => 'Сброс настроек не прошел!'
         ], 500);
     }
-    public function SettingsDeleteAll(Request $request)
+    public function settingsDeleteAll(Request $request)
     {
         if($request->input('check') === 'Yes' && $request->input('ButtonDeleteAll') === 'DELETEALL'){
 
@@ -965,8 +939,8 @@ class AdminController extends Controller
             Teams::truncate();
             Tasks::truncate();
 
-            $this->AdminEvents();
-            $this->AppEvents();
+            $this->adminEvents();
+            $this->appEvents();
 
             return response()->json([
                 'success' => true,
@@ -981,7 +955,7 @@ class AdminController extends Controller
             'message' => 'Удаление настроек не прошло!'
         ], 500);
     }
-    public function SettingsChngCategory(Request $request, SettingsService $settings)
+    public function settingsChangeCategory(Request $request, SettingsService $settings)
     {
         try {
             $action = $request->input('command');
@@ -1016,9 +990,9 @@ class AdminController extends Controller
                                 }
                             }
                         }
-                        $this->UpdateTeamsScores();
-                        $this->AdminEvents();
-                        $this->AppEvents();
+                        $this->updateTeamsScores();
+                        $this->adminEvents();
+                        $this->appEvents();
                         return response()->json(['success' => true,'message' => 'Категория успешно удалена!','categories' => $settings->get('categories')], 200);
                     }
                     else {
@@ -1035,7 +1009,7 @@ class AdminController extends Controller
         }
 
     }
-    public function SettingsChngRules(Request $request, SettingsService $settings)
+    public function settingsChangeRules(Request $request, SettingsService $settings)
     {
         // Проверяем условия выполнения
         if ($request->input('check') !== 'Yes' || $request->input('ButtonChangeRull') !== 'CHNGRULL') {
@@ -1075,7 +1049,7 @@ class AdminController extends Controller
             ], 500);
         }
     }
-    public function SettingsSlidebars(Request $request, SettingsService $settings)
+    public function settingsSidebars(Request $request, SettingsService $settings)
     {
         try {
             // Подготавливаем массив для массового обновления
@@ -1143,7 +1117,7 @@ class AdminController extends Controller
     }
 
     // ----------------------------------------------------------------EVENTS
-    public function AdminEvents()
+    public function adminEvents()
     {
         $Teams = Teams::all()->makeVisible('token');
         $Tasks = Tasks::all()->makeVisible('flag');
@@ -1161,7 +1135,7 @@ class AdminController extends Controller
         AdminHomeEvent::dispatch($dataHome);
         AdminScoreboardEvent::dispatch($dataScoreboard);
     }
-    public function AppEvents()
+    public function appEvents()
     {
         $CHKT = CheckTasks::all();
         $Team = Teams::all();
@@ -1524,7 +1498,7 @@ class AdminController extends Controller
             throw new \Exception("Invalid docker-compose.yml format");
         }
     }
-    public function UpdateTeamsScores()
+    public function updateTeamsScores()
     {
         $userAll = Teams::all();
         foreach ($userAll as $user) {

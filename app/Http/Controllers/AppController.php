@@ -66,8 +66,8 @@ class AppController extends Controller
         $this->updateUserStats($userId, $task->id, $complexity);
         $this->updateAllUsersScores();
 
-        $this->AppEvents();
-        $this->AdminEvents();
+        $this->appEvents();
+        $this->adminEvents();
         $this->cacheClear();
     }
 
@@ -84,20 +84,20 @@ class AppController extends Controller
     private function updateTaskPrice(Tasks $task): void
     {
         $solvedCount = $task->solved + 1;
-        $teamsCount = DB::table('users')->count();
-        $successRate = $solvedCount / $teamsCount;
+        $teamsCount = DB::table('teams')->count();
+        $rate = $solvedCount / $teamsCount;
 
-        $discountRates = [
-            0.2 => 0.2,
-            0.4 => 0.4,
-            0.6 => 0.6,
-            0.8 => 0.8
-        ];
-
-        foreach ($discountRates as $threshold => $discount) {
-            if ($successRate >= $threshold) {
-                $task->price = $task->oldprice - ($task->oldprice * $discount);
-            }
+        if($rate >= 0.2 && $rate < 0.4){
+            $task->price = $task->oldprice - $task->oldprice *0.2;
+        }
+        if($rate >= 0.4 && $rate < 0.6){
+            $task->price = $task->oldprice - $task->oldprice *0.4;
+        }
+        if($rate >= 0.6 && $rate < 0.8){
+            $task->price = $task->oldprice - $task->oldprice *0.6;
+        }
+        if($rate >= 0.8){
+            $task->price = $task->oldprice - $task->oldprice *0.8;
         }
 
         $task->solved = $solvedCount;
@@ -123,12 +123,12 @@ class AppController extends Controller
         if (array_key_exists($complexity, $styleMap)) {
             $checkTasks->{$complexity} += 1;
 
-            $decidedTask = new DesidedTasksTeams();
-            $decidedTask->id = $this->makeId(DesidedTasksTeams::all());
-            $decidedTask->tasks_id = $taskId;
-            $decidedTask->teams_id = $userId;
-            $decidedTask->StyleTask = $styleMap[$complexity];
-            $decidedTask->save();
+            $CompletedTaskTeams = new CompletedTaskTeams();
+            $CompletedTaskTeams->id = $this->makeId(CompletedTaskTeams::all());
+            $CompletedTaskTeams->tasks_id = $taskId;
+            $CompletedTaskTeams->teams_id = $userId;
+            $CompletedTaskTeams->StyleTask = $styleMap[$complexity];
+            $CompletedTaskTeams->save();
         }
 
         $checkTasks->save();
@@ -179,7 +179,7 @@ class AppController extends Controller
             $solvedtask->price = $taskid;
             $solvedtask->save();
             $solved = $task->solved + 1;
-            $countteams = DB::table('users')->count();
+            $countteams = DB::table('teams')->count();
             $rate = $solved/$countteams;
 
             if($rate >= 0.2 && $rate < 0.4){
@@ -251,8 +251,8 @@ class AppController extends Controller
 
             }
 
-            $this->AppEvents();
-            $this->AdminEvents();
+            $this->appEvents();
+            $this->adminEvents();
 
             $this->cacheClear();
 
@@ -261,7 +261,7 @@ class AppController extends Controller
         }
         return response()->json(['success' => false,'message' => 'Флаг неверный!'], 200);
     }
-    public function DwnlFile($md5file, $id, Request $request)
+    public function downloadFile($md5file, $id, Request $request)
     {
         $task = Tasks::find($id);
 
@@ -287,7 +287,7 @@ class AppController extends Controller
     }
 
     //----------------------------------------------------------------EVENTS
-    public function NotifEventsSucces($agent)
+    public function notifEventsSucces($agent)
     {
         $id = Auth::id();
         $message = __('Success');
@@ -297,7 +297,7 @@ class AppController extends Controller
         $notification = compact('message', 'text', 'color', 'id', 'userAgent');
         AppCheckTaskEvent::dispatch($notification);
     }
-    public function NotifEventsOups($agent)
+    public function notifEventsOups($agent)
     {
         $id = Auth::id();
         $message = __('Oups!');
@@ -307,7 +307,7 @@ class AppController extends Controller
         $notification = compact('message', 'text', 'color', 'id', 'userAgent');
         AppCheckTaskEvent::dispatch($notification);
     }
-    public function NotifEventsError($agent)
+    public function notifEventsError($agent)
     {
         $id = Auth::id();
         $message = __('Error');
@@ -317,7 +317,7 @@ class AppController extends Controller
         $notification = compact('message', 'text', 'color', 'id', 'userAgent');
         AppCheckTaskEvent::dispatch($notification);
     }
-    public function AppEvents()
+    public function appEvents()
     {
         $CHKT = CheckTasks::all();
         $Team = Teams::all();
@@ -336,7 +336,7 @@ class AppController extends Controller
         ProjectorEvent::dispatch($data3);
 
     }
-    public function AdminEvents()
+    public function adminEvents()
     {
         $Teams = Teams::all()->makeVisible('token');
         $Tasks = Tasks::all()->makeVisible('flag');

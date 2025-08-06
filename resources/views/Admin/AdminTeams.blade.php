@@ -45,46 +45,62 @@
         <div id="FormSwitchTheme" class="app-content-header">
             <h1 class="app-content-headerText">{{ __('Teams') }}</h1>
             <button id="button-plus" class="button-plus">
-                <svg width="30px" height="30px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"
-                     xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
-                     fill="#000000">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-                    <g id="SVGRepo_iconCarrier"><title>plus-square</title>
-                        <desc>Created with Sketch Beta.</desc>
-                        <defs></defs>
-                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"
-                           sketch:type="MSPage">
-                            <g id="Icon-Set-Filled" sketch:type="MSLayerGroup"
-                               transform="translate(-102.000000, -1037.000000)" fill="var(--app-bg-inv)">
-                                <path
-                                    d="M124,1054 L119,1054 L119,1059 C119,1059.55 118.552,1060 118,1060 C117.448,1060 117,1059.55 117,1059 L117,1054 L112,1054 C111.448,1054 111,1053.55 111,1053 C111,1052.45 111.448,1052 112,1052 L117,1052 L117,1047 C117,1046.45 117.448,1046 118,1046 C118.552,1046 119,1046.45 119,1047 L119,1052 L124,1052 C124.552,1052 125,1052.45 125,1053 C125,1053.55 124.552,1054 124,1054 L124,1054 Z M130,1037 L106,1037 C103.791,1037 102,1038.79 102,1041 L102,1065 C102,1067.21 103.791,1069 106,1069 L130,1069 C132.209,1069 134,1067.21 134,1065 L134,1041 C134,1038.79 132.209,1037 130,1037 L130,1037 Z"
-                                    id="plus-square" sketch:type="MSShapeGroup"></path>
-                            </g>
-                        </g>
+                <svg id="button-plus-svg" version="1.0" xmlns="http://www.w3.org/2000/svg"
+                     width="30px" height="30px" viewBox="0 0 512.000000 512.000000"
+                     preserveAspectRatio="xMidYMid meet">
+
+                    <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+                       fill="var(--app-bg-inv)" stroke="none">
+                        <path d="M1696 5104 c-258 -47 -493 -170 -681 -359 -193 -193 -314 -425 -361
+-695 -24 -140 -15 -381 19 -510 116 -441 422 -775 837 -914 142 -47 258 -66
+410 -66 350 0 659 128 905 375 151 151 244 301 310 498 46 139 65 256 65 407
+0 350 -127 657 -375 905 -192 192 -425 314 -689 360 -110 19 -332 18 -440 -1z
+m369 -429 c323 -57 574 -281 672 -602 23 -77 26 -106 27 -228 0 -115 -4 -154
+-22 -218 -88 -308 -301 -521 -609 -609 -64 -18 -103 -22 -218 -22 -122 1 -151
+4 -228 27 -49 15 -112 39 -140 54 -522 264 -637 953 -227 1363 197 197 469
+283 745 235z"/>
+                        <path d="M4180 3318 c-52 -28 -97 -87 -110 -144 -5 -21 -10 -137 -10 -256 l0
+-218 -238 0 c-230 0 -240 -1 -283 -23 -54 -28 -104 -99 -113 -159 -9 -63 15
+-135 61 -180 66 -64 85 -68 343 -68 l230 0 0 -218 c0 -254 8 -297 67 -354 93
+-91 213 -91 306 0 59 57 67 100 67 354 l0 218 233 0 c264 0 283 5 350 78 l37
+42 0 94 c0 87 -2 96 -29 133 -16 22 -49 50 -73 62 -41 20 -60 21 -280 21
+l-236 0 -4 243 -3 242 -28 48 c-41 69 -94 101 -176 105 -55 3 -74 -1 -111 -20z"/>
+                        <path d="M1745 2129 c-903 -85 -1623 -785 -1735 -1689 -16 -130 -13 -275 6
+-313 40 -79 113 -127 194 -127 84 0 147 35 192 108 16 26 22 60 29 160 20 292
+95 530 235 750 208 326 556 567 947 653 144 32 398 37 552 11 307 -53 580
+-192 799 -409 121 -120 205 -235 281 -385 101 -199 147 -372 164 -620 9 -133
+20 -165 73 -215 81 -76 222 -69 299 14 49 52 59 84 59 190 0 506 -251 1050
+-644 1394 -401 353 -930 527 -1451 478z" />
                     </g>
                 </svg>
             </button>
             <button id="button-minus" class="button-minus">
-                <svg width="30px" height="30px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                     xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
-                     fill="#000000">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-                    <g id="SVGRepo_iconCarrier"><title>minus-square</title>
-                        <desc>Created with Sketch Beta.</desc>
-                        <defs></defs>
-                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"
-                           sketch:type="MSPage">
-                            <g id="Icon-Set-Filled" sketch:type="MSLayerGroup"
-                               transform="translate(-154.000000, -1037.000000)" fill="var(--app-bg-inv)">
-                                <path
-                                    d="M176,1054 L164,1054 C163.448,1054 163,1053.55 163,1053 C163,1052.45 163.448,1052 164,1052 L176,1052 C176.552,1052 177,1052.45 177,1053 C177,1053.55 176.552,1054 176,1054 L176,1054 Z M182,1037 L158,1037 C155.791,1037 154,1038.79 154,1041 L154,1065 C154,1067.21 155.791,1069 158,1069 L182,1069 C184.209,1069 186,1067.21 186,1065 L186,1041 C186,1038.79 184.209,1037 182,1037 L182,1037 Z"
-                                    id="minus-square" sketch:type="MSShapeGroup"></path>
-                            </g>
-                        </g>
+                <svg id="button-minus-svg" version="1.0" xmlns="http://www.w3.org/2000/svg"
+                     width="30px" height="30px" viewBox="0 0 512.000000 512.000000"
+                     preserveAspectRatio="xMidYMid meet">
+
+                    <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+                       fill="var(--app-bg-inv)" stroke="none">
+                        <path d="M1696 5104 c-258 -47 -493 -170 -681 -359 -193 -193 -314 -425 -361
+-695 -24 -140 -15 -381 19 -510 116 -441 422 -775 837 -914 142 -47 258 -66
+410 -66 350 0 659 128 905 375 151 151 244 301 310 498 46 139 65 256 65 407
+0 350 -127 657 -375 905 -192 192 -425 314 -689 360 -110 19 -332 18 -440 -1z
+m369 -429 c323 -57 574 -281 672 -602 23 -77 26 -106 27 -228 0 -115 -4 -154
+-22 -218 -88 -308 -301 -521 -609 -609 -64 -18 -103 -22 -218 -22 -122 1 -151
+4 -228 27 -49 15 -112 39 -140 54 -522 264 -637 953 -227 1363 197 197 469
+283 745 235z"/>
+                        <path d="M3555 2686 c-59 -27 -77 -46 -104 -106 -35 -77 -24 -157 31 -224 65
+-79 26 -76 806 -76 666 0 694 1 731 19 21 11 52 36 69 56 32 35 32 37 32 142
+l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
+                        <path d="M1745 2129 c-903 -85 -1623 -785 -1735 -1689 -16 -130 -13 -275 6
+-313 40 -79 113 -127 194 -127 84 0 147 35 192 108 16 26 22 60 29 160 20 292
+95 530 235 750 208 326 556 567 947 653 144 32 398 37 552 11 307 -53 580
+-192 799 -409 121 -120 205 -235 281 -385 101 -199 147 -372 164 -620 9 -133
+20 -165 73 -215 81 -76 222 -69 299 14 49 52 59 84 59 190 0 506 -251 1050
+-644 1394 -401 353 -930 527 -1451 478z"/>
                     </g>
                 </svg>
+
             </button>
             <button id="switchTheme" class="mode-switch" title="Switch Theme">
                 <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"

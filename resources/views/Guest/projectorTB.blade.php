@@ -220,17 +220,17 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
         let check = false;
         const userStyles = {};
         desidedteams.forEach(team => {
-            if (!userStyles[team.user_id]) {
-                userStyles[team.user_id] = [];
+            if (!userStyles[team.teams_id]) {
+                userStyles[team.teams_id] = [];
             }
-            userStyles[team.user_id].push(updateStyles(team.StyleTask));
+            userStyles[team.teams_id].push(updateStyles(team.StyleTask));
         });
 
         // Обрабатываем массив Teams
         data.forEach(team => {
-            const user_id = team.id; // Предполагается, что id команды совпадает с id пользователя
-            if (userStyles[user_id]) {
-                team.style = userStyles[user_id].join(''); // Присваиваем стили команде
+            const teams_id = team.id; // Предполагается, что id команды совпадает с id пользователя
+            if (userStyles[teams_id]) {
+                team.style = userStyles[teams_id].join(''); // Присваиваем стили команде
             }
         });
 
@@ -256,17 +256,17 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
             count = 0;
             const userStyles = {};
             desidedteams.forEach(team => {
-                if (!userStyles[team.user_id]) {
-                    userStyles[team.user_id] = [];
+                if (!userStyles[team.teams_id]) {
+                    userStyles[team.teams_id] = [];
                 }
-                userStyles[team.user_id].push(updateStyles(team.StyleTask));
+                userStyles[team.teams_id].push(updateStyles(team.StyleTask));
             });
 
             // Обрабатываем массив Teams
             data.forEach(team => {
-                const user_id = team.id; // Предполагается, что id команды совпадает с id пользователя
-                if (userStyles[user_id]) {
-                    team.style = userStyles[user_id].join(''); // Присваиваем стили команде
+                const teams_id = team.id; // Предполагается, что id команды совпадает с id пользователя
+                if (userStyles[teams_id]) {
+                    team.style = userStyles[teams_id].join(''); // Присваиваем стили команде
                 }
             });
             const sortedData = data.sort((a, b) => b.scores - a.scores);

@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categories;
 use App\Models\CheckTasks;
 use App\Models\CompletedTaskTeams;
-use App\Models\Complexities;
 use App\Models\Tasks;
 use App\Models\Teams;
 use App\Services\SettingsService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 class TakeModels
@@ -89,18 +86,18 @@ class ViewController extends Controller
 {
     public function __construct(private SettingsService $settings) {}
     // ----------------------------------------------------------------VIEW-ADMIN
-    public function AdminScoreboardView()
+    public function adminScoreboardView()
     {
         $Users = TakeModels::getAllTeams();
         $DesidedT = TakeModels::getAllDesidedTasksAndTeams();
         return view('Admin.AdminScoreboard', compact('Users', 'DesidedT'));
     }
-    public function AdminTeamsView()
+    public function adminTeamsView()
     {
         $Teams = TakeModels::getAllTeamsNoHidden();
         return view('Admin.AdminTeams', compact('Teams'));
     }
-    public function AdminTasksView()
+    public function adminTasksView()
     {
         $Tasks = TakeModels::getAllTasksNoHidden();
         $universalResult = $this->processTasksUniversal($Tasks);
@@ -127,14 +124,14 @@ class ViewController extends Controller
             'AllCategories' => $AllCategories,
         ]);
     }
-    public function AdminSettingsView()
+    public function adminSettingsView()
     {
         $Rules = $this->settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
         $SettSidebar = $this->settings->get('sidebar');
         $TypeAuth = $this->settings->get('auth');
         return view('Admin.AdminSettings', compact('Rules', 'SettSidebar', 'TypeAuth'));
     }
-    public function AdminHomeView()
+    public function adminHomeView()
     {
         $Teams = TakeModels::getAllTeams();
         $Tasks = TakeModels::getAllTasks();
@@ -144,7 +141,7 @@ class ViewController extends Controller
         $data = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
         return view('Admin.AdminHome', compact('data'));
     }
-    public function AdminAuthView()
+    public function adminAuthView()
     {
         if (Auth::guard('admin')->check()) {
             // Пользователь вошел в систему...
@@ -154,7 +151,7 @@ class ViewController extends Controller
     }
 
     //----------------------------------------------------------------VIEW-APP
-    public function StatisticIDview(int $id)
+    public function statisticIDview(int $id)
     {
         $user = Teams::with([
             'solvedTasks.tasks',
@@ -179,22 +176,22 @@ class ViewController extends Controller
             'TeamSolvedTAsks' => $TeamSolvedTasks
         ]);
     }
-    public function StatisticView()
+    public function statisticView()
     {
         $M = TakeModels::getAllTeams();
         return view('App.AppStatistic', compact('M'));
     }
-    public function ScoreboardView()
+    public function scoreboardView()
     {
         $M = TakeModels::getAllTeams();
         return view('App.AppScoreboard', compact('M'));
     }
-    public function ProjectorView()
+    public function projectorView()
     {
         $M = TakeModels::getAllTeams();
         return view('Guest.projectorTB', compact('M'));
     }
-    public function HomeView()
+    public function homeView()
     {
         $Tasks = TakeModels::getAllTasks();
 
@@ -215,7 +212,7 @@ class ViewController extends Controller
             'SolvedTasks' => $SolvedTasks,
         ]);
     }
-    public function RulesView()
+    public function rulesView()
     {
         $sett = $this->settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
         if (Auth::check()) {
@@ -223,19 +220,30 @@ class ViewController extends Controller
         }
         return view('Guest.rules', compact('sett'));
     }
-    public function AuthView()
+    public function authView()
     {
         if (Auth::check()) {
             return redirect('/Home');
         }
         return view('App.AppAuth');
     }
-    public function SlashView()
+    public function slashView()
     {
         if (Auth::check()) {
             return redirect('/Home');
         }
         return redirect('/Auth');
+    }
+    public function tasksIDView(int $id)
+    {
+        $task = Tasks::find($id);
+        if($task){
+            $data = compact('id', 'task');
+            return view('App.AppTasksID', compact('data'));
+        }
+        else {
+            return redirect()->back()->with('error', 'Задача не найдена');
+        }
     }
 
     //----------------------------------------------------------------Other
