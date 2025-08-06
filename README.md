@@ -16,7 +16,7 @@ WEB приложение созданное для проведения соре
 
 [Laravel](https://laravel.com/docs) - Фреймворк.
 
-[Laravel Sail](https://laravel.su/docs/10.x/sail) - Взаимодействия со средой разработки Docker.
+[Laravel Sail](https://laravel.su/docs/10.x/sail) - Docker-интерфейс.
 
 [Laravel Reverb](https://laravel.su/docs/10.x/reverb) - WebSocket.
 
@@ -112,25 +112,11 @@ npm run build
 
 Для запуска приложения нужно открыть консоль в дирректории проекта, вставить все эти команды одновременно и дождаться их выполнения:
 ```
-./vendor/bin/sail up --build -d
-./vendor/bin/sail artisan migrate --seed
+ docker compose exec app up --build -d
+ docker compose exec app artisan migrate --seed
 ```
-Чтобы узнать, что все работает, откройте браузер и перейдите к localhost:80,и вы должны увидеть страницу авторизации.
+Чтобы узнать, что все работает, откройте браузер и перейдите к `localhost:80`,и вы должны увидеть страницу авторизации.
 
-#### Далее для работы с Jury-App используйте следующие команды:
-
-Чтобы запустить все контейнеры Docker в фоновом режиме введите команду:
-```
-./vendor/bin/sail up -d
-```
-Чтобы остановить все контейнеры Docker введите команду:
-```
-./vendor/bin/sail stop
-```
-Чтобы перезапустить все контейнеры Docker введите команду:
-```
-./vendor/bin/sail restart
-```
 ## <img src="public/media/icon/book.png" width="32" align="absmiddle"> Useful Things
 #### Пароль от Администратора
 находится в файле `.env` и хрнаится в таблице admins в хешированном виде.
@@ -138,16 +124,16 @@ npm run build
 > Имя администратора в базе данных изменять нельзя! только для продвинутых пользователей!
 #### Для удобного переноса данных с одного устройства на другое предусмотрено сохранение и загрузка базы данных.
 
-```./vendor/bin/sail artisan dumb:db-export``` - сохранение
+``` docker compose exec app artisan dumb:db-export``` - сохранение дампа базы.
 
-```./vendor/bin/sail artisan dump:db-import``` - загрузка
+``` docker compose exec app artisan dump:db-import``` - загрузка дампа базы.
+
+``` docker compose exec app artisan dump``` - просмотр документации.
 #### Миграции
 При использовании миграций laravel использовать команду:
 
 ```
-./vendor/bin/sail artisan migrate --seed
+ docker compose exec app artisan migrate --seed
 ```
-чтобы произошла начальная загрузка данных в главные таблицы, либо используйте dump базы данных и команды приведенные выше.
-
 ## <img src="public/media/icon/tips.png" width="30" align="absmiddle"> Helper
 - ### [Возможные решения при появлении ошибок](ISSUES.md)
