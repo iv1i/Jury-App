@@ -45,7 +45,7 @@ class AdminServiceProvider extends ServiceProvider
 
                 User::updateOrCreate(
                     ['name' => 'admin'],
-                    ['password' => Hash::make($admin['password'])]
+                    ['password' => Hash::make($admin['password'])],
                 );
             }
         }  catch (Exception $e) {

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('token')->nullable();
             $table->string('name')->unique();
             $table->string('password');
-            $table->longText('teamlogo');
+            $table->longText('teamlogo')->nullable();
             $table->integer('players');
             $table->string('wherefrom');
             $table->string('guest');

@@ -1,4 +1,4 @@
-# Checker-App-Issues
+# Jury-App-Issues
 
 В случае появления ошибки:
 

@@ -4,7 +4,7 @@
 
 WEB приложение созданное для проведения соревнований AltayCTF-School в формате Task-based;
 
-## <img src="public/media/icon/technology.png" width="30"> Technologies Used
+## <img src="public/media/icon/technology.png" width="30" align="absmiddle"> Technologies Used
 
 [PHP](https://www.php.net/) - Язык программироваия.
 
@@ -20,7 +20,7 @@ WEB приложение созданное для проведения соре
 
 [Laravel Reverb](https://laravel.su/docs/10.x/reverb) - WebSocket.
 
-## <img src="public/media/icon/tools.png" width="30"> Installation (Linux Debian)
+## <img src="public/media/icon/tools.png" width="30" align="absmiddle"> Installation (Linux Debian)
 
 #### Системные Требования:
 ```
@@ -80,12 +80,18 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
 nvm install 22
 ```
 
-## <img src="public/media/icon/rocket.png" width="30"> Launch
+## <img src="public/media/icon/rocket.png" width="30" align="absmiddle"> Launch
 #### Jury-App(В дирректории проекта):
 > [!WARNING]
 > Скрипт launch.sh находится в разработке, здесь представлена Alpha версия, использовать с осторожностью!
+
+> [!INFO]
 > Рекомендуется установить DNS 8.8.8.8 - чтобы не было проблем со сборкой контейнеров!
 
+Скопируйте Production версию в docker-compose:
+```bash
+cp docker/production/docker-compose.prod.yml docker-compose.yml
+```
 Чтобы автоматически создать все необходимые таблицы базы данных, раскоментируйте строчку в docker-compose:
 ```
 - './database/schema/init.sql:/docker-entrypoint-initdb.d/dump.sql'
@@ -125,9 +131,7 @@ npm run build
 ```
 ./vendor/bin/sail restart
 ```
-## <img src="public/media/icon/tips.png" width="30"> Helper
-- [Возможные решения при появлении ошибок](ISSUES.md)
-## <img src="public/media/icon/book.png" width="32"> Useful Things
+## <img src="public/media/icon/book.png" width="32" align="absmiddle"> Useful Things
 #### Пароль от Администратора
 находится в файле `.env` и хрнаится в таблице admins в хешированном виде.
 > [!WARNING]
@@ -144,3 +148,6 @@ npm run build
 ./vendor/bin/sail artisan migrate --seed
 ```
 чтобы произошла начальная загрузка данных в главные таблицы, либо используйте dump базы данных и команды приведенные выше.
+
+## <img src="public/media/icon/tips.png" width="30" align="absmiddle"> Helper
+- ### [Возможные решения при появлении ошибок](ISSUES.md)
