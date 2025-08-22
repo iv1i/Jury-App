@@ -1,10 +1,39 @@
-<p align="center"><img src="public/media/img/kolos-white.png" width="300" alt="Laravel Logo"></p>
+<p align="center"><img src="public/media/img/kolos-white.png" width="300" alt="Laravel Logo"></p><a id='links'></a>
 
 # Jury-App
 
-WEB приложение созданное для проведения соревнований AltayCTF-School в формате Task-based;
+### Журийная система для соревнований CTF в формате Task-based;
 
-## <img src="public/media/icon/technology.png" width="30" align="absmiddle"> Technologies Used
+## <img src="public/media/icon/link.png" width="27" align="absmiddle"> Ссылки
+### [Технологии](#technologies) | [Описание](#description) | [Установка](#download) | [Инициализация](#init)
+### [Использование](#using) | [Помощь](#help) | [Галерея](#galery)
+
+## <img src="public/media/icon/book2.png" width="35" align="absmiddle"> Описание <a id='description'></a>[<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
+
+#### Платформа представляет собой специализированный ресурс для организации и проведения CTF-соревнований в task-based формате. 
+#### Основное функциональное назначение системы включает четыре ключевых аспекта: 
+- Создание и администрирование CTF-заданий, 
+- Мониторинг решенных заданий, 
+- Визуализацию рейтинговой системы и статистических данных, 
+- Управление пользовательскими аккаунтами.
+
+### Основные сущности
+
+- **Пользователи**
+- **Команды**
+- **Задания**
+- **Решенные задания**
+
+### Связи между сущностями
+
+- Команды → много решенных заданий
+- Решенное задание → много команд
+
+### Технические особенности
+- **Json-ответы сервера**
+- **Веб-сокеты**
+
+## <img src="public/media/icon/technology.png" width="30" align="absmiddle"> <a id='technologies'></a> Используемые технологии [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 
 [PHP](https://www.php.net/) - Язык программироваия.
 
@@ -12,7 +41,7 @@ WEB приложение созданное для проведения соре
 
 [Docker](https://www.docker.com/) - Контейнеризация.
 
-[NodeJS](https://nodejs.org/en) - NodeJS.
+[Npm](https://nodejs.org/en) - NodeJS.
 
 [Laravel](https://laravel.com/docs) - Фреймворк.
 
@@ -20,7 +49,7 @@ WEB приложение созданное для проведения соре
 
 [Laravel Reverb](https://laravel.su/docs/10.x/reverb) - WebSocket.
 
-## <img src="public/media/icon/tools.png" width="30" align="absmiddle"> Installation (Linux Debian)
+## <img src="public/media/icon/tools.png" width="30" align="absmiddle"> <a id='download'></a> Установка (Linux Debian) [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 
 #### Системные Требования:
 ```
@@ -80,7 +109,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
 nvm install 22
 ```
 
-## <img src="public/media/icon/rocket.png" width="30" align="absmiddle"> Launch
+## <img src="public/media/icon/rocket.png" width="30" align="absmiddle"> <a id='init'></a> Инициализация [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 #### Jury-App(В дирректории проекта):
 > [!WARNING]
 > Скрипт launch.sh находится в разработке, здесь представлена Alpha версия, использовать с осторожностью!
@@ -117,7 +146,7 @@ npm run build
 ```
 Чтобы узнать, что все работает, откройте браузер и перейдите к `localhost:80`,и вы должны увидеть страницу авторизации.
 
-## <img src="public/media/icon/book.png" width="32" align="absmiddle"> Useful Things
+## <img src="public/media/icon/magic.png" width="32" align="absmiddle"> <a id='using'></a> Использование [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 #### Пароль от Администратора
 находится в файле `.env` и хрнаится в таблице admins в хешированном виде.
 > [!WARNING]
@@ -135,5 +164,37 @@ npm run build
 ```
  docker compose exec app artisan migrate --seed
 ```
-## <img src="public/media/icon/tips.png" width="30" align="absmiddle"> Helper
+
+## <img src="public/media/icon/quest.png" width="30" align="absmiddle"> <a id='help'></a> Помощь [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 - ### [Возможные решения при появлении ошибок](ISSUES.md)
+
+## <img src="public/media/icon/flow.png" width="30" align="absmiddle"> <a id='galery'></a> Галерея [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
+
+### Гости:
+<img src="public/media/UI/1.png">
+<img src="public/media/UI/2.png">
+<img src="public/media/UI/3.png">
+<img src="public/media/UI/4.png">
+<img src="public/media/UI/5.png">
+
+### Команды(авторизованные пользователи):
+<img src="public/media/UI/6.png">
+<img src="public/media/UI/7.png">
+<img src="public/media/UI/8.png">
+<img src="public/media/UI/9.png">
+<img src="public/media/UI/10.png">
+<img src="public/media/UI/12.png">
+
+### Администраторы:
+<img src="public/media/UI/13.png">
+<img src="public/media/UI/14.png">
+<img src="public/media/UI/15.png">
+<img src="public/media/UI/16.png">
+<img src="public/media/UI/17.png">
+<img src="public/media/UI/18.png">
+<img src="public/media/UI/19.png">
+<img src="public/media/UI/20.png">
+<img src="public/media/UI/21.png">
+<img src="public/media/UI/22.png">
+<img src="public/media/UI/23.png">
+<img src="public/media/UI/24.png">
