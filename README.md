@@ -1,8 +1,8 @@
 <p align="center"><img src="public/media/img/kolos-white.png" width="300" alt="Laravel Logo"></p><a id='links'></a>
 
-# Jury-App
+# <p align="center">Jury-App</p>
 
-### Журийная система для соревнований CTF в формате Task-based;
+### <p align="center">Журийная система для соревнований CTF в формате Task-based</p>
 
 ## <img src="public/media/icon/link.png" width="27" align="absmiddle"> Ссылки
 ### [Технологии](#technologies) | [Описание](#description) | [Установка](#download) | [Инициализация](#init)
