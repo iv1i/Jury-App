@@ -3,102 +3,54 @@
 namespace App\Http\Controllers;
 
 use App\Models\Teams;
+use App\Services\AuthService;
 use App\Services\SettingsService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
-    // ----------------------------------------------------------------AUTH-ADMIN
-    public function authAdmin(Request $request)
+    public function __construct(protected AuthService $authService)
     {
-        $credentials = $request->validate([
-            'name' => ['max:255'],
-            'password' => ['required'],
-        ]);
-        $remember = $request->has('remember');
+    }
 
-        if (Auth::guard('admin')->attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
-            // Возвращаем JSON с URL для редиректа
-            return response()->json([
-                'success' => true,
-                'redirect_url' => url("/Admin"), // или ->intended() если нужно
-            ]);
-
-//            $url = url("/Admin");
-//            return redirect()->intended($url);
+    // ----------------------------------------------------------------AUTH-ADMIN
+    public function authAdmin(Request $request): JsonResponse
+    {
+        $resp = $this->authService->authAdmin($request);
+        if ($resp['status'] === 200 ) {
+            return response()->json($resp, 200); // 200 - OK
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => __('Incorrect username or password'), // Исправлено на "credentials"
-        ], 401); // 401 — Unauthorized
+        if ($resp['status'] === 401 ) {
+            return response()->json($resp, 401); // 401 - Unauthorized
+        }
+
+       abort(400);
     }
     public function logoutAdmin(Request $request)
     {
-        Auth::guard('admin')->logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/Admin/Auth');
+        $this->authService->logoutAdmin($request);
     }
 
     //----------------------------------------------------------------Auth
-    public function authApp(Request $request, SettingsService $settings)
+    public function authApp(Request $request)
     {
-        $auth = $settings->get('auth');
-        $credentials = [];
-        if ($auth === 'base') {
-            $credentials = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'password' => ['required'],
-            ]);
-            if (Auth::attempt($credentials)) {
-                $request->session()->regenerate();
-
-                return response()->json([
-                    'success' => true,
-                    'redirect_url' => url("/Home"), // или ->intended() если нужно
-                ]);
-            }
-        }
-        if ($auth === 'token') {
-            $user = Teams::where('token', $request->token)->first();
-
-            if (!$user) {
-                return response()->json(['success' => false, 'message' => __('Incorrect token')], 401);
-            }
-
-            Auth::login($user);
-            $request->session()->regenerate();
-
-            return response()->json(['success' => true, 'redirect_url' => url("/Home")]);
+        $resp = $this->authService->authApp($request);
+        if ($resp['status'] === 200 ) {
+            return response()->json($resp, 200); // 200 - OK
         }
 
-        if ($auth === 'base') {
-            return response()->json(['success' => false,'message' => __('Incorrect username or password')], 401);
-        }
-        if ($auth === 'token') {
-            return response()->json(['success' => false,'message' => __('Incorrect token')], 401);
+        if ($resp['status'] === 401 ) {
+            return response()->json($resp, 401); // 401 - Unauthorized
         }
 
-        return response()->json(['success' => false,'message' => __('Auth error')], 500);
+        abort(400);
+
     }
     public function logoutApp(Request $request, SettingsService $settings)
     {
-        if(!$settings->get('sidebar.Logout')){
-            abort(403);
-        }
-        // Выход текущего пользователя из системы
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/Auth');
+        $this->authService->logoutApp($request);
     }
 }
