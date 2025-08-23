@@ -161,7 +161,6 @@
         </div>
         <form action="/Admin/Tasks/Add" method="POST" class="form" id="MyFormPlus">
             @csrf
-            @method('PUT')
             <div class="form_item">
                 <div>Название</div>
                 <input name="name" class="" required="" autocomplete="off">
@@ -265,7 +264,6 @@
         </div>
         <form method="POST" class="form" id="MyFormMinus" action="/Admin/Tasks/Delete">
             @csrf
-            @method('DELETE')
             <div class="form_item">
                 <div>{{ __('ID') }}</div>
                 <input type="text" name="ID" class="" required="" autocomplete="off">
@@ -365,7 +363,6 @@
         </div>
         <form action="/Admin/Tasks/Change" method="POST" class="form" id="MyFormChange${task.id}" enctype="multipart/form-data">
             @csrf
-            @method('PATCH')
             <div class="form_item">
                 <div>Название</div>
                 <input name="name" class="" required value="${task.name}">

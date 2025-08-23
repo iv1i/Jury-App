@@ -193,7 +193,6 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
         </div>
         <form method="POST" class="form" id="MyFormMinus" action="/Admin/Teams/Delete">
             @csrf
-            @method('DELETE')
             <div class="form_item">
                 <div>{{ __('ID') }}</div>
                 <input type="text" name="ID" class="" required="" autocomplete="off">
@@ -233,7 +232,6 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
         </div>
         <form action="/Admin/Teams/Add" method="POST" id="MyFormPlus" class="form" enctype="multipart/form-data">
             @csrf
-            @method('PUT')
             <div class="form_item">
                 <div>Название</div>
                 <input type="text" name="name" class="" required="" autocomplete="off">
@@ -338,7 +336,6 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
             </div>
             <form action="/Admin/Teams/Change" method="POST" id="MyFormChange${team.id}" class="form" enctype="multipart/form-data">
                 @csrf
-            @method('PATCH')
             <div class="form_item"><div>Название</div>
                 <input type="text" name="name" class="" required="" value="${team.name}">
                 </div>

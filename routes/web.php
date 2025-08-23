@@ -40,17 +40,16 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('/Admin/Settings/СhangeRull', [AdminController::class, 'settingsChangeRules'])->name('Admin-Settings-Сhange-Rules');
     Route::post('/Admin/Settings/СhangeCategory', [AdminController::class, 'settingsChangeCategory'])->name('Admin-Settings-Сhange-Categories');
 
+    Route::post('/Admin/Tasks/Add', [AdminController::class, 'addTasks'])->name('Admin-Tasks-Add');
+    Route::post('/Admin/Tasks/Change', [AdminController::class, 'changeTasks'])->name('Admin-Tasks-Change');
+    Route::post('/Admin/Tasks/Delete', [AdminController::class, 'deleteTasks'])->name('Admin-Tasks-Delete');
 
-    Route::put('/Admin/Tasks/Add', [AdminController::class, 'addTasks'])->name('Admin-Tasks-Add');
-    Route::patch('/Admin/Tasks/Change', [AdminController::class, 'changeTasks'])->name('Admin-Tasks-Change');
-    Route::delete('/Admin/Tasks/Delete', [AdminController::class, 'deleteTasks'])->name('Admin-Tasks-Delete');
+    Route::post('/Admin/Teams/Add', [AdminController::class, 'addTeams'])->name('Admin-Teams-Add');
+    Route::post('/Admin/Teams/Change', [AdminController::class, 'changeTeams'])->name('Admin-Teams-Change');
+    Route::post('/Admin/Teams/Delete', [AdminController::class, 'deleteTeams'])->name('Admin-Teams-Delete');
 
-    Route::put('/Admin/Teams/Add', [AdminController::class, 'addTeams'])->name('Admin-Teams-Add');
-    Route::patch('/Admin/Teams/Change', [AdminController::class, 'changeTeams'])->name('Admin-Teams-Change');
-    Route::delete('/Admin/Teams/Delete', [AdminController::class, 'deleteTeams'])->name('Admin-Teams-Delete');
-
-    Route::get('/Admin/Tasks/{id}', [AdminController::class, 'TaskID']);
-    Route::get('/Admin/Teams/{id}', [AdminController::class, 'TeamsID']);
+    //Route::get('/Admin/Tasks/{id}', [AdminController::class, 'TaskID']);
+    //Route::get('/Admin/Teams/{id}', [AdminController::class, 'TeamsID']);
 
     Route::get('/cache-vs-db-test', function () {
         $id = 1; // ID тестовой записи
