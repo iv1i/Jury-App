@@ -51,8 +51,6 @@
 
 ## <img src="public/media/icon/tools.png" width="30" align="absmiddle"> <a id='download'></a> Установка (Linux Debian) [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 
-#### Системные Требования:
-
 > [!WARNING]
 >  Фреймворк Laravel имеет несколько системных требований.
 >  Вы должны убедиться, что ваш веб-сервер имеет следующую минимальную версию PHP и расширения:
