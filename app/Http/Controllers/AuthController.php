@@ -19,15 +19,8 @@ class AuthController extends Controller
     public function authAdmin(Request $request): JsonResponse
     {
         $resp = $this->authService->authAdmin($request);
-        if ($resp['status'] === 200 ) {
-            return response()->json($resp, 200); // 200 - OK
-        }
 
-        if ($resp['status'] === 401 ) {
-            return response()->json($resp, 401); // 401 - Unauthorized
-        }
-
-       abort(400);
+        return response()->json($resp, $resp['status']);
     }
     public function logoutAdmin(Request $request)
     {
@@ -38,16 +31,8 @@ class AuthController extends Controller
     public function authApp(Request $request)
     {
         $resp = $this->authService->authApp($request);
-        if ($resp['status'] === 200 ) {
-            return response()->json($resp, 200); // 200 - OK
-        }
 
-        if ($resp['status'] === 401 ) {
-            return response()->json($resp, 401); // 401 - Unauthorized
-        }
-
-        abort(400);
-
+        return response()->json($resp, $resp['status']);
     }
     public function logoutApp(Request $request, SettingsService $settings)
     {

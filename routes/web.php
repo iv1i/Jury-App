@@ -21,7 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/Download/File/{md5file}/{id}', [AppController::class, 'downloadFile'])->name('App-Download-File')->middleware('check.sidebar.access:Home');
     Route::post('/Home/Tasks/Check', [AppController::class, 'checkFlag'])->name('App-Check-Flag')->middleware('check.sidebar.access:Home');
 
-    Route::get('/Home/{id}', [ViewController::class, 'tasksIDView'])->name('TasksID');
+    //Route::get('/Home/{id}', [ViewController::class, 'tasksIDView'])->name('TasksID');
 
 });
 
