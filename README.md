@@ -8,6 +8,22 @@
 ### [Технологии](#technologies) | [Описание](#description) | [Установка](#download) | [Инициализация](#init)
 ### [Использование](#using) | [Помощь](#help) | [Галерея](#galery)
 
+## <img src="public/media/icon/technology.png" width="30" align="absmiddle"> <a id='technologies'></a> Используемые технологии [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
+
+[PHP](https://www.php.net/) - Язык программироваия.
+
+[Composer](https://getcomposer.org/) - Менеджер зависимостей для PHP.
+
+[Docker](https://www.docker.com/) - Контейнеризация.
+
+[Npm](https://nodejs.org/en) - NodeJS.
+
+[Laravel](https://laravel.com/docs) - Фреймворк.
+
+[Laravel Sail](https://laravel.su/docs/10.x/sail) - Docker-интерфейс.
+
+[Laravel Reverb](https://laravel.su/docs/10.x/reverb) - WebSocket.
+
 ## <img src="public/media/icon/book2.png" width="35" align="absmiddle"> Описание <a id='description'></a>[<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 
 #### Платформа представляет собой специализированный ресурс для организации и проведения CTF-соревнований в task-based формате. 
@@ -32,22 +48,6 @@
 ### Технические особенности
 - **Json-ответы сервера**
 - **Веб-сокеты**
-
-## <img src="public/media/icon/technology.png" width="30" align="absmiddle"> <a id='technologies'></a> Используемые технологии [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
-
-[PHP](https://www.php.net/) - Язык программироваия.
-
-[Composer](https://getcomposer.org/) - Менеджер зависимостей для PHP.
-
-[Docker](https://www.docker.com/) - Контейнеризация.
-
-[Npm](https://nodejs.org/en) - NodeJS.
-
-[Laravel](https://laravel.com/docs) - Фреймворк.
-
-[Laravel Sail](https://laravel.su/docs/10.x/sail) - Docker-интерфейс.
-
-[Laravel Reverb](https://laravel.su/docs/10.x/reverb) - WebSocket.
 
 ## <img src="public/media/icon/tools.png" width="30" align="absmiddle"> <a id='download'></a> Установка (Linux Debian) [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 
