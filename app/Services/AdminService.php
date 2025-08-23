@@ -2,15 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\AdminHomeEvent;
-use App\Events\AdminScoreboardEvent;
-use App\Events\AdminTasksEvent;
-use App\Events\AdminTeamsEvent;
-use App\Events\AppHomeEvent;
-use App\Events\AppScoreboardEvent;
-use App\Events\AppStatisticEvent;
-use App\Events\AppStatisticIDEvent;
-use App\Events\ProjectorEvent;
 use App\Events\UpdateRulesEvent;
 use App\Models\CheckTasks;
 use App\Models\CompletedTaskTeams;
@@ -18,7 +9,6 @@ use App\Models\SolvedTasks;
 use App\Models\Tasks;
 use App\Models\Teams;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +16,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
-use staabm\SideEffectsDetector\SideEffect;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 

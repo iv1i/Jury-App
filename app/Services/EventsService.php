@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Events\AdminHomeEvent;
 use App\Events\AdminScoreboardEvent;
+use App\Events\AdminTasksEvent;
+use App\Events\AdminTeamsEvent;
 use App\Events\AppHomeEvent;
 use App\Events\AppScoreboardEvent;
 use App\Events\AppStatisticEvent;
@@ -22,7 +24,7 @@ class EventsService
     {
     }
 
-    public function appEvents()
+    public function appEventsUsers()
     {
         $CHKT = CheckTasks::all();
         $Team = Teams::all();
@@ -41,7 +43,7 @@ class EventsService
         ProjectorEvent::dispatch($data3);
 
     }
-    public function adminEvents()
+    public function adminEventsUsers()
     {
         $Teams = Teams::all()->makeVisible('token');
         $Tasks = Tasks::all()->makeVisible('flag');
@@ -53,5 +55,44 @@ class EventsService
         $data3 = compact('Teams', 'DesidedT');
         AdminHomeEvent::dispatch($data);
         AdminScoreboardEvent::dispatch($data3);
+    }
+
+    public function adminEvents()
+    {
+        $Teams = Teams::all()->makeVisible('token');
+        $Tasks = Tasks::all()->makeVisible('flag');
+        $universalResult = $this->utility->processTasksUniversal($Tasks);
+        $InfoTasks = $this->utility->formatToLegacyUniversal($universalResult);
+        $CheckTasks = CheckTasks::all();
+        $DesidedT = CompletedTaskTeams::all();
+        $dataHome = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
+        $dataScoreboard = [$Teams, $DesidedT];
+
+        $this->utility->cacheClear();
+
+        AdminTasksEvent::dispatch($Tasks);
+        AdminTeamsEvent::dispatch($Teams);
+        AdminHomeEvent::dispatch($dataHome);
+        AdminScoreboardEvent::dispatch($dataScoreboard);
+    }
+
+    public function appEvents()
+    {
+        $CHKT = CheckTasks::all();
+        $Team = Teams::all();
+        $Tasks = Tasks::all();
+        $DesidedT = CompletedTaskTeams::all();
+        $SolvedTasks = SolvedTasks::all();
+        $Teams = $Team;
+        $data = compact('Team', 'Tasks', 'SolvedTasks', 'CHKT');
+        $data2 = compact('Tasks', 'SolvedTasks');
+        $data3 = compact('Teams', 'DesidedT');
+        $this->utility->cacheClear();
+
+        AppStatisticIDEvent::dispatch($data);
+        AppHomeEvent::dispatch($data2);
+        AppScoreboardEvent::dispatch($data3);
+        AppStatisticEvent::dispatch($Team);
+        ProjectorEvent::dispatch($data3);
     }
 }

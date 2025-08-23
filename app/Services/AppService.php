@@ -90,8 +90,8 @@ class AppService
         $this->updateUserStats($userId, $task->id, $complexity);
         $this->updateAllUsersScores();
 
-        $this->eventsService->appEvents();
-        $this->eventsService->adminEvents();
+        $this->eventsService->appEventsUsers();
+        $this->eventsService->adminEventsUsers();
 
         $this->utility->cacheClear();
     }
@@ -311,8 +311,8 @@ class AppService
 
             }
 
-            $this->eventsService->appEvents();
-            $this->eventsService->adminEvents();
+            $this->eventsService->appEventsUsers();
+            $this->eventsService->adminEventsUsers();
 
             $this->utility->cacheClear();
 

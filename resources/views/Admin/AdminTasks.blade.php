@@ -714,7 +714,7 @@
                                 headers: {
                                     'Content-Type': 'application/x-www-form-urlencoded',
                                 },
-                                body: `_token=${encodeURIComponent(document.querySelector('input[name="_token"]').value)}&_method=DELETE&ID=${taskId}`
+                                body: `_token=${encodeURIComponent(document.querySelector('input[name="_token"]').value)}&ID=${taskId}`
                             });
 
                             const data = await response.json();

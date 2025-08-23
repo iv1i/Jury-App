@@ -13,11 +13,26 @@ use Symfony\Component\Yaml\Yaml;
 
 class Utility
 {
+    public function makeId($q)
+    {
+        $table = [];
+        foreach ($q as $item) {
+            $table[] = $item->id;
+        }
+        $id = 1;
+
+        foreach ($table as $value) {
+            if ($value != $id) {
+                break;
+            }
+            $id++;
+        }
+        return $id;
+    }
     public function cacheClear()
     {
         Cache::tags('ModelList')->flush();
     }
-
     public function formatToLegacyUniversal($universalResult) {
         // Сначала создаем массив только с sumary
         $legacy = [
@@ -355,22 +370,5 @@ class Utility
             Log::error("YAML parse error: ".$e->getMessage());
             throw new \Exception("Invalid docker-compose.yml format");
         }
-    }
-
-    public function makeId($q)
-    {
-        $table = [];
-        foreach ($q as $item) {
-            $table[] = $item->id;
-        }
-        $id = 1;
-
-        foreach ($table as $value) {
-            if ($value != $id) {
-                break;
-            }
-            $id++;
-        }
-        return $id;
     }
 }
