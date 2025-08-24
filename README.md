@@ -142,6 +142,11 @@ npm run build
  docker compose exec app up --build -d
  docker compose exec app artisan migrate --seed
 ```
+
+Генерация ключа
+```
+docker compose exec app php artisan key:generate
+```
 Чтобы узнать, что все работает, откройте браузер и перейдите к `localhost:80`,и вы должны увидеть страницу авторизации.
 
 ## <img src="public/media/icon/magic.png" width="32" align="absmiddle"> <a id='using'></a> Использование [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
