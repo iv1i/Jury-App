@@ -7,8 +7,12 @@ use App\Models\CompletedTaskTeams;
 use App\Models\Tasks;
 use App\Models\Teams;
 use App\Services\SettingsService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\View;
+
 class TakeModels
 {
     static function getAllTasks()
@@ -86,18 +90,20 @@ class ViewController extends Controller
 {
     public function __construct(private SettingsService $settings) {}
     // ----------------------------------------------------------------VIEW-ADMIN
-    public function adminScoreboardView()
+    public function adminScoreboardView(): \Illuminate\Contracts\View\View
     {
         $Users = TakeModels::getAllTeams();
         $DesidedT = TakeModels::getAllDesidedTasksAndTeams();
+
         return view('Admin.AdminScoreboard', compact('Users', 'DesidedT'));
     }
-    public function adminTeamsView()
+    public function adminTeamsView(): \Illuminate\Contracts\View\View
     {
         $Teams = TakeModels::getAllTeamsNoHidden();
+
         return view('Admin.AdminTeams', compact('Teams'));
     }
-    public function adminTasksView()
+    public function adminTasksView(): \Illuminate\Contracts\View\View
     {
         $Tasks = TakeModels::getAllTasksNoHidden();
         $universalResult = $this->processTasksUniversal($Tasks);
@@ -113,8 +119,6 @@ class ViewController extends Controller
         $AllComplexities = $this->settings->get('complexity');
         $AllCategories = $this->settings->get('categories');
 
-
-
         return view('Admin.AdminTasks', [
             'Tasks' => $Tasks,
             'categories' => $categories,
@@ -124,14 +128,15 @@ class ViewController extends Controller
             'AllCategories' => $AllCategories,
         ]);
     }
-    public function adminSettingsView()
+    public function adminSettingsView(): \Illuminate\Contracts\View\View
     {
         $Rules = $this->settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
         $SettSidebar = $this->settings->get('sidebar');
         $TypeAuth = $this->settings->get('auth');
+
         return view('Admin.AdminSettings', compact('Rules', 'SettSidebar', 'TypeAuth'));
     }
-    public function adminHomeView()
+    public function adminHomeView(): \Illuminate\Contracts\View\View
     {
         $Teams = TakeModels::getAllTeams();
         $Tasks = TakeModels::getAllTasks();
@@ -139,19 +144,21 @@ class ViewController extends Controller
         $InfoTasks = $this->formatToLegacyUniversal($universalResult);
         $CheckTasks = CheckTasks::all();
         $data = [$Tasks, $Teams, $InfoTasks, $CheckTasks];
+
         return view('Admin.AdminHome', compact('data'));
     }
-    public function adminAuthView()
+    public function adminAuthView(): \Illuminate\Contracts\View\View|RedirectResponse
     {
         if (Auth::guard('admin')->check()) {
             // Пользователь вошел в систему...
             return redirect('/Admin');
         }
+
         return view('Admin.AdminAuth');
     }
 
     //----------------------------------------------------------------VIEW-APP
-    public function statisticIDview(int $id)
+    public function statisticIDview(int $id): \Illuminate\Contracts\View\View|RedirectResponse
     {
         $user = Teams::with([
             'solvedTasks.tasks',
@@ -166,6 +173,7 @@ class ViewController extends Controller
 
         $M = TakeModels::getAllTeams()->map(function($user) {
             $user->teamlogo = asset('storage/teamlogo/' . $user->teamlogo);
+
             return $user;
         });
 
@@ -176,22 +184,25 @@ class ViewController extends Controller
             'TeamSolvedTAsks' => $TeamSolvedTasks
         ]);
     }
-    public function statisticView()
+    public function statisticView(): \Illuminate\Contracts\View\View
     {
         $M = TakeModels::getAllTeams();
+
         return view('App.AppStatistic', compact('M'));
     }
-    public function scoreboardView()
+    public function scoreboardView(): \Illuminate\Contracts\View\View
     {
         $M = TakeModels::getAllTeams();
+
         return view('App.AppScoreboard', compact('M'));
     }
-    public function projectorView()
+    public function projectorView(): \Illuminate\Contracts\View\View
     {
         $M = TakeModels::getAllTeams();
+
         return view('Guest.projectorTB', compact('M'));
     }
-    public function homeView()
+    public function homeView(): \Illuminate\Contracts\View\View
     {
         $Tasks = TakeModels::getAllTasks();
 
@@ -205,6 +216,7 @@ class ViewController extends Controller
         // Получаем все возможные сложности
         $complexities = $universalResult['difficulty'] ?? [];
         ksort($complexities);
+
         return view('App.AppHome', [
             'Tasks' => $Tasks,
             'categories' => $categories,
@@ -212,26 +224,29 @@ class ViewController extends Controller
             'SolvedTasks' => $SolvedTasks,
         ]);
     }
-    public function rulesView()
+    public function rulesView(): \Illuminate\Contracts\View\View
     {
         $sett = $this->settings->get('AppRulesTB') ?? '(•ิ_•ิ)?';
         if (Auth::check()) {
             return view('App.AppRules', compact('sett'));
         }
+
         return view('Guest.rules', compact('sett'));
     }
-    public function authView()
+    public function authView(): \Illuminate\Contracts\View\View|RedirectResponse
     {
         if (Auth::check()) {
             return redirect('/Home');
         }
+
         return view('App.AppAuth');
     }
-    public function slashView()
+    public function slashView(): \Illuminate\Contracts\View\View|RedirectResponse
     {
         if (Auth::check()) {
             return redirect('/Home');
         }
+
         return redirect('/Auth');
     }
     public function tasksIDView(int $id)
@@ -239,6 +254,7 @@ class ViewController extends Controller
         $task = Tasks::find($id);
         if($task){
             $data = compact('id', 'task');
+
             return view('App.AppTasksID', compact('data'));
         }
         else {
@@ -247,7 +263,8 @@ class ViewController extends Controller
     }
 
     //----------------------------------------------------------------Other
-    function formatToLegacyUniversal($universalResult) {
+    function formatToLegacyUniversal($universalResult): array
+    {
         // Сначала создаем массив только с sumary
         $legacy = [
             'sumary' => $universalResult['sumary'] ?? 0
@@ -283,7 +300,8 @@ class ViewController extends Controller
 
         return $legacy;
     }
-    function processTasksUniversal($tasks) {
+    function processTasksUniversal($tasks): array
+    {
         $result = [
             'sumary' => 0,
             'difficulty' => [],

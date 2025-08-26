@@ -205,7 +205,7 @@ class AppService
     }
 
     //----------------------------------------------------------------OLD
-    public function СheckFlagOLD(Request $request)
+    private function СheckFlagOLD(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'flag' => ['required', 'string', 'max:255'],

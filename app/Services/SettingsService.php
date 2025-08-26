@@ -251,7 +251,7 @@ class SettingsService
             $this->save();
         }
     }
-    protected function loadSettings()
+    protected function loadSettings(): void
     {
         $fileContents = file_get_contents($this->path);
         $decoded = json_decode($fileContents, true);

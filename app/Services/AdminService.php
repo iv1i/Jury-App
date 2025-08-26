@@ -42,6 +42,7 @@ class AdminService
 
         if ($validator->fails()) {
             $firstErrorMessage = $validator->errors()->first();
+
             return [
                 'success' => false,
                 'message' => $firstErrorMessage,
@@ -321,6 +322,7 @@ class AdminService
 
         if ($validator->fails()) {
             $firstErrorMessage = $validator->errors()->first();
+
             return [
                 'success' => false,
                 'message' => $firstErrorMessage,
@@ -396,6 +398,7 @@ class AdminService
                 } else {
                     $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
                     Log::error($errorMsg);
+
                     return [
                         'success' => false,
                         'message' => 'Ошибка открытия архива',
@@ -446,6 +449,7 @@ class AdminService
             } else {
                 $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
                 Log::error($errorMsg);
+
                 return [
                     'success' => false,
                     'message' => 'Ошибка открытия архива',
@@ -502,6 +506,7 @@ class AdminService
 
         if ($validator->fails()) {
             $firstErrorMessage = $validator->errors()->first();
+
             return [
                 'success' => false,
                 'message' => $firstErrorMessage,
@@ -552,6 +557,7 @@ class AdminService
                         } catch (\Exception $e) {
                             $zip->close();
                             Log::error("Error extracting ZIP archive: " . $e->getMessage() . " | Path: " . $zipPath);
+
                             return [
                                 'success' => false,
                                 'message' => 'Ошибка распаковки архива',
@@ -561,6 +567,7 @@ class AdminService
                     } else {
                         $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
                         Log::error($errorMsg);
+
                         return [
                             'success' => false,
                             'message' => 'Ошибка открытия архива',
@@ -597,6 +604,7 @@ class AdminService
                     } catch (\Exception $e) {
                         $zip->close();
                         Log::error("Error extracting ZIP archive: " . $e->getMessage() . " | Path: " . $zipPath);
+
                         return [
                             'success' => false,
                             'message' => 'Ошибка распаковки архива',
@@ -606,6 +614,7 @@ class AdminService
                 } else {
                     $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
                     Log::error($errorMsg);
+
                     return [
                         'success' => false,
                         'message' => 'Ошибка открытия архива',
@@ -931,6 +940,7 @@ class AdminService
                 }
             }
         }
+
         $task->solvedTasks()->delete();
         $task->delete();
     }
@@ -1010,6 +1020,7 @@ class AdminService
                     if (!in_array($categoryName, $AllCategories)) {
                         $AllCategories[] = $categoryName;
                         $this->settings->set('categories', $AllCategories);
+
                         return [
                             'success' => true,
                             'message' => 'Категория успешно добавлена!',
@@ -1041,6 +1052,7 @@ class AdminService
                         $this->updateTeamsScores();
                         $this->eventsService->adminEvents();
                         $this->eventsService->appEvents();
+
                         return [
                             'success' => true,
                             'message' => 'Категория успешно удалена!',
@@ -1057,6 +1069,7 @@ class AdminService
                         ];
                     }
                 }
+
                 return [
                     'success' => false,
                     'message' => 'Ошибка при добавлении категории! Команда не распознана!',
@@ -1064,6 +1077,7 @@ class AdminService
                     'status' => 404
                 ];
             }
+
             return [
                 'success' => false,
                 'message' => 'Ошибка при добавлении категории!',
@@ -1165,6 +1179,7 @@ class AdminService
             if ($request->input('TokenAuth') === 'yes'){
                 $auth = 'token';
                 $this->settings->set('auth', $auth);
+
                 return [
                     'success' => true,
                     'message' => 'Включена авторизация через токены!',
@@ -1174,6 +1189,7 @@ class AdminService
             if ($request->input('TokenAuth') === 'no') {
                 $auth = 'base';
                 $this->settings->set('auth', $auth);
+
                 return [
                     'success' => true,
                     'message' => 'Включена авторизация через логин и пароль!',

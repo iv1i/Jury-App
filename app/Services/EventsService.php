@@ -24,7 +24,7 @@ class EventsService
     {
     }
 
-    public function appEventsUsers()
+    public function appEventsUsers(): void
     {
         $CHKT = CheckTasks::all();
         $Team = Teams::all();
@@ -43,7 +43,7 @@ class EventsService
         ProjectorEvent::dispatch($data3);
 
     }
-    public function adminEventsUsers()
+    public function adminEventsUsers(): void
     {
         $Teams = Teams::all()->makeVisible('token');
         $Tasks = Tasks::all()->makeVisible('flag');
@@ -57,7 +57,7 @@ class EventsService
         AdminScoreboardEvent::dispatch($data3);
     }
 
-    public function adminEvents()
+    public function adminEvents(): void
     {
         $Teams = Teams::all()->makeVisible('token');
         $Tasks = Tasks::all()->makeVisible('flag');
@@ -76,7 +76,7 @@ class EventsService
         AdminScoreboardEvent::dispatch($dataScoreboard);
     }
 
-    public function appEvents()
+    public function appEvents(): void
     {
         $CHKT = CheckTasks::all();
         $Team = Teams::all();

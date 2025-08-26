@@ -91,6 +91,7 @@ class AdminController extends Controller
     public function settingsDeleteAll(Request $request): JsonResponse
     {
         $resp = $this->adminService->settingsDeleteAll($request);
+
         return response()->json($resp, $resp['status']);
     }
     public function settingsChangeCategory(Request $request): JsonResponse
@@ -99,13 +100,13 @@ class AdminController extends Controller
 
         return response()->json($resp, $resp['status']);
     }
-    public function settingsChangeRules(Request $request, SettingsService $settings): JsonResponse
+    public function settingsChangeRules(Request $request): JsonResponse
     {
         $resp = $this->adminService->settingsChangeRules($request);
 
         return response()->json($resp, $resp['status']);
     }
-    public function settingsSidebars(Request $request, SettingsService $settings): JsonResponse
+    public function settingsSidebars(Request $request): JsonResponse
     {
         $resp = $this->adminService->settingsSidebars($request);
 
