@@ -48,7 +48,7 @@
 ### Технические особенности
 - **Json-ответы сервера**
 - **Веб-сокеты**
-
+- **Валидация в Requests**
 ## <img src="public/media/icon/tools.png" width="30" align="absmiddle"> <a id='download'></a> Установка (Linux Debian) [<img src="public/media/icon/up.png" width="20" align="absmiddle">](#links)
 
 > [!WARNING]
