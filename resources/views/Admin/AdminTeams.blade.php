@@ -439,26 +439,26 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
             const formData = new FormData(form);
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
+            const inputFile = document.getElementById(`images${teamId}`);
 
             try {
                 // Показываем индикатор загрузки
                 submitButton.disabled = true;
                 submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обновление...';
 
+                inputFile.value = '';
+
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
                 });
-
-                if (!response.ok) {
-                    throw new Error('Сетевая ошибка: ' + response.statusText);
-                }
 
                 const data = await response.json();
 
                 if (data.success) {
                     // Сохраняем данные формы перед любыми действиями
                     const formValues = Object.fromEntries(formData.entries());
+                    submitButton.innerHTML = 'Обновить';
 
                     showToast('success', 'Успех', data.message || 'Операция выполнена успешно', data.actions);
                 } else {
@@ -473,7 +473,7 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
             } finally {
                 // Восстанавливаем кнопку в исходное состояние
                 submitButton.disabled = false;
-                submitButton.innerHTML = originalButtonText;
+                submitButton.innerHTML = 'Обновить';
             }
         }
         // Функция копирования

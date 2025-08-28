@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AuthRequest;
 use App\Models\Teams;
 use App\Services\AuthService;
 use App\Services\SettingsService;
@@ -11,12 +12,12 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function __construct(protected AuthService $authService)
+    public function __construct(protected AuthService $authService, protected SettingsService $settings)
     {
     }
 
     // ----------------------------------------------------------------AUTH-ADMIN
-    public function authAdmin(Request $request): JsonResponse
+    public function authAdmin(AuthRequest $request): JsonResponse
     {
         $resp = $this->authService->authAdmin($request);
 
@@ -28,7 +29,7 @@ class AuthController extends Controller
     }
 
     //----------------------------------------------------------------Auth
-    public function authApp(Request $request)
+    public function authApp(AuthRequest $request)
     {
         $resp = $this->authService->authApp($request);
 
@@ -36,6 +37,12 @@ class AuthController extends Controller
     }
     public function logoutApp(Request $request, SettingsService $settings)
     {
-        $this->authService->logoutApp($request);
+        if(!$this->settings->get('sidebar.Logout')){
+            abort(403);
+        }
+
+        $resp = $this->authService->logoutApp($request);
+
+        return redirect($resp);
     }
 }

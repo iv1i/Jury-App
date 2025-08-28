@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Requests\AuthRequest;
 use App\Models\Teams;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,12 +15,9 @@ class AuthService
     }
 
     // ----------------------------------------------------------------AUTH-ADMIN
-    public function authAdmin(Request $request): array
+    public function authAdmin(AuthRequest $request): array
     {
-        $credentials = $request->validate([
-            'name' => ['max:255'],
-            'password' => ['required'],
-        ]);
+        $credentials = $request->validated();
         $remember = $request->has('remember');
 
         if (Auth::guard('admin')->attempt($credentials, $remember)) {
@@ -49,15 +47,11 @@ class AuthService
     }
 
     //----------------------------------------------------------------Auth
-    public function authApp(Request $request): array
+    public function authApp(AuthRequest $request): array
     {
         $auth = $this->settings->get('auth');
-        $credentials = [];
         if ($auth === 'base') {
-            $credentials = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'password' => ['required'],
-            ]);
+            $credentials = $request->validated();
             if (Auth::attempt($credentials)) {
                 $request->session()->regenerate();
 
@@ -68,6 +62,7 @@ class AuthService
                 ];
             }
         }
+
         if ($auth === 'token') {
             $user = Teams::where('token', $request->token)->first();
 
@@ -91,17 +86,13 @@ class AuthService
 
         return ['success' => false,'message' => __('Auth error'), 'status' => 401];
     }
-    public function logoutApp(Request $request)
+    public function logoutApp(Request $request): string
     {
-        if(!$this->settings->get('sidebar.Logout')){
-            abort(403);
-        }
-        // Выход текущего пользователя из системы
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/Auth');
+        return '/Auth';
     }
 }

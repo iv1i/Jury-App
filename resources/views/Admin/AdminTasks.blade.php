@@ -522,10 +522,6 @@
                     body: formData,
                 });
 
-                if (!response.ok) {
-                    throw new Error('Сетевая ошибка: ' + response.statusText);
-                }
-
                 const data = await response.json();
 
                 if (data.success) {

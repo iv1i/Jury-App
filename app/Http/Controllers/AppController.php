@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\{AdminHomeEvent, AdminScoreboardEvent, AppCheckTaskEvent, AppHomeEvent, AppScoreboardEvent, AppStatisticEvent, AppStatisticIDEvent, ProjectorEvent};
+use App\Http\Requests\CheckFlagRequest;
 use App\Services\AppService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\{Tasks, SolvedTasks, Teams, CompletedTaskTeams, CheckTasks};
@@ -18,7 +19,7 @@ class AppController extends Controller
 
     //----------------------------------------------------------------APP
 
-    public function checkFlag(Request $request): JsonResponse
+    public function checkFlag(CheckFlagRequest $request): JsonResponse
     {
         $resp = $this->appService->checkFlag($request);
 

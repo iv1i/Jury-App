@@ -12,6 +12,10 @@ use App\Events\AppStatisticEvent;
 use App\Events\AppStatisticIDEvent;
 use App\Events\ProjectorEvent;
 use App\Events\UpdateRulesEvent;
+use App\Http\Requests\AdminAddTasksRequest;
+use App\Http\Requests\AdminAddTeamsRequest;
+use App\Http\Requests\AdminChangeTasksRequest;
+use App\Http\Requests\AdminChangeTeamsRequest;
 use App\Models\CheckTasks;
 use App\Models\CompletedTaskTeams;
 use App\Models\SolvedTasks;
@@ -41,19 +45,21 @@ class AdminController extends Controller
     }
 
     // ----------------------------------------------------------------TEAMS
-    public function addTeams(Request $request): JsonResponse
+    public function addTeams(AdminAddTeamsRequest $request): JsonResponse
     {
         $resp = $this->adminService->addTeams($request);
 
         return response()->json($resp, $resp['status']);
     }
+
     public function deleteTeams(Request $request): JsonResponse
     {
         $resp = $this->adminService->deleteTeams($request);
 
         return response()->json($resp, $resp['status']);
     }
-    public function changeTeams(Request $request): JsonResponse
+
+    public function changeTeams(AdminChangeTeamsRequest $request): JsonResponse
     {
         $resp = $this->adminService->changeTeams($request);
 
@@ -62,18 +68,20 @@ class AdminController extends Controller
 
     // ----------------------------------------------------------------TASKS
 
-    public function addTasks(Request $request): JsonResponse
+    public function addTasks(AdminAddTasksRequest $request): JsonResponse
     {
         $resp = $this->adminService->addTasks($request);
 
         return response()->json($resp, $resp['status']);
     }
-    public function changeTasks(Request $request): JsonResponse
+
+    public function changeTasks(AdminChangeTasksRequest $request): JsonResponse
     {
         $resp = $this->adminService->changeTasks($request);
 
         return response()->json($resp, $resp['status']);
     }
+
     public function deleteTasks(Request $request): JsonResponse
     {
         $resp = $this->adminService->deleteTasks($request);
@@ -88,24 +96,28 @@ class AdminController extends Controller
 
         return response()->json($resp, $resp['status']);
     }
+
     public function settingsDeleteAll(Request $request): JsonResponse
     {
         $resp = $this->adminService->settingsDeleteAll($request);
 
         return response()->json($resp, $resp['status']);
     }
+
     public function settingsChangeCategory(Request $request): JsonResponse
     {
         $resp = $this->adminService->settingsChangeCategory($request);
 
         return response()->json($resp, $resp['status']);
     }
+
     public function settingsChangeRules(Request $request): JsonResponse
     {
         $resp = $this->adminService->settingsChangeRules($request);
 
         return response()->json($resp, $resp['status']);
     }
+
     public function settingsSidebars(Request $request): JsonResponse
     {
         $resp = $this->adminService->settingsSidebars($request);

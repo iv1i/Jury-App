@@ -47,7 +47,7 @@
 
         .card-grid-6 {
             grid-column: span 4;
-            height: 97%;
+            height: auto;
         }
 
         .card-grid-12 {
@@ -84,11 +84,11 @@
         }
 
         .scrollable-table {
-            max-height: 330px;
             overflow-y: auto;
             margin-top: 15px;
             border-radius: 8px;
             background-color: var(--app-bg-2);
+            height: 215px;
         }
 
         .scrollable-table table {

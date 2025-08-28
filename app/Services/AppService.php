@@ -10,6 +10,7 @@ use App\Events\AppScoreboardEvent;
 use App\Events\AppStatisticEvent;
 use App\Events\AppStatisticIDEvent;
 use App\Events\ProjectorEvent;
+use App\Http\Requests\CheckFlagRequest;
 use App\Models\CheckTasks;
 use App\Models\CompletedTaskTeams;
 use App\Models\SolvedTasks;
@@ -31,21 +32,8 @@ class AppService
     }
 
     //----------------------------------------------------------------APP
-    public function checkFlag(Request $request): array
+    public function checkFlag(CheckFlagRequest $request): array
     {
-        $validator = Validator::make($request->all(), [
-            'flag' => ['required', 'string', 'max:255'],
-            'ID' => ['required', 'numeric', 'integer'],
-        ]);
-
-        if ($validator->fails()) {
-            return [
-                    'success' => false,
-                    'message' => $validator->errors()->first(),
-                    'status' => 422
-                ];
-        }
-
         $taskId = $request->input('ID');
         $task = Tasks::findOrFail($taskId);
         $authUserId = Auth::id();

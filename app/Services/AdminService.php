@@ -3,6 +3,10 @@
 namespace App\Services;
 
 use App\Events\UpdateRulesEvent;
+use App\Http\Requests\AdminAddTasksRequest;
+use App\Http\Requests\AdminAddTeamsRequest;
+use App\Http\Requests\AdminChangeTasksRequest;
+use App\Http\Requests\AdminChangeTeamsRequest;
 use App\Models\CheckTasks;
 use App\Models\CompletedTaskTeams;
 use App\Models\SolvedTasks;
@@ -24,32 +28,10 @@ class AdminService
     public function __construct(private SettingsService $settings, private Utility $utility, private EventsService $eventsService)
     {
     }
+
 // ----------------------------------------------------------------TEAMS
-    public function addTeams(Request $request): array
+    public function addTeams(AdminAddTeamsRequest $request): array
     {
-        // Валидация входных данных
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'players' => ['required', 'integer', 'min:1'],
-            'WhereFrom' => ['required', 'string'],
-            'password' => ['required','string','min:6'],
-            'file' => [
-                File::image()
-                    ->min('1kb')
-                    ->max('1mb')
-            ]
-        ]);
-
-        if ($validator->fails()) {
-            $firstErrorMessage = $validator->errors()->first();
-
-            return [
-                'success' => false,
-                'message' => $firstErrorMessage,
-                'status' => 422,
-                ];
-        }
-
         // Обработка значения IsGuest
         $isGuest = $request->input('IsGuest') === null ? 'No' : 'Yes';
 
@@ -124,33 +106,11 @@ class AdminService
             'status' => 200,
             ];
     }
-    public function changeTeams(Request $request): array
+    public function changeTeams(AdminChangeTeamsRequest $request): array
     {
         //dd($request->all());
         $TeamID = $request->input('id');
         $team = Teams::find($TeamID);
-
-        //dd([$sanitizedName, $sanitizedPlayers, $sanitizedWhereFrom]);
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string','max:255'],
-            'players' => ['required', 'integer','min:1'],
-            'WhereFrom' => ['required','string'],
-            'file' => [
-                File::image()
-                    ->min('1kb')
-                    ->max('1mb')
-            ]
-        ]);
-
-
-        if ($validator->fails()) {
-            $firstErrorMessage = $validator->errors()->first();
-            return [
-                'success' => false,
-                'message' => $firstErrorMessage,
-                'status' => 422
-            ];
-        }
 
         if ($team){
             if ($request->input('IsGuest') === null){
@@ -300,36 +260,8 @@ class AdminService
 
     // ----------------------------------------------------------------TASKS
 
-    public function addTasks(Request $request): array
+    public function addTasks(AdminAddTasksRequest $request): array
     {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string','max:255'],
-            'category' => ['required', 'string','max:255'],
-            'complexity' => ['required','string','max:255'],
-            'points' => ['required','int','min:200'],
-            'description' => ['required','string'],
-            'flag' => ['required','string'],
-            'web_port' => 'nullable|integer|between:1024,65535',
-            'db_port' => 'nullable|integer|between:1024,65535',
-            'sourcecode' => [
-                'nullable',
-                'file',
-                'mimetypes:application/zip,application/x-zip-compressed',
-                'mimes:zip',
-                'max:10240' // 10MB максимум
-            ]
-        ]);
-
-        if ($validator->fails()) {
-            $firstErrorMessage = $validator->errors()->first();
-
-            return [
-                'success' => false,
-                'message' => $firstErrorMessage,
-                'status' => 422
-            ];
-        }
-
         $sanitizedName = htmlspecialchars($request->input('name'));
         $sanitizedCategory = htmlspecialchars($request->input('category'));
         $sanitizedComplexity = htmlspecialchars($request->input('complexity'));
@@ -483,37 +415,8 @@ class AdminService
             'status' => 200
         ];
     }
-    public function changeTasks(Request $request): array
+    public function changeTasks(AdminChangeTasksRequest $request): array
     {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:255'],
-            'complexity' => ['required', 'string', 'max:255'],
-            'points' => ['required', 'int', 'min:200'],
-            'description' => ['required', 'string'],
-            'flag' => ['required', 'string'],
-            'id' => ['required', 'int'],
-            'web_port' => 'nullable|integer|between:1024,65535',
-            'db_port' => 'nullable|integer|between:1024,65535',
-            'sourcecode' => [
-                'nullable',
-                'file',
-                'mimetypes:application/zip,application/x-zip-compressed',
-                'mimes:zip',
-                'max:10240'
-            ]
-        ]);
-
-        if ($validator->fails()) {
-            $firstErrorMessage = $validator->errors()->first();
-
-            return [
-                'success' => false,
-                'message' => $firstErrorMessage,
-                'status' => 422
-            ];
-        }
-
         $sanitizedName = htmlspecialchars($request->input('name'));
         $sanitizedCategory = htmlspecialchars($request->input('category'));
         $sanitizedComplexity = htmlspecialchars($request->input('complexity'));
@@ -894,9 +797,11 @@ class AdminService
 
         } catch (\Exception $e) {
             // Обработка ошибки
+            dd($e);
             return [
                 'success' => false,
                 'message' => 'Ошибка при удалении',
+                'error' => $e->getMessage(),
                 'status' => 500
             ];
         }
@@ -920,7 +825,8 @@ class AdminService
         $UsersID = [];
         if ($users) {
             foreach ($users as $user) {
-                $UsersID[] = $user->user->id;
+                //dd($user);
+                $UsersID[] = $user->id;
             }
             foreach ($UsersID as $ID) {
                 $user = Teams::find($ID);
