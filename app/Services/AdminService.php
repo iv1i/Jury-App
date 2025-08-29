@@ -25,7 +25,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class AdminService
 {
-    public function __construct(private SettingsService $settings, private Utility $utility, private EventsService $eventsService)
+    public function __construct(private SettingsService $settings, private Utility $utility, private EventsService $events)
     {
     }
 
@@ -95,8 +95,8 @@ class AdminService
         $this->updateTeamsScores();
 
         // Обновление событий
-        $this->eventsService->adminEvents();
-        $this->eventsService->appEvents();
+        $this->events->adminEvents();
+        $this->events->appEvents();
 
 
         // Возврат ответа
@@ -168,8 +168,8 @@ class AdminService
 
         }
 
-        $this->eventsService->adminEvents();
-        $this->eventsService->appEvents();
+        $this->events->adminEvents();
+        $this->events->appEvents();
 
         return [
             'success' => true,
@@ -210,8 +210,8 @@ class AdminService
                 }
             }
 
-            $this->eventsService->adminEvents();
-            $this->eventsService->appEvents();
+            $this->events->adminEvents();
+            $this->events->appEvents();
 
 
 
@@ -406,8 +406,8 @@ class AdminService
         $task->solved = 0;
         $task->save();
 
-        $this->eventsService->adminEvents();
-        $this->eventsService->appEvents();
+        $this->events->adminEvents();
+        $this->events->appEvents();
 
         return [
             'success' => true,
@@ -715,8 +715,8 @@ class AdminService
                 $user->save();
             }
 
-            $this->eventsService->adminEvents();
-            $this->eventsService->appEvents();
+            $this->events->adminEvents();
+            $this->events->appEvents();
 
 
 
@@ -784,8 +784,8 @@ class AdminService
                 }
             }
             $this->updateTeamsScores();
-            $this->eventsService->adminEvents();
-            $this->eventsService->appEvents();
+            $this->events->adminEvents();
+            $this->events->appEvents();
 
 
 
@@ -870,8 +870,8 @@ class AdminService
                 }
             }
 
-            $this->eventsService->adminEvents();
-            $this->eventsService->appEvents();
+            $this->events->adminEvents();
+            $this->events->appEvents();
 
 
 
@@ -898,8 +898,8 @@ class AdminService
             Teams::truncate();
             Tasks::truncate();
 
-            $this->eventsService->adminEvents();
-            $this->eventsService->appEvents();
+            $this->events->adminEvents();
+            $this->events->appEvents();
 
             return [
                 'success' => true,
@@ -956,8 +956,8 @@ class AdminService
                             }
                         }
                         $this->updateTeamsScores();
-                        $this->eventsService->adminEvents();
-                        $this->eventsService->appEvents();
+                        $this->events->adminEvents();
+                        $this->events->appEvents();
 
                         return [
                             'success' => true,

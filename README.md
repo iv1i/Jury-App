@@ -16,8 +16,6 @@
 
 [Docker](https://www.docker.com/) - Контейнеризация.
 
-[Npm](https://nodejs.org/en) - NodeJS.
-
 [Laravel](https://laravel.com/docs) - Фреймворк.
 
 [Laravel Sail](https://laravel.su/docs/10.x/sail) - Docker-интерфейс.
