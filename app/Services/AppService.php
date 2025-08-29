@@ -90,7 +90,7 @@ class AppService
         $solvedTask->id = $this->utility->makeId(SolvedTasks::all());
         $solvedTask->teams_id = $userId;
         $solvedTask->tasks_id = $task->id;
-        $solvedTask->price = $task->id;
+        $solvedTask->price = $task->price;
         $solvedTask->save();
     }
 
@@ -173,7 +173,10 @@ class AppService
 
                 // Проверяем, существует ли файл
                 if (!Storage::disk('private')->exists($filePath)) {
-                    abort(404); // Файл не найден
+                    return [
+                        'success' => false,
+                        'status' => 404
+                    ];
                 }
                 $extension = pathinfo($f, PATHINFO_EXTENSION);
                 $name = 'file_' . $task->name  . '_'. $k+1 . '.' . $extension;

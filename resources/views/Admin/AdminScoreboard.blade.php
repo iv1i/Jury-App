@@ -98,8 +98,8 @@
 @section('scripts')
     <script type="text/javascript">
         //--------------------------------Init-Of-Data
-        const data = {!! json_encode($Users) !!};
-        const desidedteams = {!! json_encode($DesidedT) !!};
+        const data = @json($teams);
+        const desidedteams = @json($completedTasksTeams);
         const divElement = document.querySelector('.products-area-wrapper');
 
         //--------------------------------Functions
@@ -108,9 +108,6 @@
             const svg = `{!! view('SVG.GuestSVG') !!}`;
             const desidedteams = DesidedTeams;
             for (let i = 0; i < data2.length; i++) {
-                if (data2[i].guest === 'Yes') {
-                    data2[i].GuestLogo = svg;
-                }
                 data2[i].style = '';
             }
 

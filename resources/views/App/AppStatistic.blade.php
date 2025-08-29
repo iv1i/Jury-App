@@ -84,15 +84,10 @@
 
 @section('scripts')
     <script type="text/javascript">
-        const Locale = {!! json_encode(__('messages')) !!};
-        const Userid = {{ auth()->user()->id }};
-        const data = {!! json_encode($M) !!};
-        const svg = `{!! view('SVG.GuestSVG') !!}`;
+        const data = @json($teams);
+        const Userid = {{ $teamId }};
 
         for (let i = 0; i < data.length; i++){
-            if(data[i].guest == 'Yes'){
-                data[i].GuestLogo = svg;
-            }
             if (data[i].id == Userid){
                 data[i].BorderStyle=`BorderStyle`;
             }
@@ -115,9 +110,6 @@
             const divimgElement = document.querySelector('.account-info-picture');
             console.log('Принято!');
             for (let i = 0; i < valueToDisplay.length; i++){
-                if(valueToDisplay[i].guest == 'Yes'){
-                    valueToDisplay[i].GuestLogo = svg;
-                }
                 if(valueToDisplay[i].id == authuserid){
                     divimgElement.innerHTML = `<img src="/storage/teamlogo/${valueToDisplay[i].teamlogo}" alt="Account">`;
                 }

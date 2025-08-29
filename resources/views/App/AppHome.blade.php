@@ -143,8 +143,8 @@
         //--------------------------------Init-Of-Data
         const divElement = document.querySelector('.Product-body');
         const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
-        const teamid = {{ auth()->id() }};
-        const solvedtasks = {!! json_encode($SolvedTasks) !!};
+        const teamid = {{ $teamId }};
+        const solvedtasks = @json($solvedTasks);
         const complexityOrder = { easy: 1, medium: 2, hard: 3 };
         const sortButtons = {
             'name': '.sort-button-Name',
@@ -154,7 +154,7 @@
             'price': '.sort-button-Price'
         };
 
-        let data = {!! json_encode($Tasks) !!};
+        let data = @json($tasks);
         let sortStates = { name: 0, category: 0, complexity: 0, solved: 0, price: 0 };
         let currentSort = { column: null, direction: 0 };
         let currentlyOpenTaskId = null;
@@ -173,8 +173,8 @@
         renderFilteredTasks(data, taskcomplexity, taskcategory);
         initializeEventHandlers(divElement, data);
 
-        @foreach ($Tasks as $T)
-        createTaskForm({!! json_encode($T) !!});
+        @foreach ($tasks as $task)
+        createTaskForm(@json($task));
         @endforeach
 
         //--------------------------------Functions
@@ -190,7 +190,10 @@
                 <div style="text-align: center; height: 3em;">
                     <h1 class="TaskH1">${task.name}</h1>
                     <div id="CloseBtn" class="btnclosetask" onclick="Taskid${task.id}close()">
-                        <img class="closeicontask" src="{{ asset('/media/icon/close.png') }}">
+                        <svg width="28" height="28" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                        <path fill="var(--app-bg-inv)" d="M195.2 195.2a64 64 0 0 1 90.496 0L512 421.504 738.304 195.2a64 64 0 0 1 90.496 90.496L602.496 512 828.8 738.304a64 64 0 0 1-90.496 90.496L512 602.496 285.696 828.8a64 64 0 0 1-90.496-90.496L421.504 512 195.2 285.696a64 64 0 0 1 0-90.496z"></path></g></svg>
                     </div>
                 </div>
                 <div class="${task.complexity} taskID_complexity">${task.complexity.toUpperCase()}</div>

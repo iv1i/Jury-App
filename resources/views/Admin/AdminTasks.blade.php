@@ -168,7 +168,7 @@
             <div class="form_item ">
                 <div>Категория</div>
                 <select name="category" id="category">
-                    @foreach($AllCategories as $count => $category)
+                    @foreach($allCategories as $count => $category)
                         <option>{{ $category }}</option>
                     @endforeach
                 </select>
@@ -176,7 +176,7 @@
             <div class="form_item ">
                 <div>Сложность</div>
                 <select name="complexity" id="complexity">
-                    @foreach($AllComplexities as $count => $complexity)
+                    @foreach($allComplexities as $count => $complexity)
                         <option>{{ $complexity }}</option>
                     @endforeach
                 </select>
@@ -302,7 +302,7 @@
     <script src="{{ asset('js/Admin/AdminOpenBlock.js') }}"></script>
     <script id="Main-Script-V4">
         //--------------------------------Init-Of-Data
-        const data = {!! json_encode($Tasks) !!};
+        const data = @json($tasks);
         const CloseTaskBanner = document.querySelector('.CloseTaskBanner');
         const divElement = document.querySelector('.Product-body');
 
@@ -338,8 +338,8 @@
         // Функция для создания формы задачи
         function createTaskForm(task) {
 
-            const AllCategories = @json($AllCategories);
-            const AllComplexities = @json($AllComplexities);
+            const AllCategories = @json($allCategories);
+            const AllComplexities = @json($allComplexities);
 
             // Генерируем options для категорий
             const categoryOptions = AllCategories.map(category =>
@@ -838,8 +838,8 @@
 
         //--------------------------------Start-Functions
         // Инициализация существующих форм
-        @foreach ($Tasks as $T)
-        createTaskForm({!! $T !!});
+        @foreach ($tasks as $task)
+        createTaskForm({!! $task !!});
         @endforeach
         OpenBlocks('tasks');
         Filtereed(data, taskcomplexity, taskcategory);

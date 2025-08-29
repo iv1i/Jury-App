@@ -158,7 +158,7 @@
                 <h1 class="rules-title">{{ __('Rules') }}</h1>
             </div>
             <div class="rules-content">
-                {!! $sett !!}
+                {!! $rules !!}
             </div>
         </div>
     </div>
@@ -167,14 +167,11 @@
 @section('scripts')
     <script>
         function MakeHTML(Data, Element) {
-            const HTML = `${Data}`;
-            Element.innerHTML = HTML;
+            Element.innerHTML = `${Data}`;
         }
         Echo.channel(`channel-updaterules-guest`).listen('UpdateRulesEvent', (e) => {
-            const valueToDisplay = e.data;
 
             const divElement = document.querySelector('.rul');
-
             MakeHTML(e.data, divElement)
         });
     </script>

@@ -29,7 +29,7 @@ class AdminService
     {
     }
 
-// ----------------------------------------------------------------TEAMS
+    // ----------------------------------------------------------------TEAMS
     public function addTeams(AdminAddTeamsRequest $request): array
     {
         // Обработка значения IsGuest
@@ -229,14 +229,14 @@ class AdminService
             ];
         }
     }
-    private function deleteTeam(Teams $user): void
+    private function deleteTeam(Teams $team): void
     {
-        if ($user->teamlogo !== 'StandartLogo.png') {
-            $deleteImage = 'public/teamlogo/' . $user->teamlogo;
+        if ($team->teamlogo !== 'StandartLogo.png') {
+            $deleteImage = 'public/teamlogo/' . $team->teamlogo;
             Storage::delete($deleteImage);
         }
 
-        $tasks = $user->solvedTasks()->with('tasks')->get();
+        $tasks = $team->solvedTasks()->with('tasks')->get();
         if($tasks){
             foreach ($tasks as $task) {
                 $task->tasks->solved--;
@@ -251,15 +251,12 @@ class AdminService
             $this->updateTaskPriceDelete($task);
         }
 
-        $user->completed_task_team()->delete();
-        $user->solvedTasks()->delete();
-        $user->checkTasks()->delete();
+        $team->checkTasks()->delete();
 
-        $user->delete();
+        $team->delete();
     }
 
     // ----------------------------------------------------------------TASKS
-
     public function addTasks(AdminAddTasksRequest $request): array
     {
         $sanitizedName = htmlspecialchars($request->input('name'));
@@ -683,7 +680,7 @@ class AdminService
             $task->save();
 
             $userAll = Teams::with(['solvedTasks.tasks'])->get();
-            $countteams = DB::table('users')->count(); // Выносим подсчет количества пользователей за пределы цикла
+            $countteams = Teams::count();
 
             foreach ($userAll as $user) {
                 // Сначала обрабатываем solvedTasks пользователя
@@ -808,46 +805,32 @@ class AdminService
     }
     private function deleteTask(Tasks $task): void
     {
-        // Остановка веб-контейнера, если он есть
-        if ($task->web_directory) {
-            /*
-            $command = "cd ".storage_path('app/private/'.$task->web_directory)." && docker-compose down";
-            shell_exec($command);
-            */
+        $teamIds = $task->solvedTasks()->pluck('teams_id')->unique()->filter()->toArray();
 
-            // Удаление директории
-            Storage::disk('private')->deleteDirectory($task->web_directory);
+        if (empty($teamIds)) {
+            $task->delete();
+            return;
         }
 
-        $task->completed_task_team()->delete();
+        $checkTasks = CheckTasks::whereIn('teams_id', $teamIds)->get();
 
-        $users = $task->solvedTasks()->with('user')->get();
-        $UsersID = [];
-        if ($users) {
-            foreach ($users as $user) {
-                //dd($user);
-                $UsersID[] = $user->id;
+        foreach ($checkTasks as $checkTask) {
+            $checkTask->sumary = max(0, $checkTask->sumary - 1);
+
+            $complexityField = match($task->complexity) {
+                'easy' => 'easy',
+                'medium' => 'medium',
+                'hard' => 'hard',
+                default => null
+            };
+
+            if ($complexityField && $checkTask->$complexityField > 0) {
+                $checkTask->$complexityField -= 1;
             }
-            foreach ($UsersID as $ID) {
-                $user = Teams::find($ID);
-                $CHKTforUser = $user->checkTasks;
-                if ($CHKTforUser) {
-                    $CHKTforUser->sumary--;
-                    if ($task->complexity === 'easy') {
-                        $CHKTforUser->easy -= 1;
-                    }
-                    if ($task->complexity === 'medium') {
-                        $CHKTforUser->medium -= 1;
-                    }
-                    if ($task->complexity === 'hard') {
-                        $CHKTforUser->hard -= 1;
-                    }
-                    $CHKTforUser->save();
-                }
-            }
+
+            $checkTask->save();
         }
 
-        $task->solvedTasks()->delete();
         $task->delete();
     }
 

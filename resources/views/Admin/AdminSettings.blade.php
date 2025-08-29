@@ -49,25 +49,25 @@
             <div class="instruction-box">
                 <h1>Инструкция по управлению настройками</h1>
                 <ul>
-                    <li><strong>Раздел {!! __('Guest') !!}:</strong> Управление видимостью разделов гостя</li>
+                    <li><strong>Раздел {{ __('Guest') }}:</strong> Управление видимостью разделов гостя</li>
                     <ul>
                     <li><strong>{{ __('Rules') }}:</strong> Включение/отключение отображения правил</li>
                     <li><strong>{{ __('Projector') }}:</strong> Включение/отключение отображения проектора</li>
                     </ul>
 
 
-                    <li><strong>Раздел {!! __('App') !!}:</strong> Управление видимостью разделов приложения</li>
+                    <li><strong>Раздел {{ __('App') }}:</strong> Управление видимостью разделов приложения</li>
                     <ul>
                         <li><strong>{{ __('Home') }}/{{ __('Scoreboard') }}/{{ __('Statistics') }}:</strong> Показывать или скрывать соответствующие разделы</li>
                         <li><strong>{{ __('Logout') }}:</strong> Показывать или скрывать кнопку выхода</li>
                     </ul>
-                    <li><strong>Раздел {!! __('Auth') !!}:</strong> Управление типом авторизации приложения</li>
+                    <li><strong>Раздел {{ __('Auth') }}:</strong> Управление типом авторизации приложения</li>
                     <ul>
                         <li><strong>{{ __('Token Authorization') }}:</strong> Включение/отключение авторизации по токену</li>
                     </ul>
 
 
-                    <li><strong>Раздел {!! __('Tools') !!}:</strong> Опасные операции</li>
+                    <li><strong>Раздел {{ __('Tools') }}:</strong> Опасные операции</li>
                     <ul>
                         <li><strong>{{ __('Reset') }}:</strong> Сброс итогов соревнований</li>
                         <li><strong>{{ __('Delete All') }}:</strong> Удаление всех данных (используйте с осторожностью!)</li>
@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="danger">
-                    <b>Осторожно:</b> Операции в разделе <i>{!! __('Tools') !!}</i> необратимы. Убедитесь в необходимости действий перед подтверждением.
+                    <b>Осторожно:</b> Операции в разделе <i>{{ __('Tools') }}</i> необратимы. Убедитесь в необходимости действий перед подтверждением.
                 </div>
 
                 <div class="confirm-section">
@@ -98,7 +98,7 @@
         <div class="settings-grid">
             <!-- Настройки гостей -->
             <div class="settings-card">
-                <h2 class="settings-card-title">{!! __('Guest') !!} /sidebar</h2>
+                <h2 class="settings-card-title">{{ __('Guest') }} /sidebar</h2>
 
                 <div class="settings-item">
                     <span class="settings-label">{{ __('Rules') }}</span>
@@ -119,7 +119,7 @@
 
             <!-- Настройки приложения -->
             <div class="settings-card">
-                <h2 class="settings-card-title">{!! __('App') !!} /sidebar</h2>
+                <h2 class="settings-card-title">{{ __('User') }} /sidebar</h2>
 
                 <div class="settings-item">
                     <span class="settings-label">{{ __('Home') }}</span>
@@ -156,7 +156,7 @@
 
             <!-- Настройки авторизации -->
             <div class="settings-card">
-                <h2 class="settings-card-title">{!! __('Auth') !!}</h2>
+                <h2 class="settings-card-title">{{ __('Auth') }}</h2>
                 <div class="settings-item">
                     <span class="settings-label">{{ __('Token Authorization') }}</span>
                     <label class="toggle-switch">
@@ -168,7 +168,7 @@
 
             <!-- Инструменты -->
             <div class="settings-card">
-                <h2 class="settings-card-title">{!! __('Tools') !!}</h2>
+                <h2 class="settings-card-title">{{ __('Tools') }}</h2>
 
                 <form method="post" id="MyFormReset" action="{{ route('Admin-Settings-Reset') }}">
                     @csrf
@@ -226,7 +226,7 @@
                 <input type="checkbox" id="delivery_3" value="Yes" name="check" style="display: none;">
                 <input type="hidden" value="CHNGRULL" name="ButtonChangeRull">
 
-                <textarea name="Rull" id="TextAreaRull" class="rules-editor" spellcheck="false">{{ $Rules }}</textarea>
+                <textarea name="Rull" id="TextAreaRull" class="rules-editor" spellcheck="false">{{ $rules }}</textarea>
 
                 <div class="modal-footer">
                     <button type="button" class="settings-button" id="cancelRulesButton">
@@ -312,9 +312,9 @@
 
 @section('scripts')
     <script src="{{ asset('js/Other/Notifications.js') }}"></script>
-    <script id="V3">
+    <script id="V5">
         //--------------------------------Init-Of-Data
-        const token = '{!! csrf_token() !!}';
+        const token = '{{ csrf_token() }}';
 
         //--------------------------------Functions
         // Функция для асинхронной отправки форм
@@ -398,8 +398,8 @@
         //--------------------------------Other
         // Инициализация всех форм на странице
         document.addEventListener('DOMContentLoaded', function() {
-            const SettingsSidebar = {!! json_encode($SettSidebar) !!};
-            const TypeAuth = {!! json_encode($TypeAuth) !!};
+            const SettingsSidebar = @json($settingsSidebar);
+            const TypeAuth = @json($authType);
             const checkboxes0 = document.querySelectorAll('.CHECKBOX');
             const checkboxauth = document.getElementById('TokenAuth');
 

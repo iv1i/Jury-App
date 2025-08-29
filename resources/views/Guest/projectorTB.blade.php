@@ -195,18 +195,10 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
 @section('scripts')
     <script src="{{ asset('js/Slidebars/SlidebarGuest.js') }}"></script>
     <script type="text/javascript">
-        const data = {!! json_encode($M) !!};
-        const checktasks = {!! json_encode(\App\Models\CheckTasks::all()) !!};
-        const desidedteams = {!! json_encode(\App\Models\CompletedTaskTeams::all()) !!};
-        const svg = `{!! view('SVG.GuestSVG') !!}`;
-        // console.log(desidedteams);
-        // console.log(data);
-        // console.log(checktasks);
-        for (let i = 0; i < data.length; i++) {
-            if (data[i].guest == 'Yes') {
-                data[i].GuestLogo = svg;
-            }
-        }
+        const data = @json($teams);
+        const checkTasks = @json($checkTasks);
+        const completedTasksTeams = @json($completedTasksTeams);
+
         for (let i = 0; i < data.length; i++) {
             data[i].style = '';
         }
@@ -219,7 +211,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
         let count = 0;
         let check = false;
         const userStyles = {};
-        desidedteams.forEach(team => {
+        completedTasksTeams.forEach(team => {
             if (!userStyles[team.teams_id]) {
                 userStyles[team.teams_id] = [];
             }
@@ -240,22 +232,17 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
         Echo.channel(`channel-projector`).listen('ProjectorEvent', (e) => {
             const valueToDisplay = e.projector;
             const data = valueToDisplay.Teams;
-            const desidedteams = valueToDisplay.DesidedT;
+            const completedTasksTeams = valueToDisplay.DesidedT;
 
 
             console.log('Принято!');
-            for (let i = 0; i < data.length; i++) {
-                if (data[i].guest == 'Yes') {
-                    data[i].GuestLogo = svg;
-                }
-            }
             for (let i = 0; i < data.length; i++) {
                 data[i].style = '';
             }
 
             count = 0;
             const userStyles = {};
-            desidedteams.forEach(team => {
+            completedTasksTeams.forEach(team => {
                 if (!userStyles[team.teams_id]) {
                     userStyles[team.teams_id] = [];
                 }
@@ -346,7 +333,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
             });
         }
 
-        switchgrid.addEventListener('click', () => {
+        document.querySelector(".grid").addEventListener('click', () => {
             const images = document.querySelectorAll('.gridView .product-cell img');
 
             images.forEach(img => {
@@ -355,7 +342,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
             });
         });
 
-        switchlist.addEventListener('click', () => {
+        document.querySelector(".list").addEventListener('click', () => {
             const images = document.querySelectorAll('.tableView .product-cell img');
 
             // Изменяем стили для каждого изображения
@@ -367,6 +354,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
                 });
             }
         });
+
         const images = document.querySelectorAll('.tableView .product-cell img');
 
         // Изменяем стили для каждого изображения
@@ -377,16 +365,5 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
                 img.style.height = '60px'; // Новая высота
             });
         }
-    </script>
-    <script>
-        const sidebar = document.querySelector('.sidebar');
-        sidebar.style.display = 'none';
-
-        function reloadPage() {
-            location.reload();
-        }
-
-        // Вызов функции reloadPage каждые 5 секунд
-        setInterval(reloadPage, 5000);
     </script>
 @endsection

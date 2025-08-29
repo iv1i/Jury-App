@@ -13,8 +13,10 @@ if (document.querySelector(".jsFilter")){
     document.addEventListener("click", function (event) {
         const filterMenu = document.querySelector(".filter-menu");
         // Проверяем, был ли клик внутри .filter-menu или на кнопке .jsFilter
-        if (filterMenu.classList.contains("active") && !filterMenu.contains(event.target) && !event.target.classList.contains("jsFilter")) {
-            filterMenu.classList.remove("active");
+        if (filterMenu){
+            if (filterMenu.classList.contains("active") && !filterMenu.contains(event.target) && !event.target.classList.contains("jsFilter")) {
+                filterMenu.classList.remove("active");
+            }
         }
     });
 

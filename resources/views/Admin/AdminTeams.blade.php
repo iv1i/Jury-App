@@ -293,7 +293,7 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
     <script src="{{ asset('js/Admin/AdminOpenBlock.js') }}"></script>
     <script type="text/javascript" id="V2">
         //--------------------------------Init-Of-Data
-        const data = {!! json_encode($Teams) !!};
+        const data = @json($teams);
         const CloseTeamBanner = document.querySelector('.CloseTeamBanner');
         const divElement = document.querySelector('.Product-body');
 
@@ -536,8 +536,8 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
 
         //--------------------------------Start-Functions
         // Инициализация существующих форм
-        @foreach ($Teams as $T)
-        createTeamForm({!! $T !!});
+        @foreach ($teams as $team)
+        createTeamForm({!! $team !!});
         @endforeach
         // Включение блоков
         OpenBlocks('teams');

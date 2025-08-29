@@ -53,14 +53,9 @@
     transition: background-color 0.2s;
 }
 
-.btnclosetask:hover {
-    background-color: var(--sidebar-hover-link);
-}
-
 .closeicontask {
     width: 24px;
     height: 24px;
-    filter: invert(80%);
 }
 
 /* Блок с описанием задачи */

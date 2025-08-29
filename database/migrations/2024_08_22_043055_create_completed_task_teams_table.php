@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('completed_task_teams', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Teams::class);
-            $table->foreignIdFor(Tasks::class);
+            $table->foreignIdFor(Teams::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Tasks::class)->constrained()->onDelete('cascade');
             $table->longText('StyleTask');
             $table->timestamps();
         });

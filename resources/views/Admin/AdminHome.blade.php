@@ -235,13 +235,13 @@
                     <div class="chart-controls">
                         <div class="search-box">
                             <input type="text" id="team-search" placeholder="{{ __('Search teams...') }}"
-                                   oninput="updateTeamsChart(teamsData, { searchQuery: this.value })">
+                                   oninput="updateTeamsChart({ searchQuery: this.value })">
                             <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
                         <div class="filters">
-                            <select id="team-filter" onchange="updateTeamsChart(teamsData, { showTop: this.value ? parseInt(this.value) : null })">
+                            <select id="team-filter" onchange="updateTeamsChart({ showTop: this.value ? parseInt(this.value) : null })">
                                 <option value="">{{ __('All teams') }}</option>
                                 <option value="10">Top 10</option>
                                 <option value="20">Top 20</option>
@@ -308,12 +308,12 @@
 @endsection
 
 @section('scripts')
-    <script type="text/javascript">
+    <script id="v1" type="text/javascript">
         //--------------------------------Init-Of-Data
-        let Tasks = {!! json_encode($data[0]) !!};
-        let Teams = {!! json_encode($data[1]) !!};
-        let infoTasks = {!! json_encode($data[2]) !!};
-        let CheckTask = {!! json_encode($data[3]) !!};
+        let Tasks = @json($tasks);
+        let Teams = @json($teams);
+        let infoTasks = @json($infoTasks);
+        let CheckTask = @json($checkTasks);
 
         //--------------------------------Functions
         // Обновляем диаграмму команд
@@ -328,7 +328,7 @@
                     return team.name.toLowerCase().includes(searchQuery.toLowerCase());
                 })
                 .map(team => {
-                    const checkTask = CheckTask.find(ct => ct.user_id === team.id) || {sumary: 0};
+                    const checkTask = CheckTask.find(ct => ct.teams_id === team.id) || {sumary: 0};
                     const progress = Math.round((checkTask.sumary / TotalTasks) * 100);
                     return { ...team, progress };
                 })

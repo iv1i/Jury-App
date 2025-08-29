@@ -117,11 +117,11 @@
 
 @section('scripts')
     <script type="text/javascript">
-        const data = {!! json_encode($M) !!};
-        const desidedteams = {!! json_encode(\App\Models\CompletedTaskTeams::all()) !!};
+        const data = @json($teams);
+        const completedTasksTeams = @json($completedTasksTeams);
         const divElement = document.querySelector('.Product-body');
 
-        MakeHTML(MakeMassive(data, desidedteams), divElement);
+        MakeHTML(MakeMassive(data, completedTasksTeams), divElement);
 
         Echo.private(`channel-app-scoreboard`).listen('AppScoreboardEvent', (e) => {
             const valueToDisplay = e.scoreboard;

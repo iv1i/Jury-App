@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('solved_tasks', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Teams::class);
-            $table->foreignIdFor(Tasks::class);
+            $table->foreignIdFor(Teams::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Tasks::class)->constrained()->onDelete('cascade');
             $table->float('price');
             $table->timestamps();
         });

@@ -74,208 +74,218 @@
 
 @section('scripts')
     <script type="text/javascript">
-        const data = {!! json_encode(\App\Models\Tasks::all()) !!};
-        let team = {!! json_encode(\App\Models\Teams::find($id)) !!};
-        const teamid = {{ $id }};
-        let teamlogo = '{{ asset('storage/teamlogo/' . \App\Models\Teams::find($id)['teamlogo']) }}';
-        let chkt = {!! json_encode($chkT) !!};
-        let solvedtasks = {!! json_encode($TeamSolvedTAsks) !!};
+        // Константы и переменные
+        const TEAM_ID = {{ $id }};
+        const TASKS_DATA = @json($tasks);
+        let teamData = @json($team);
+        let teamLogoUrl = '{{ $teamLogoUrl }}';
+        let checkTasks = @json($checkTasks);
+        let solvedTasks = @json($teamSolvedTasks);
 
+        // Кэширование DOM элементов
+        const contentWrapper = document.querySelector('.app-content-body-wrapper');
+        const productBody = document.querySelector('.Product-body');
+        const accountLogo = document.querySelector('.account-info-picture');
 
-        //console.log(team);
-        //console.log(chkt);
-        //console.log(teamlogo);
+        // Константы для классов и текстов
+        const CLASSES = {
+            easy: 'easy',
+            medium: 'medium',
+            hard: 'hard',
+            status: 'status'
+        };
 
-        //const sortedData = data.sort((a, b) => b.score - a.score);
-        //console.log(sortedData);
-        const divElement2 = document.querySelector('.app-content-body-wrapper');
-        const divElement = document.querySelector('.Product-body');
+        const TEXTS = {
+            solved: '{{ __('Solved') }}',
+            name: '{{ __('Name') }}',
+            category: '{{ __('Category') }}',
+            complexity: '{{ __('Complexity') }}',
+            price: '{{ __('Price') }}'
+        };
 
-        const html0 = `<div class="wrapper">
+        // Функция для создания HTML профиля команды
+        function createProfileHTML(team, logo, tasks) {
+            return `
+            <div class="wrapper">
                 <div class="profile-card js-profile-card">
                     <div class="profile-card__img">
-                        <img src="${teamlogo}" alt="product">
+                        <img src="${logo}" alt="${team.name} logo">
                     </div>
-
                     <div class="profile-card__cnt js-profile-cnt">
-                        <div class="profile-card__name">${team.name}</div>
-                        <div class="profile-card__name">${team.scores}</div>
-                        <div class="profile-card__txt"><strong>${team.wherefrom}</strong></div>
-
+                        <div class="profile-card__name">${escapeHtml(team.name)}</div>
+                        <div class="profile-card__score">${team.scores}</div>
+                        <div class="profile-card__txt"><strong>${escapeHtml(team.wherefrom)}</strong></div>
                         <div class="profile-card-inf">
                             <div class="profile-card-inf__item">
-                                <div class="profile-card-inf__title">${chkt.sumary}</div>
-                                <div class="profile-card-inf__txt">{{ __('Solved') }}</div>
+                                <div class="profile-card-inf__title">${tasks.sumary}</div>
+                                <div class="profile-card-inf__txt">${TEXTS.solved}</div>
                             </div>
-
                             <div class="profile-card-inf__item">
-                                <div class="profile-card-inf__title">${chkt.easy}</div>
-                                <div class="profile-card-inf__txt easy">EASY</div>
+                                <div class="profile-card-inf__title">${tasks.easy}</div>
+                                <div class="profile-card-inf__txt ${CLASSES.easy}">EASY</div>
                             </div>
-
                             <div class="profile-card-inf__item">
-                                <div class="profile-card-inf__title">${chkt.medium}</div>
-                                <div class="profile-card-inf__txt medium">MEDIUM</div>
+                                <div class="profile-card-inf__title">${tasks.medium}</div>
+                                <div class="profile-card-inf__txt ${CLASSES.medium}">MEDIUM</div>
                             </div>
-
                             <div class="profile-card-inf__item">
-                                <div class="profile-card-inf__title">${chkt.hard}</div>
-                                <div class="profile-card-inf__txt hard">HARD</div>
+                                <div class="profile-card-inf__title">${tasks.hard}</div>
+                                <div class="profile-card-inf__txt ${CLASSES.hard}">HARD</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>`;
-        divElement2.innerHTML = html0;
-        const html22 = `
+        }
+
+        // Функция для создания HTML заголовков таблицы
+        function createTableHeaders() {
+            return `
             <div class="products-header">
                 <div class="product-cell image">
-                    {{ __('Name') }}
-        <button class="sort-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
-                <path fill="currentColor"
-                      d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/>
-            </svg>
-        </button>
-    </div>
-    <div class="product-cell category">{{ __('Category') }}
-        <button class="sort-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
-                <path fill="currentColor"
-                      d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/>
-            </svg>
-        </button>
-    </div>
-    <div class="product-cell status-cell">{{ __('Complexity') }}
-        <button class="sort-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
-                <path fill="currentColor"
-                      d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/>
-            </svg>
-        </button>
-    </div>
-    <div class="product-cell price">{{ __('Price') }}
-        <button class="sort-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
-                <path fill="currentColor"
-                      d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/>
-            </svg>
-        </button>
-    </div>
-</div>
-`;
-        const html2 = solvedtasks.map(item => `
-            <div href="/Home/${item.id}" class="products-row tasklink">
-                <div class="product-cell image">
-                    <span>${item.name}</span>
+                    ${TEXTS.name}
+                    <button class="sort-button">
+                        ${sortIcon}
+                    </button>
                 </div>
-                <div class="product-cell category"><span class="cell-label">{{ __('Category') }}:</span>${item.category.toUpperCase()}</div>
-                <div class="product-cell status-cell"><span class="cell-label">{{ __('Complexity') }}:</span><span class="status ${item.complexity}">${item.complexity.toUpperCase()}</span></div>
-                <div class="product-cell price"><span class="cell-label">{{ __('Price') }}:</span>${item.price}</div>
-            </div>
-        `).join("");
-
-        divElement.innerHTML = html2;
-
-        Echo.private(`channel-app-statisticID`).listen('AppStatisticIDEvent', (e) => {
-            const divElementLogo = document.querySelector('.account-info-picture');
-            const valueToDisplay = e.data;
-            let CHkT = {};
-            for (let i = 0; i < valueToDisplay.Team.length; i++) {
-                if (valueToDisplay.Team[i].id === teamid) {
-                    team = valueToDisplay.Team[i];
-                    //console.log(team);
-                    break;
-                }
-            }
-            for (let i = 0; i < valueToDisplay.CHKT.length; i++) {
-                if (teamid === valueToDisplay.CHKT[i].teams_id) {
-                    CHkT = valueToDisplay.CHKT[i];
-                    //console.log(valueToDisplay.CHKT[i]);
-                    break;
-                }
-            }
-            teamlogo = '/storage/teamlogo/' + team.teamlogo;
-            const htmllogo = `<img src="${teamlogo}" alt="Account">`;
-            divElementLogo.innerHTML = htmllogo;
-            let SolvedTasks = [];
-            for (let i = 0; i < valueToDisplay.SolvedTasks.length; i++) {
-                if (valueToDisplay.SolvedTasks[i].user_id === teamid) {
-                    SolvedTasks.push(valueToDisplay.SolvedTasks[i]);
-                }
-            }
-
-            let Solvedtasks = [];
-            for (let i = 0; i < valueToDisplay.Tasks.length; i++) {
-                for (let j = 0; j < SolvedTasks.length; j++) {
-                    if (SolvedTasks[j].tasks_id === valueToDisplay.Tasks[i].id) {
-                        Solvedtasks.push(valueToDisplay.Tasks[i]);
-                    }
-                }
-            }
-
-            console.log('Принято!');
-
-            //const sortedData = valueToDisplay.sort((a, b) => b.score - a.score);
-            //console.log(sortedData);
-
-            const html0 = `<div class="wrapper">
-                <div class="profile-card js-profile-card">
-                    <div class="profile-card__img">
-                        <img src="${teamlogo}" alt="product">
-                    </div>
-
-                    <div class="profile-card__cnt js-profile-cnt">
-                        <div class="profile-card__name">${team.name}</div>
-                        <div class="profile-card__name">${team.scores}</div>
-                        <div class="profile-card__txt"><strong>${team.wherefrom}</strong></div>
-
-                        <div class="profile-card-inf">
-                            <div class="profile-card-inf__item">
-                                <div class="profile-card-inf__title">${CHkT.sumary}</div>
-                                <div class="profile-card-inf__txt">{{ __('Solved') }}</div>
-                            </div>
-
-                            <div class="profile-card-inf__item">
-                                <div class="profile-card-inf__title">${CHkT.easy}</div>
-                                <div class="profile-card-inf__txt easy">EASY</div>
-                            </div>
-
-                            <div class="profile-card-inf__item">
-                                <div class="profile-card-inf__title">${CHkT.medium}</div>
-                                <div class="profile-card-inf__txt medium">MEDIUM</div>
-                            </div>
-
-                            <div class="profile-card-inf__item">
-                                <div class="profile-card-inf__title">${CHkT.hard}</div>
-                                <div class="profile-card-inf__txt hard">HARD</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="product-cell category">
+                    ${TEXTS.category}
+                    <button class="sort-button">
+                        ${sortIcon}
+                    </button>
+                </div>
+                <div class="product-cell status-cell">
+                    ${TEXTS.complexity}
+                    <button class="sort-button">
+                        ${sortIcon}
+                    </button>
+                </div>
+                <div class="product-cell price">
+                    ${TEXTS.price}
+                    <button class="sort-button">
+                        ${sortIcon}
+                    </button>
                 </div>
             </div>`;
-            divElement2.innerHTML = html0;
+        }
 
-            const html2 = Solvedtasks.map(item => `
-            <div class="products-row">
-                <button class="cell-more-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                </button>
+        // Функция для создания HTML строки задачи
+        function createTaskRowHTML(task) {
+            const complexityClass = CLASSES[task.complexity] || '';
+
+            return `
+            <div href="/Home/${task.id}" class="products-row tasklink">
                 <div class="product-cell image">
-                    <span>${item.name}</span>
+                    <span>${escapeHtml(task.name)}</span>
                 </div>
-                <div class="product-cell category"><span class="cell-label">Category:</span>${item.category.toUpperCase()}</div>
+                <div class="product-cell category">
+                    <span class="cell-label">${TEXTS.category}:</span>
+                    ${task.category.toUpperCase()}
+                </div>
                 <div class="product-cell status-cell">
-                    <span class="cell-label">Complexity:</span>
-                    <span class="status ${item.complexity}">${item.complexity.toUpperCase()}</span>
+                    <span class="cell-label">${TEXTS.complexity}:</span>
+                    <span class="${CLASSES.status} ${complexityClass}">
+                        ${task.complexity.toUpperCase()}
+                    </span>
                 </div>
-                <div class="product-cell price"><span class="cell-label">Price:</span>${item.price}</div>
-            </div>
-        `).join("");
+                <div class="product-cell price">
+                    <span class="cell-label">${TEXTS.price}:</span>
+                    ${task.price}
+                </div>
+            </div>`;
+        }
 
-            divElement.innerHTML = html2;
-            //console.log(e.test);
-        });
+        // Утилитарные функции
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateTeamLogo(logoUrl) {
+            if (accountLogo) {
+                accountLogo.innerHTML = `<img src="${logoUrl}" alt="Account">`;
+            }
+        }
+
+        function processSolvedTasks(allTasks, solvedTasksData, teamId) {
+            const userSolvedTasks = solvedTasksData.filter(task => task.teams_id === teamId);
+            return allTasks.filter(task =>
+                userSolvedTasks.some(solved => solved.tasks_id === task.id)
+            );
+        }
+
+        function findTeamById(teams, teamId) {
+            return teams.find(team => team.id === teamId) || {};
+        }
+
+        function findCheckTasksByTeamId(checkTasksData, teamId) {
+            return checkTasksData.find(item => item.teams_id === teamId) || {};
+        }
+
+        // Иконка для сортировки (вынесена в константу для переиспользования)
+        const sortIcon = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512">
+            <path fill="currentColor"
+                d="M496.1 138.3L375.7 17.9c-7.9-7.9-20.6-7.9-28.5 0L226.9 138.3c-7.9 7.9-7.9 20.6 0 28.5 7.9 7.9 20.6 7.9 28.5 0l85.7-85.7v352.8c0 11.3 9.1 20.4 20.4 20.4 11.3 0 20.4-9.1 20.4-20.4V81.1l85.7 85.7c7.9 7.9 20.6 7.9 28.5 0 7.9-7.8 7.9-20.6 0-28.5zM287.1 347.2c-7.9-7.9-20.6-7.9-28.5 0l-85.7 85.7V80.1c0-11.3-9.1-20.4-20.4-20.4-11.3 0-20.4 9.1-20.4 20.4v352.8l-85.7-85.7c-7.9-7.9-20.6-7.9-28.5 0-7.9 7.9-7.9 20.6 0 28.5l120.4 120.4c7.9 7.9 20.6 7.9 28.5 0l120.4-120.4c7.8-7.9 7.8-20.7-.1-28.5z"/>
+        </svg>`;
+
+        // Инициализация страницы
+        function initializePage() {
+            if (contentWrapper) {
+                contentWrapper.innerHTML = createProfileHTML(teamData, teamLogoUrl, checkTasks);
+            }
+
+            if (productBody) {
+                const headersHTML = createTableHeaders();
+                const tasksHTML = solvedTasks.map(createTaskRowHTML).join('');
+                productBody.innerHTML = tasksHTML;
+            }
+
+            updateTeamLogo(teamLogoUrl);
+        }
+
+        // Обработчик событий WebSocket
+        function handleStatisticEvent(event) {
+            const eventData = event.data;
+
+            // Обновляем данные команды
+            teamData = findTeamById(eventData.Team, TEAM_ID);
+            const teamCheckTasks = findCheckTasksByTeamId(eventData.CHKT, TEAM_ID);
+
+            // Обновляем логотип
+            teamLogoUrl = '/storage/teamlogo/' + teamData.teamlogo;
+            updateTeamLogo(teamLogoUrl);
+
+            // Обрабатываем решенные задачи
+            const updatedSolvedTasks = processSolvedTasks(
+                eventData.Tasks,
+                eventData.SolvedTasks,
+                TEAM_ID
+            );
+
+            // Обновляем UI
+            if (contentWrapper) {
+                contentWrapper.innerHTML = createProfileHTML(teamData, teamLogoUrl, teamCheckTasks);
+            }
+
+            if (productBody) {
+                const headersHTML = createTableHeaders();
+                const tasksHTML = updatedSolvedTasks.map(createTaskRowHTML).join('');
+                productBody.innerHTML = tasksHTML;
+            }
+
+            console.log('Данные статистики обновлены!');
+        }
+
+        // Инициализируем страницу при загрузке
+        document.addEventListener('DOMContentLoaded', initializePage);
+
+        // Настраиваем WebSocket соединение
+        if (typeof Echo !== 'undefined') {
+            Echo.private(`channel-app-statisticID`)
+                .listen('AppStatisticIDEvent', handleStatisticEvent);
+        }
     </script>
 @endsection
 
