@@ -188,7 +188,12 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
     <div style="display:none;" class="topmost-div-task-minus">
         <div style="text-align: center; color: white; height: 3vw;">
             <h1 class="TaskH1">{{ __('Delete Teams') }}</h1>
-            <button id="CloseBtnMinus" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
+            <button id="CloseBtnMinus" class="btnclose">
+                <svg width="28" height="28" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <path fill="var(--app-bg-inv)" d="M195.2 195.2a64 64 0 0 1 90.496 0L512 421.504 738.304 195.2a64 64 0 0 1 90.496 90.496L602.496 512 828.8 738.304a64 64 0 0 1-90.496 90.496L512 602.496 285.696 828.8a64 64 0 0 1-90.496-90.496L421.504 512 195.2 285.696a64 64 0 0 1 0-90.496z"></path></g>
+                </svg>
             </button>
         </div>
         <form method="POST" class="form" id="MyFormMinus" action="/Admin/Teams/Delete">
@@ -227,7 +232,12 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
     <div style="display:none;" class="topmost-div-task-plus">
         <div style="text-align: center; color: white; height: 3vw;">
             <h1 class="TaskH1">{{ __('Add Teams') }}</h1>
-            <button id="CloseBtnPlus" class="btnclose"><img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
+            <button id="CloseBtnPlus" class="btnclose">
+                <svg width="28" height="28" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <path fill="var(--app-bg-inv)" d="M195.2 195.2a64 64 0 0 1 90.496 0L512 421.504 738.304 195.2a64 64 0 0 1 90.496 90.496L602.496 512 828.8 738.304a64 64 0 0 1-90.496 90.496L512 602.496 285.696 828.8a64 64 0 0 1-90.496-90.496L421.504 512 195.2 285.696a64 64 0 0 1 0-90.496z"></path></g>
+                </svg>
             </button>
         </div>
         <form action="/Admin/Teams/Add" method="POST" id="MyFormPlus" class="form" enctype="multipart/form-data">
@@ -331,7 +341,11 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
             <div style="text-align: center; color: white; height: 3vw;">
                 <h1 class="TaskH1">{{ __('Change Teams') }} #${team.id}</h1>
                 <div id="CloseBtn" class="btnclose" onclick="Teamid${team.id}close(); return false;">
-                    <img class="closeicontask" src="{{ asset('media/icon/close.png') }}">
+                    <svg width="28" height="28" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <path fill="var(--app-bg-inv)" d="M195.2 195.2a64 64 0 0 1 90.496 0L512 421.504 738.304 195.2a64 64 0 0 1 90.496 90.496L602.496 512 828.8 738.304a64 64 0 0 1-90.496 90.496L512 602.496 285.696 828.8a64 64 0 0 1-90.496-90.496L421.504 512 195.2 285.696a64 64 0 0 1 0-90.496z"></path></g>
+                </svg>
                 </div>
             </div>
             <form action="/Admin/Teams/Change" method="POST" id="MyFormChange${team.id}" class="form" enctype="multipart/form-data">

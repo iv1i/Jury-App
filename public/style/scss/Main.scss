@@ -851,19 +851,6 @@ body {
     height: 24px;
 }
 
-.btnclose{
-    width: 2vw; height: 2vw; position: relative; left: 23.8vw; top: -4.4vw;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    border: none;
-    cursor: pointer;
-    overflow: hidden;
-    outline: none;
-    @media screen and (max-width: 1024px) {&{
-        left: 42%; top: -170%;
-    }}
-}
-
 .btnclosetask {
   position: relative;
   background-color: transparent;
