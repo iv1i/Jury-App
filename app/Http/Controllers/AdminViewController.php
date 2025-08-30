@@ -26,9 +26,9 @@ class AdminViewController extends Controller
     public function adminScoreboardView(): \Illuminate\Contracts\View\View
     {
         $teams = $this->teamsRepository->getAllTeams();
-        $completedTasksTeams = $this->completedTasksTeamsRepository->getAllCompletedTasksAndTeams();
+        $solvedTasks = $this->completedTasksTeamsRepository->getAllSolvedTasks();
 
-        return view('Admin.AdminScoreboard', compact('teams', 'completedTasksTeams'));
+        return view('Admin.AdminScoreboard', compact('teams', 'solvedTasks'));
     }
 
     public function adminTeamsView(): \Illuminate\Contracts\View\View

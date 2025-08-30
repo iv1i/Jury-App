@@ -250,8 +250,8 @@
             const eventData = event.data;
 
             // Обновляем данные команды
-            teamData = findTeamById(eventData.Team, TEAM_ID);
-            const teamCheckTasks = findCheckTasksByTeamId(eventData.CHKT, TEAM_ID);
+            teamData = findTeamById(eventData.teams, TEAM_ID);
+            const teamCheckTasks = findCheckTasksByTeamId(eventData.checkTasks, TEAM_ID);
 
             // Обновляем логотип
             teamLogoUrl = '/storage/teamlogo/' + teamData.teamlogo;
@@ -259,8 +259,8 @@
 
             // Обрабатываем решенные задачи
             const updatedSolvedTasks = processSolvedTasks(
-                eventData.Tasks,
-                eventData.SolvedTasks,
+                eventData.tasks,
+                eventData.solvedTasks,
                 TEAM_ID
             );
 

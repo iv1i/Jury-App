@@ -106,14 +106,13 @@
 
         Echo.private(`channel-app-statistic`).listen('AppStatisticEvent', (e) => {
             const valueToDisplay = e.stat;
-            const authuserid = {{ Auth::user()['id'] }};
             const divimgElement = document.querySelector('.account-info-picture');
             console.log('Принято!');
             for (let i = 0; i < valueToDisplay.length; i++){
-                if(valueToDisplay[i].id == authuserid){
+                if(valueToDisplay[i].id == Userid){
                     divimgElement.innerHTML = `<img src="/storage/teamlogo/${valueToDisplay[i].teamlogo}" alt="Account">`;
                 }
-                if (valueToDisplay[i].id == authuserid){
+                if (valueToDisplay[i].id == Userid){
                     valueToDisplay[i].BorderStyle=`BorderStyle`;
                 }
                 else {
@@ -155,7 +154,7 @@
             <a href="/Statistics/ID/${item.id}" class="products-row teamlink ${item.BorderStyle}">
                 <div class="product-cell id"><span class="cell-label">{{ __('ID') }}:</span>${item.id}</div>
                 <div class="product-cell image">
-                    <img class="logo_sc" src="${url + item.teamlogo}" alt="product">
+                    <img class="logo_sc" src="${url + item.teamlogo}" alt="logo">
                     <span class="span-name">${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
                 </div>
                 <div class="product-cell category"><span class="cell-label">{{ __('Where-From') }}:</span>${item.wherefrom}</div>

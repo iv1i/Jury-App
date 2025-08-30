@@ -515,7 +515,7 @@ l0 106 -45 43 c-24 24 -61 48 -82 53 -25 7 -271 11 -713 11 l-675 0 -50 -24z"/>
            <div style="cursor: pointer" class="products-row teamlink" onclick="Teamid${item.id}()">
            <div class="product-cell id"><span class="cell-label">{{ __('ID') }}:</span>${item.id}</div>
     <div class="product-cell image">
-        <img src="${url + item.teamlogo}" alt="product">
+        <img src="${url + item.teamlogo}" alt="logo">
         <span>${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
     </div>
     <div class="product-cell category"><span class="cell-label">{{__('Players')}}:</span>${item.players}</div>

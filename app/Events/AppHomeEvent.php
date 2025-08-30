@@ -15,13 +15,13 @@ class AppHomeEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $tasks;
+    public $data;
     /**
      * Create a new event instance.
      */
     public function __construct($data)
     {
-        $this->tasks = $data;
+        $this->data = $data;
     }
 
     /**

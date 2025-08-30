@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(Teams::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(Tasks::class)->constrained()->onDelete('cascade');
             $table->float('price');
+            $table->longText('style_tasks');
             $table->timestamps();
         });
     }
