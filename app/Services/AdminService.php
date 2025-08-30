@@ -414,323 +414,45 @@ class AdminService
     }
     public function changeTasks(AdminChangeTasksRequest $request): array
     {
-        $sanitizedName = htmlspecialchars($request->input('name'));
-        $sanitizedCategory = htmlspecialchars($request->input('category'));
-        $sanitizedComplexity = htmlspecialchars($request->input('complexity'));
-        $sanitizedDescription = $request->input('description');
-
-        // Массив для хранения выполненных действий
-        $actions = [];
-
         try {
             $task = Tasks::findOrFail($request->input('id'));
+            $actions = [];
 
-            // Обработка веб-приложения и исходного кода
-            $webDirectory = $task->web_directory;
-            $sourceCodeUpdated = false;
-            $dockerRestarted = false;
+            // Санитизация входных данных
+            $sanitizedName = htmlspecialchars($request->input('name'));
+            $sanitizedCategory = htmlspecialchars($request->input('category'));
+            $sanitizedComplexity = htmlspecialchars($request->input('complexity'));
+            $sanitizedDescription = $request->input('description');
 
-            if ($request->has('web_port') && $request->input('web_port')) {
-                if ($request->file('sourcecode')) {
-                    $sourcecode = $request->file('sourcecode');
-                    $sourcecode->storeAs($webDirectory, 'source.zip', 'private');
+            // Обработка исходного кода
+            $sourceCodeUpdated = $this->handleSourceCode($request, $task, $actions);
 
-                    $zipPath = storage_path('app/private/'.$webDirectory.'/source.zip');
-                    $extractPath = storage_path('app/private/'.$webDirectory);
+            // Обновление сложности и стилей решенных задач
+            $complexityChanged = $this->handleComplexityChange($task, $request->input('complexity'), $actions);
 
-                    $zip = new ZipArchive;
-                    $res = $zip->open($zipPath);
-                    if ($res === TRUE) {
-                        try {
-                            if (!file_exists($extractPath)) {
-                                mkdir($extractPath, 0755, true);
-                            }
+            // Обработка файлов задачи
+            $this->handleFiles($request, $task, $sanitizedName, $actions);
 
-                            if ($zip->extractTo($extractPath)) {
-                                $zip->close();
-                                unlink($zipPath);
-                                $sourceCodeUpdated = true;
-                                $actions[] = 'Исходный код обновлен';
-                            } else {
-                                throw new \Exception("Failed to extract ZIP archive");
-                            }
-                        } catch (\Exception $e) {
-                            $zip->close();
-                            Log::error("Error extracting ZIP archive: " . $e->getMessage() . " | Path: " . $zipPath);
+            // Обновление основных полей задачи
+            $this->updateTaskFields($task, $request, $sanitizedName, $sanitizedCategory, $sanitizedComplexity, $sanitizedDescription, $actions);
 
-                            return [
-                                'success' => false,
-                                'message' => 'Ошибка распаковки архива',
-                                'status' => 500
-                            ];
-                        }
-                    } else {
-                        $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
-                        Log::error($errorMsg);
+            // Пересчет баллов пользователей
+            $this->recalculateUserScores();
 
-                        return [
-                            'success' => false,
-                            'message' => 'Ошибка открытия архива',
-                            'status' => 500
-                        ];
-                    }
-                    $this->smartReplaceDockerPorts($webDirectory, $request->input('web_port'), $request->input('db_port'));
-                    $actions[] = 'Порты Docker обновлены! ';
-                }
-            }
-            elseif ($request->file('sourcecode')) {
-                $sourcecode = $request->file('sourcecode');
-                $sourcecode->storeAs($webDirectory, 'source.zip', 'private');
-
-                $zipPath = storage_path('app/private/'.$webDirectory.'/source.zip');
-                $extractPath = storage_path('app/private/'.$webDirectory);
-
-                $zip = new ZipArchive;
-                $res = $zip->open($zipPath);
-                if ($res === TRUE) {
-                    try {
-                        if (!file_exists($extractPath)) {
-                            mkdir($extractPath, 0755, true);
-                        }
-
-                        if ($zip->extractTo($extractPath)) {
-                            $zip->close();
-                            unlink($zipPath);
-                            $sourceCodeUpdated = true;
-                            $actions[] = 'Исходный код обновлен! ';
-                        } else {
-                            throw new \Exception("Failed to extract ZIP archive");
-                        }
-                    } catch (\Exception $e) {
-                        $zip->close();
-                        Log::error("Error extracting ZIP archive: " . $e->getMessage() . " | Path: " . $zipPath);
-
-                        return [
-                            'success' => false,
-                            'message' => 'Ошибка распаковки архива',
-                            'status' => 500
-                        ];
-                    }
-                } else {
-                    $errorMsg = "Failed to open ZIP archive (code $res): " . $zipPath;
-                    Log::error($errorMsg);
-
-                    return [
-                        'success' => false,
-                        'message' => 'Ошибка открытия архива',
-                        'status' => 500
-                    ];
-                }
-            }
-
-            // Обновление сложности для решенных задач
-            $complexityChanged = false;
-            if ($task->complexity != $request->input('complexity')) {
-                $complexityChanged = true;
-                $actions[] = 'Сложность изменена с ' . $task->complexity . ' на ' . $request->input('complexity') . '! ';
-            }
-
-            $desid = $task->completed_task_team;
-            if ($desid) {
-                foreach ($desid as $desidtask) {
-                    if ($desidtask) {
-                        $oldStyle = $desidtask->StyleTask;
-                        $newStyle = '';
-
-                        if ($request->input('complexity') === 'easy') {
-                            $newStyle = '<div id="easy" style="background-color: #2ba972; border-radius: 5px; Text-align: center; width: 10px; height: 20px; margin-right: 4px"> <b></b> </div>';
-                        } elseif ($request->input('complexity') === 'medium') {
-                            $newStyle = '<div id="medium" style="background-color: #0086d3; border-radius: 5px; Text-align: center; width: 10px; height: 20px; margin-right: 4px"> <b></b> </div>';
-                        } elseif ($request->input('complexity') === 'hard') {
-                            $newStyle = '<div id="hard" style="background-color: #ba074f; border-radius: 5px; Text-align: center; width: 10px; height: 20px; margin-right: 4px"> <b></b> </div>';
-                        }
-
-                        if ($oldStyle != $newStyle) {
-                            $desidtask->StyleTask = $newStyle;
-                            $desidtask->save();
-                        }
-                    }
-                }
-            }
-
-            if ($complexityChanged) {
-                $ST = $task->SolvedTasks;
-                if (!$ST->isEmpty()) {
-                    $Uid = $ST->pluck('teams_id')->unique()->toArray();
-
-                    foreach ($Uid as $uid) {
-                        $user = Teams::find($uid);
-                        if ($user && $user->checkTasks) {
-                            $CHKT = $user->checkTasks;
-
-                            $oldComplexity = strtolower($task->complexity);
-                            if (isset($CHKT->{$oldComplexity})) {
-                                $CHKT->{$oldComplexity} = max(0, $CHKT->{$oldComplexity} - 1);
-                            }
-
-                            $newComplexity = strtolower($request->input('complexity'));
-                            if (isset($CHKT->{$newComplexity})) {
-                                $CHKT->{$newComplexity} += 1;
-                            }
-
-                            $CHKT->save();
-                        }
-                    }
-                    $actions[] = 'Статистика пользователей обновлена! ';
-                }
-            }
-
-            // Обработка файлов
-            $filesChanged = false;
-            $filenames = $task->FILES;
-
-            if ($request->file('file')) {
-                $filesChanged = true;
-                $filenames = null;
-
-                if ($task->FILES) {
-                    $FILES = $task->FILES;
-                    $arrayfiles = explode(";", $FILES);
-                    foreach ($arrayfiles as $file) {
-                        if ($file) {
-                            $deleteFile = 'private/TasksFiles/' . $file;
-                            Storage::delete($deleteFile);
-                        }
-                    }
-                    $actions[] = 'Старые файлы удалены! ';
-                }
-
-                $file = $request->file('file');
-                $Hashfile = md5(time() . '_' . $sanitizedName . '_' . $request->input('id') . 'file');
-                foreach ($file as $item) {
-                    $filename = md5($Hashfile . '_' . $item->getClientOriginalName()) .'.'. $item->getClientOriginalExtension();
-                    $filenames .= $filename . ';';
-                    $item->storeAs('TasksFiles', $filename, 'private');
-                }
-                $actions[] = 'Новые файлы загружены! ';
-            }
-
-            if ($request->input('deleteFilesFromTask')) {
-                $filesChanged = true;
-                if ($task->FILES) {
-                    $FILES = $task->FILES;
-                    $arrayfiles = explode(";", $FILES);
-                    foreach ($arrayfiles as $file) {
-                        if ($file) {
-                            $deleteFile = 'private/TasksFiles/' . $file;
-                            Storage::delete($deleteFile);
-                        }
-                    }
-                    $actions[] = 'Все файлы удалены! ';
-                }
-                $filenames = null;
-            }
-
-            // Основные поля задачи
-            $basicFieldsUpdated = false;
-            if ($task->name != $sanitizedName) {
-                $basicFieldsUpdated = true;
-                $actions[] = 'Название обновлено! ';
-            }
-            if ($task->category != $sanitizedCategory) {
-                $basicFieldsUpdated = true;
-                $actions[] = 'Категория обновлена! ';
-            }
-            if ($task->description != $sanitizedDescription) {
-                $basicFieldsUpdated = true;
-                $actions[] = 'Описание обновлено! ';
-            }
-            if ($task->oldprice != $request->input('points')) {
-                $basicFieldsUpdated = true;
-                $actions[] = 'Баллы обновлены! ';
-            }
-            if ($request->input('flag') && $task->flag != $request->input('flag')) {
-                $basicFieldsUpdated = true;
-                $actions[] = 'Флаг обновлен! ';
-            }
-            if ($request->input('web_port') && $task->web_port != $request->input('web_port')) {
-                $basicFieldsUpdated = true;
-                $actions[] = 'Web порт обновлен! ';
-            }
-            if ($request->input('db_port') && $task->db_port != $request->input('db_port')) {
-                $basicFieldsUpdated = true;
-                $actions[] = 'DB порт обновлен! ';
-            }
-
-            $task->name = $sanitizedName;
-            $task->category = $sanitizedCategory;
-            $task->complexity = $sanitizedComplexity;
-            $task->description = $sanitizedDescription;
-            $task->price = $request->input('points');
-            $task->oldprice = $request->input('points');
-            $task->decide = null;
-            $task->FILES = $filenames;
-
-            if ($request->input('flag')) {
-                $task->flag = $request->input('flag');
-            }
-            if ($request->input('web_port')) {
-                $task->web_port = $request->input('web_port');
-            }
-            if ($request->input('db_port')) {
-                $task->db_port = $request->input('db_port');
-            }
-
-            $task->web_directory = $webDirectory;
-            $task->save();
-
-            $userAll = Teams::with(['solvedTasks.tasks'])->get();
-            $countteams = Teams::count();
-
-            foreach ($userAll as $user) {
-                // Сначала обрабатываем solvedTasks пользователя
-                foreach ($user->solvedTasks as $solvedTask) {
-                    if ($solvedTask->tasks) {
-                        $solved = $solvedTask->tasks->solved ?? 0;
-                        $rate = $countteams > 0 ? $solved / $countteams : 0;
-
-                        if ($rate >= 0.8) {
-                            $solvedTask->tasks->price = $solvedTask->tasks->oldprice * 0.2;
-                        } elseif ($rate >= 0.6) {
-                            $solvedTask->tasks->price = $solvedTask->tasks->oldprice * 0.4;
-                        } elseif ($rate >= 0.4) {
-                            $solvedTask->tasks->price = $solvedTask->tasks->oldprice * 0.6;
-                        } elseif ($rate >= 0.2) {
-                            $solvedTask->tasks->price = $solvedTask->tasks->oldprice * 0.8;
-                        }
-
-                        $solvedTask->tasks->save(); // Сохраняем измененную цену задачи
-                    }
-                }
-
-                // Затем считаем общий балл пользователя
-                $scores = $user->solvedTasks->sum(function($solvedTask) {
-                    return $solvedTask->tasks->price ?? 0;
-                });
-
-                $user->scores = $scores;
-                $user->save();
-            }
-
+            // Обновление событий
             $this->events->adminEvents();
             $this->events->appEvents();
-
-
-
-            // Если не было конкретных действий, но задача обновлена
-            if (empty($actions)) {
-                $actions[] = 'Настройки задачи сохранены (без изменений)';
-            }
-            $message = implode(' ', $actions);
 
             return [
                 'success' => true,
                 'message' => 'Задача успешно обновлена!',
-                'actions' => $actions,
+                'actions' => empty($actions) ? ['Настройки задачи сохранены (без изменений)'] : $actions,
                 'status' => 200,
             ];
 
         } catch (\Exception $e) {
+            Log::error("Error updating task: " . $e->getMessage());
+
             return [
                 'success' => false,
                 'error' => 'Ошибка при обновлении задачи',
@@ -739,6 +461,242 @@ class AdminService
             ];
         }
     }
+
+    private function handleSourceCode($request, $task, &$actions): bool
+    {
+        if (!$request->file('sourcecode')) {
+            return false;
+        }
+
+        $webDirectory = $task->web_directory;
+        $sourcecode = $request->file('sourcecode');
+
+        // Сохранение ZIP архива
+        $sourcecode->storeAs($webDirectory, 'source.zip', 'private');
+
+        $zipPath = storage_path('app/private/'.$webDirectory.'/source.zip');
+        $extractPath = storage_path('app/private/'.$webDirectory);
+
+        $zip = new ZipArchive;
+        if ($zip->open($zipPath) !== TRUE) {
+            Log::error("Failed to open ZIP archive: " . $zipPath);
+            throw new \Exception('Ошибка открытия архива');
+        }
+
+        try {
+            if (!file_exists($extractPath)) {
+                mkdir($extractPath, 0755, true);
+            }
+
+            if (!$zip->extractTo($extractPath)) {
+                throw new \Exception("Failed to extract ZIP archive");
+            }
+
+            $zip->close();
+            unlink($zipPath);
+
+            $actions[] = 'Исходный код обновлен';
+
+            // Обновление портов Docker если указаны
+            if ($request->has('web_port') && $request->input('web_port')) {
+                $this->smartReplaceDockerPorts(
+                    $webDirectory,
+                    $request->input('web_port'),
+                    $request->input('db_port')
+                );
+                $actions[] = 'Порты Docker обновлены';
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            $zip->close();
+            Log::error("Error extracting ZIP archive: " . $e->getMessage());
+            throw new \Exception('Ошибка распаковки архива');
+        }
+    }
+
+    private function handleComplexityChange($task, $newComplexity, &$actions): bool
+    {
+        if ($task->complexity === $newComplexity) {
+            return false;
+        }
+
+        $actions[] = 'Сложность изменена с ' . $task->complexity . ' на ' . $newComplexity;
+
+        // Обновление стилей в решенных задачах
+        $newStyle = $this->getComplexityStyle($newComplexity);
+
+        SolvedTasks::where('tasks_id', $task->id)
+            ->update(['style_tasks' => $newStyle]);
+
+        // Обновление статистики пользователей
+        $this->updateUserComplexityStats($task, $newComplexity);
+
+        $actions[] = 'Статистика пользователей обновлена';
+
+        return true;
+    }
+
+    private function getComplexityStyle($complexity): string
+    {
+        $styles = [
+            'easy' => '<div id="easy" style="background-color: #2ba972; border-radius: 5px; text-align: center; width: 10px; height: 20px; margin-right: 4px"></div>',
+            'medium' => '<div id="medium" style="background-color: #0086d3; border-radius: 5px; text-align: center; width: 10px; height: 20px; margin-right: 4px"></div>',
+            'hard' => '<div id="hard" style="background-color: #ba074f; border-radius: 5px; text-align: center; width: 10px; height: 20px; margin-right: 4px"></div>'
+        ];
+
+        return $styles[$complexity] ?? $styles['medium'];
+    }
+
+    private function updateUserComplexityStats($task, $newComplexity): void
+    {
+        $solvedTasks = $task->solvedTasks;
+        if ($solvedTasks->isEmpty()) {
+            return;
+        }
+
+        $userIds = $solvedTasks->pluck('teams_id')->unique();
+        $users = Teams::with('checkTasks')->whereIn('id', $userIds)->get();
+
+        foreach ($users as $user) {
+            if (!$user->checkTasks) {
+                continue;
+            }
+
+            $checkTasks = $user->checkTasks;
+            $oldComplexity = strtolower($task->complexity);
+            $newComplexityLower = strtolower($newComplexity);
+
+            // Уменьшаем старую сложность
+            if (isset($checkTasks->{$oldComplexity})) {
+                $checkTasks->{$oldComplexity} = max(0, $checkTasks->{$oldComplexity} - 1);
+            }
+
+            // Увеличиваем новую сложность
+            if (isset($checkTasks->{$newComplexityLower})) {
+                $checkTasks->{$newComplexityLower} += 1;
+            }
+
+            $checkTasks->save();
+        }
+    }
+
+    private function handleFiles($request, $task, $taskName, &$actions): void
+    {
+        // Удаление файлов если запрошено
+        if ($request->input('deleteFilesFromTask')) {
+            $this->deleteTaskFiles($task);
+            $task->FILES = null;
+            $actions[] = 'Все файлы удалены';
+            return;
+        }
+
+        // Загрузка новых файлов
+        if ($request->file('file')) {
+            $this->deleteTaskFiles($task);
+
+            $files = $request->file('file');
+            $filenames = '';
+            $fileHash = md5(time() . '_' . $taskName . '_' . $task->id . 'file');
+
+            foreach ($files as $file) {
+                $filename = md5($fileHash . '_' . $file->getClientOriginalName()) . '.' . $file->getClientOriginalExtension();
+                $filenames .= $filename . ';';
+                $file->storeAs('TasksFiles', $filename, 'private');
+            }
+
+            $task->FILES = $filenames;
+            $actions[] = 'Новые файлы загружены';
+        }
+    }
+
+    private function deleteTaskFiles($task): void
+    {
+        if (!$task->FILES) {
+            return;
+        }
+
+        $files = array_filter(explode(";", $task->FILES));
+        foreach ($files as $file) {
+            Storage::delete('private/TasksFiles/' . $file);
+        }
+    }
+
+    private function updateTaskFields($task, $request, $name, $category, $complexity, $description, &$actions): void
+    {
+        $fieldsToCheck = [
+            'name' => [$task->name, $name, 'Название обновлено'],
+            'category' => [$task->category, $category, 'Категория обновлена'],
+            'complexity' => [$task->complexity, $complexity, 'Сложность обновлена'],
+            'description' => [$task->description, $description, 'Описание обновлено'],
+            'oldprice' => [$task->oldprice, $request->input('points'), 'Баллы обновлены'],
+        ];
+
+        foreach ($fieldsToCheck as $field => [$oldValue, $newValue, $message]) {
+            if ($oldValue != $newValue) {
+                $task->$field = $newValue;
+                $actions[] = $message;
+            }
+        }
+
+        // Специальные поля
+        $specialFields = ['flag', 'web_port', 'db_port'];
+        foreach ($specialFields as $field) {
+            if ($request->input($field) && $task->$field != $request->input($field)) {
+                $task->$field = $request->input($field);
+                $actions[] = ucfirst($field) . ' обновлен';
+            }
+        }
+
+        $task->price = $request->input('points');
+        $task->decide = null;
+        $task->save();
+    }
+
+    private function recalculateUserScores(): void
+    {
+        $countTeams = Teams::count();
+        if ($countTeams === 0) {
+            return;
+        }
+
+        $users = Teams::with(['solvedTasks.tasks'])->get();
+
+        foreach ($users as $user) {
+            $totalScore = 0;
+
+            foreach ($user->solvedTasks as $solvedTask) {
+                if (!$solvedTask->tasks) {
+                    continue;
+                }
+
+                $task = $solvedTask->tasks;
+                $solvedCount = $task->solved ?? 0;
+                $completionRate = $solvedCount / $countTeams;
+
+                // Динамическое изменение цены задачи в зависимости от популярности
+                $task->price = $this->calculateDynamicPrice($task->oldprice, $completionRate);
+                $task->save();
+
+                $totalScore += $task->price;
+            }
+
+            $user->scores = $totalScore;
+            $user->save();
+        }
+    }
+
+    private function calculateDynamicPrice($basePrice, $completionRate): float
+    {
+        if ($completionRate >= 0.8) return $basePrice * 0.2;
+        if ($completionRate >= 0.6) return $basePrice * 0.4;
+        if ($completionRate >= 0.4) return $basePrice * 0.6;
+        if ($completionRate >= 0.2) return $basePrice * 0.8;
+
+        return $basePrice;
+    }
+
     public function deleteTasks(Request $request): array
     {
         try {
@@ -803,6 +761,7 @@ class AdminService
             ];
         }
     }
+
     private function deleteTask(Tasks $task): void
     {
         $teamIds = $task->solvedTasks()->pluck('teams_id')->unique()->filter()->toArray();
@@ -838,7 +797,6 @@ class AdminService
     public function settingsReset(Request $request): array
     {
         if($request->input('check') === 'Yes' && $request->input('ButtonReset') === 'RESET'){
-            CompletedTaskTeams::truncate();
             SolvedTasks::truncate();
 
             CheckTasks::query()->update(['sumary' => 0, 'easy' => 0, 'medium' => 0, 'hard' => 0]);
@@ -871,11 +829,11 @@ class AdminService
             'status' => 500
         ];
     }
+
     public function settingsDeleteAll(Request $request): array
     {
         if($request->input('check') === 'Yes' && $request->input('ButtonDeleteAll') === 'DELETEALL'){
 
-            CompletedTaskTeams::truncate();
             SolvedTasks::truncate();
             CheckTasks::truncate();
             Teams::truncate();
@@ -897,6 +855,7 @@ class AdminService
             'status' => 500
         ];
     }
+
     public function settingsChangeCategory(Request $request): array
     {
         try {
@@ -983,6 +942,7 @@ class AdminService
             ];
         }
     }
+
     public function settingsChangeRules(Request $request): array
     {
         // Проверяем условия выполнения
@@ -1027,6 +987,7 @@ class AdminService
             ];
         }
     }
+
     public function settingsSidebars(Request $request): array
     {
         try {
@@ -1214,6 +1175,7 @@ class AdminService
             return false;
         }
     }
+
     private function updateTeamsScores(): void
     {
         $userAll = Teams::all();
@@ -1228,6 +1190,7 @@ class AdminService
             $user->save();
         }
     }
+
     private function updateTaskPriceDelete(Tasks $task): void
     {
         $countteams = DB::table('users')->count()-1;
@@ -1253,6 +1216,7 @@ class AdminService
         }
         $task->save();
     }
+
     private function updateTaskPrice(Tasks $task): void
     {
         $countteams = DB::table('users')->count();

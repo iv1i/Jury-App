@@ -99,25 +99,25 @@
     <script type="text/javascript">
         //--------------------------------Init-Of-Data
         const data = @json($teams);
-        const desidedteams = @json($completedTasksTeams);
+        const solvedTasks = @json($solvedTasks);
         const divElement = document.querySelector('.products-area-wrapper');
 
         //--------------------------------Functions
         // Создает массив
         function MakeMassive(data2, DesidedTeams){
             const svg = `{!! view('SVG.GuestSVG') !!}`;
-            const desidedteams = DesidedTeams;
+            const solvedTasks = DesidedTeams;
             for (let i = 0; i < data2.length; i++) {
                 data2[i].style = '';
             }
 
             count = 0;
             const userStyles = {};
-            desidedteams.forEach(team => {
+            solvedTasks.forEach(team => {
                 if (!userStyles[team.teams_id]) {
                     userStyles[team.teams_id] = [];
                 }
-                userStyles[team.teams_id].push(team.StyleTask);
+                userStyles[team.teams_id].push(team.style_tasks);
             });
 
             // Обрабатываем массив Teams
@@ -145,7 +145,7 @@
             const html1 = Data.map(item => `
             <div class="products-row" ${item.BorderStyle}>
                 <div class="product-cell image">
-                    <img src="${url + item.teamlogo}" alt="product">
+                    <img src="${url + item.teamlogo}" alt="logo">
                     <span>${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>': ''}</span>
                 </div>
                 <div class="product-cell sales"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>
@@ -157,16 +157,16 @@
         }
 
         //--------------------------------Start-Functions
-        MakeHTML(MakeMassive(data, desidedteams), divElement);
+        MakeHTML(MakeMassive(data, solvedTasks), divElement);
 
         //--------------------------------WebSocket
         Echo.private(`channel-admin-scoreboard`).listen('AdminScoreboardEvent', (e) => {
             const valueToDisplay = e.scoreboard;
-            const data = valueToDisplay.Teams;
-            const desidedteams = valueToDisplay.DesidedT;
+            const data = valueToDisplay.teams;
+            const solvedTasks = valueToDisplay.solvedTasks;
 
             console.log('Принято!');
-            MakeHTML(MakeMassive(data, desidedteams), divElement);
+            MakeHTML(MakeMassive(data, solvedTasks), divElement);
         });
     </script>
 @endsection

@@ -3,19 +3,20 @@
 namespace App\Repositories;
 
 use App\Models\CompletedTaskTeams;
+use App\Models\SolvedTasks;
 use Illuminate\Support\Facades\Cache;
 
 class CompletedTasksTeamsRepository
 {
-    public function getAllCompletedTasksAndTeams()
+    public function getAllSolvedTasks()
     {
-        $Desided = Cache::get('All-Desided');
+        $solvedTasks = Cache::get('All-Solved');
 
-        if (is_null($Desided)) {
-            $Desided = CompletedTaskTeams::all();
-            Cache::tags('ModelList')->put('All-Desided', $Desided, now()->addMinutes(10));
+        if (is_null($solvedTasks)) {
+            $solvedTasks = SolvedTasks::all();
+            Cache::tags('ModelList')->put('All-Solved', $solvedTasks, now()->addMinutes(10));
         }
-        return $Desided;
+        return $solvedTasks;
     }
 
 }

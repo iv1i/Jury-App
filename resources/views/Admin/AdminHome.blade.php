@@ -517,10 +517,10 @@
             console.log('Обновление данных через WebSocket');
 
             // Обновляем глобальные данные
-            Tasks = e.data[0] || [];
-            Teams = e.data[1] || [];
-            infoTasks = e.data[2] || [{}];
-            CheckTask = e.data[3] || [];
+            Tasks = e.data.tasks || [];
+            Teams = e.data.teams || [];
+            infoTasks = e.data.infoTasks || [];
+            CheckTask = e.data.checkTasks || [];
 
             // Получаем текущие параметры фильтрации
             const searchQuery = document.getElementById('team-search')?.value || '';
@@ -532,10 +532,10 @@
             });
 
             updateDashboard({
-                Tasks: e.data[0] || [],
-                Teams: e.data[1] || [],
-                infoTasks: e.data[2] || [{}],
-                CheckTask: e.data[3] || []
+                Tasks: e.data.tasks || [],
+                Teams: e.data.teams || [],
+                infoTasks: e.data.infoTasks || [{}],
+                CheckTask: e.data.checkTasks || []
             });
         });
     </script>

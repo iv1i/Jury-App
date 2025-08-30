@@ -118,29 +118,26 @@
 @section('scripts')
     <script type="text/javascript">
         const data = @json($teams);
-        const completedTasksTeams = @json($completedTasksTeams);
+        const solvedTasks = @json($solvedTasks);
         const divElement = document.querySelector('.Product-body');
 
-        MakeHTML(MakeMassive(data, completedTasksTeams), divElement);
+        MakeHTML(MakeMassive(data, solvedTasks), divElement);
 
         Echo.private(`channel-app-scoreboard`).listen('AppScoreboardEvent', (e) => {
             const valueToDisplay = e.scoreboard;
-            const data2 = valueToDisplay.Teams;
-            const desidedteams = valueToDisplay.DesidedT;
+            const teams = valueToDisplay.teams;
+            const solvedTasks = valueToDisplay.solvedTasks;
 
             console.log('Принято!');
-            MakeHTML(MakeMassive(data2, desidedteams), divElement);
+            MakeHTML(MakeMassive(teams, solvedTasks), divElement);
         });
 
         function MakeMassive(data2, DesidedTeams) {
             const svg = `{!! view('SVG.GuestSVG') !!}`;
-            const desidedteams = DesidedTeams;
+            const solvedTasks = DesidedTeams;
             const divimgElement = document.querySelector('.account-info-picture');
             const authuserid = {{ Auth::user()->id }};
             for (let i = 0; i < data2.length; i++) {
-                if (data2[i].guest === 'Yes') {
-                    data2[i].GuestLogo = svg;
-                }
                 if (data2[i].id === authuserid) {
                     divimgElement.innerHTML = `<img src="/storage/teamlogo/${data2[i].teamlogo}" alt="Account">`;
                 }
@@ -156,11 +153,11 @@
 
             count = 0;
             const userStyles = {};
-            desidedteams.forEach(team => {
+            solvedTasks.forEach(team => {
                 if (!userStyles[team.teams_id]) {
                     userStyles[team.teams_id] = [];
                 }
-                userStyles[team.teams_id].push(team.StyleTask);
+                userStyles[team.teams_id].push(team.style_tasks);
             });
 
             // Обрабатываем массив Teams
@@ -197,7 +194,7 @@
             const html1 = Data.map(item => `
             <div class="products-row ${item.BorderStyle}">
                 <div class="product-cell image">
-                    <img class="logo_sc" src="${url + item.teamlogo}" alt="teamlogo">
+                    <img class="logo_sc" src="${url + item.teamlogo}" alt="logo">
                     <span class="span-name">${item.name} ${item.guest !== 'No' ? '<div class="guest-badge">{{ __('GUEST') }}</div>' : ''}</span>
                 </div>
                 <div class="product-cell sales"><span class="cell-label">{{ __('Scores') }}:</span>${item.scores}</div>

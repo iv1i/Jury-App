@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CheckTasks;
 use App\Models\CompletedTaskTeams;
+use App\Models\SolvedTasks;
 use App\Repositories\CompletedTasksTeamsRepository;
 use App\Repositories\TaskRepository;
 use App\Repositories\TeamsRepository;
@@ -27,9 +28,9 @@ class GuestViewController extends Controller
 
         $checkTasks = CheckTasks::all();
 
-        $completedTasksTeams = CompletedTaskTeams::all();
+        $solvedTasks = SolvedTasks::all();
 
-        return view('Guest.projectorTB', compact('teams', 'checkTasks', 'completedTasksTeams'));
+        return view('Guest.projectorTB', compact('teams', 'checkTasks', 'solvedTasks'));
     }
 
     public function rulesView(): View

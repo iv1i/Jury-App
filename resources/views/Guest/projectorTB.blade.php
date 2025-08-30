@@ -197,7 +197,7 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
     <script type="text/javascript">
         const data = @json($teams);
         const checkTasks = @json($checkTasks);
-        const completedTasksTeams = @json($completedTasksTeams);
+        const solvedTasks = @json($solvedTasks);
 
         for (let i = 0; i < data.length; i++) {
             data[i].style = '';
@@ -211,11 +211,11 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
         let count = 0;
         let check = false;
         const userStyles = {};
-        completedTasksTeams.forEach(team => {
+        solvedTasks.forEach(team => {
             if (!userStyles[team.teams_id]) {
                 userStyles[team.teams_id] = [];
             }
-            userStyles[team.teams_id].push(updateStyles(team.StyleTask));
+            userStyles[team.teams_id].push(updateStyles(team.style_tasks));
         });
 
         // Обрабатываем массив Teams
@@ -231,8 +231,8 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
 
         Echo.channel(`channel-projector`).listen('ProjectorEvent', (e) => {
             const valueToDisplay = e.projector;
-            const data = valueToDisplay.Teams;
-            const completedTasksTeams = valueToDisplay.DesidedT;
+            const data = valueToDisplay.teams;
+            const solvedTasks = valueToDisplay.solvedTasks;
 
 
             console.log('Принято!');
@@ -242,11 +242,11 @@ l-43 24 0 -130z m527 -203 c-3 -8 -6 -5 -6 6 -1 11 2 17 5 13 3 -3 4 -12 1
 
             count = 0;
             const userStyles = {};
-            completedTasksTeams.forEach(team => {
+            solvedTasks.forEach(team => {
                 if (!userStyles[team.teams_id]) {
                     userStyles[team.teams_id] = [];
                 }
-                userStyles[team.teams_id].push(updateStyles(team.StyleTask));
+                userStyles[team.teams_id].push(updateStyles(team.style_tasks));
             });
 
             // Обрабатываем массив Teams

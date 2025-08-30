@@ -559,16 +559,16 @@
 
         function initializeEchoListener() {
             Echo.private(`channel-app-home`).listen('AppHomeEvent', (e) => {
-                const valueToDisplay = e.tasks;
-                let Tasks = valueToDisplay.Tasks;
-                let SolvedTaasks = valueToDisplay.SolvedTasks;
+                const valueToDisplay = e.data;
+                let Tasks = valueToDisplay.tasks;
+                let solvedTasks = valueToDisplay.solvedTasks;
 
                 // Filter solved tasks for current user
-                let SolvedTasksOnThisAuthUser = SolvedTaasks.filter(
-                    solved => solved.user_id === teamid
+                let SolvedTasksOnThisAuthUser = solvedTasks.filter(
+                    solved => solved.teams_id === teamid
                 );
 
-                Tasks = initialFilter(Tasks, SolvedTaasks);
+                Tasks = initialFilter(Tasks, SolvedTasksOnThisAuthUser);
                 localStorage.setItem('data', JSON.stringify(Tasks));
 
                 const SortedTasksColEcho = JSON.parse(localStorage.getItem('SortingTasksColumn'));

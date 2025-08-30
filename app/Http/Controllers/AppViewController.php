@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CompletedTaskTeams;
+use App\Models\SolvedTasks;
 use App\Models\Tasks;
 use App\Models\Teams;
 use App\Repositories\CompletedTasksTeamsRepository;
@@ -107,12 +108,12 @@ class AppViewController extends Controller
     {
         $teams = $this->teamsRepository->getAllTeams();
         $teamId = auth()->id();
-        $completedTasksTeams = CompletedTaskTeams::all();
+        $solvedTasks = SolvedTasks::all();
 
         return view('App.AppScoreboard', compact(
             'teams',
             'teamId',
-            'completedTasksTeams',
+            'solvedTasks',
         ));
     }
 
